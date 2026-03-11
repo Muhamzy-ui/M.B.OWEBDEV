@@ -101,6 +101,9 @@ if USE_POSTGRES:
     DATABASES = {
         "default": dj_database_url.parse(DATABASE_URL)
     }
+    DATABASES["default"]["OPTIONS"] = {
+        "options": "-c search_path=mbo_portfolio,public"
+    }
 else:
     # SQLite — works out of the box, no setup needed
     DATABASES = {
