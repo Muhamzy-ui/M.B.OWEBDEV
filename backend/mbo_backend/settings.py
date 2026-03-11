@@ -170,14 +170,18 @@ CORS_ALLOW_CREDENTIALS = True
 # For development, emails print to console (you'll see them in the terminal)
 # For production, switch to smtp and add Gmail credentials in .env
 
-EMAIL_BACKEND       = "django.core.mail.backends.console.EmailBackend"
-CONTACT_EMAIL       = get_env("CONTACT_EMAIL", "mahmudolasunkami895@gmail.com")
+CONTACT_EMAIL = get_env("CONTACT_EMAIL", "mahmudolasunkami895@gmail.com")
+email_user = os.environ.get("EMAIL_HOST_USER")
 
-# Uncomment these when you have a Gmail App Password:
-# EMAIL_BACKEND       = "django.core.mail.backends.smtp.EmailBackend"
-# EMAIL_HOST          = "smtp.gmail.com"
-# EMAIL_PORT          = 587
-# EMAIL_USE_TLS       = True
-# EMAIL_HOST_USER     = get_env("EMAIL_HOST_USER", "")
-# EMAIL_HOST_PASSWORD = get_env("EMAIL_HOST_PASSWORD", "")
+if email_user:
+    # Use real email in production when credentials are provided (like on Render)
+    EMAIL_BACKEND       = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST          = "smtp.gmail.com"
+    EMAIL_PORT          = 587
+    EMAIL_USE_TLS       = True
+    EMAIL_HOST_USER     = email_user
+    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+else:
+    # Fallback for local testing
+    EMAIL_BACKEND       = "django.core.mail.backends.console.EmailBackend"
 # DEFAULT_FROM_EMAIL  = EMAIL_HOST_USER
