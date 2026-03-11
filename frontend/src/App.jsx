@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-
+import profileImg from "./assets/profile.jpg";
 // ─── THEME ────────────────────────────────────────────────────────────────────
 const DARK = {
   bg: "#080e08", bg2: "#0b150b", surface: "#0d1a0d", card: "#0f1f0f",
@@ -362,10 +362,10 @@ const Hero = ({ go, t }) => (
 
         <div className="hero-right" style={{ display: "flex", justifyContent: "center", animation: "slideInRight .8s ease both" }}>
           <div style={{ position: "relative", width: "clamp(240px,30vw,320px)" }}>
-            <div style={{ position: "absolute", top: "50%", left: "50%", width: 220, height: 220, marginLeft: -110, marginTop: -110, borderRadius: "50%", border: `1px solid ${t.border}`, pointerEvents: "none" }}>
-              <div style={{ position: "absolute", width: 9, height: 9, background: t.accent, borderRadius: "50%", boxShadow: `0 0 12px ${t.accent}`, animation: "orbit 4s linear infinite", top: "50%", left: "50%", marginLeft: -4.5, marginTop: -4.5 }} />
+            <div style={{ position: "absolute", top: "50%", left: "50%", width: 220, height: 220, marginLeft: -110, marginTop: -110, borderRadius: "50%", border: `1px solid ${t.border}`, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
+               <img src={profileImg} alt="M.B.O Profile" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.8 }} />
             </div>
-            <div style={{ background: t.card, border: `1px solid ${t.borderHov}`, borderRadius: 22, padding: 24, boxShadow: `0 20px 70px ${t.shadow},0 0 36px ${t.accentGlow}`, animation: "floatY 5s ease-in-out infinite" }}>
+            <div style={{ background: t.card, border: `1px solid ${t.borderHov}`, borderRadius: 22, padding: 24, boxShadow: `0 20px 70px ${t.shadow},0 0 36px ${t.accentGlow}`, animation: "floatY 5s ease-in-out infinite", position: "relative", zIndex: 1, marginTop: 140 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
                 <Logo size={44} />
                 <div>
@@ -721,6 +721,9 @@ const BookMeeting = ({ t }) => {
   const [form, setForm] = useState({ name: "", email: "", topic: "", notes: "" });
   const [step, setStep] = useState(1);
   const [booked, setBooked] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -730,7 +733,54 @@ const BookMeeting = ({ t }) => {
 
   const inp = { background: t.inputBg, border: `1px solid ${t.border}`, borderRadius: 9, padding: "11px 14px", color: t.text, fontFamily: "'Rajdhani',sans-serif", fontSize: 14, outline: "none", width: "100%", transition: "border-color .2s", boxSizing: "border-box" };
   const lbl = { fontFamily: "'Rajdhani',sans-serif", fontSize: 11, color: t.textMuted, fontWeight: 700, letterSpacing: 1.5, display: "block", marginBottom: 6 };
-  const reset = () => { setSel(null); setSelT(null); setForm({ name: "", email: "", topic: "", notes: "" }); setStep(1); setBooked(false) };
+  const reset = () => { setSel(null); setSelT(null); setForm({ name: "", email: "", topic: "", notes: "" }); setStep(1); setBooked(false); setAvailableSlots([]); };
+
+  const handleDateSelect = async (d) => {
+    setSel(d);
+    setStep(2);
+    setLoadingSlots(true);
+    try {
+      const formattedDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      const res = await fetch(`http://localhost:8000/api/meetings/slots/?date=${formattedDate}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableSlots(data.available);
+      }
+    } catch(e) {
+      console.error(e);
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
+
+  const handleBooking = async () => {
+    if (!form.name || !form.email || !form.topic) return;
+    setSubmitting(true);
+    const formattedDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(selDate).padStart(2, "0")}`;
+    try {
+        const res = await fetch("http://localhost:8000/api/meetings/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name: form.name,
+                email: form.email,
+                date: formattedDate,
+                time: selTime,
+                topic: form.topic,
+                notes: form.notes
+            })
+        });
+        if (res.ok) {
+            setBooked(true);
+        } else {
+            alert("Failed to book meeting. Please try again.");
+        }
+    } catch(e) {
+        alert("Error connecting to server.");
+    } finally {
+        setSubmitting(false);
+    }
+  };
 
   return (
     <PageWrap>
@@ -779,7 +829,7 @@ const BookMeeting = ({ t }) => {
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 3 }}>
                     {cells.map((d, i) => (
-                      <button key={i} disabled={!d || isPast(d) || isWknd(d)} onClick={() => { setSel(d); setStep(2) }}
+                      <button key={i} disabled={!d || isPast(d) || isWknd(d)} onClick={() => handleDateSelect(d)}
                         style={{ background: selDate === d ? "linear-gradient(135deg,#16a34a,#22c55e)" : !d || isPast(d) || isWknd(d) ? "transparent" : t.accentDim, border: `1px solid ${selDate === d ? "transparent" : !d || isPast(d) || isWknd(d) ? "transparent" : t.border}`, borderRadius: 7, padding: "clamp(5px,1.5vw,9px) 0", cursor: !d || isPast(d) || isWknd(d) ? "default" : "pointer", color: !d ? "transparent" : isPast(d) || isWknd(d) ? t.border : selDate === d ? "#fff" : t.textSub, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: "clamp(11px,1.4vw,13px)", transition: "all .18s" }}>
                         {d || ""}
                       </button>
@@ -790,11 +840,13 @@ const BookMeeting = ({ t }) => {
 
                 {step === 2 && <>
                   <div style={{ textAlign: "center", marginBottom: 18 }}><span style={{ fontFamily: "'Rajdhani',sans-serif", color: t.accent, fontSize: 14, fontWeight: 700 }}>📅 {MONTHS[month]} {selDate}, {year}</span></div>
+                  {loadingSlots ? <div style={{textAlign: "center", padding: 20}}>Loading slots...</div> : (
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(110px,1fr))", gap: 9, marginBottom: 20 }}>
-                    {TIMES.map(time => (
+                    {availableSlots.length > 0 ? availableSlots.map(time => (
                       <button key={time} onClick={() => { setSelT(time); setStep(3) }} className={selTime === time ? "btn btn-primary" : "btn btn-ghost"} style={{ width: "100%", fontSize: 13, padding: "9px 8px" }}>{time}</button>
-                    ))}
+                    )) : <div style={{gridColumn: "1/-1", textAlign: "center", color: t.textMuted}}>No slots available</div>}
                   </div>
+                  )}
                   <button className="btn btn-ghost btn-sm" onClick={() => setStep(1)}>← Back</button>
                 </>}
 
@@ -808,7 +860,7 @@ const BookMeeting = ({ t }) => {
                   <div style={{ marginBottom: 20 }}><label style={lbl}>NOTES</label><textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Additional context..." rows={3} style={{ ...inp, resize: "vertical" }} onFocus={e => e.target.style.borderColor = t.accent} onBlur={e => e.target.style.borderColor = t.border} /></div>
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                     <button className="btn btn-ghost" onClick={() => setStep(2)}>← Back</button>
-                    <button className="btn btn-primary btn-lg" style={{ flex: 1 }} onClick={() => { if (form.name && form.email && form.topic) setBooked(true) }} disabled={!form.name || !form.email || !form.topic}>✅ Confirm Booking</button>
+                    <button className="btn btn-primary btn-lg" style={{ flex: 1 }} onClick={handleBooking} disabled={submitting || !form.name || !form.email || !form.topic}>{submitting ? "⏳ Booking..." : "✅ Confirm Booking"}</button>
                   </div>
                 </>}
               </div>
@@ -830,11 +882,23 @@ const Contact = ({ t }) => {
   const submit = async () => {
     if (!form.name || !form.email || !form.message) return;
     setL(true);
-    // TODO: replace with real API call
-    // await sendContact(form);
-    await new Promise(r => setTimeout(r, 1200));
-    setL(false); setSent(true);
-    setTimeout(() => { setSent(false); setForm({ name: "", email: "", subject: "", message: "" }) }, 5000);
+    try {
+      const res = await fetch("http://localhost:8000/api/contact/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      });
+      if (res.ok) {
+        setSent(true);
+        setTimeout(() => { setSent(false); setForm({ name: "", email: "", subject: "", message: "" }) }, 5000);
+      } else {
+        alert("Failed to send message. Please try again.");
+      }
+    } catch (err) {
+      alert("Error connecting to server.");
+    } finally {
+      setL(false);
+    }
   };
 
   const inp = f => ({ background: t.inputBg, border: `1px solid ${foc === f ? t.accent : t.border}`, borderRadius: 9, padding: "11px 14px", color: t.text, fontFamily: "'Rajdhani',sans-serif", fontSize: 14, outline: "none", width: "100%", transition: "all .2s", boxSizing: "border-box", boxShadow: foc === f ? `0 0 16px ${t.accentGlow}` : "none" });
