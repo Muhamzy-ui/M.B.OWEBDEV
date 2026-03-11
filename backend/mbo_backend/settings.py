@@ -5,6 +5,7 @@ Replace your entire settings.py with this file.
 
 from pathlib import Path
 import os
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -92,18 +93,13 @@ WSGI_APPLICATION = "mbo_backend.wsgi.application"
 # Defaults to SQLite so you can run instantly without PostgreSQL
 # Change USE_POSTGRES=True in .env when you're ready for PostgreSQL
 
+# Database URL provided by Render: postgresql://apex_db_f0dm_user:gbIVKITYQY694qvYwSOSeMruvhLrRroK@dpg-d6gsd2pr0fns739h58k0-a.virginia-postgres.render.com/apex_db_f0dm
 USE_POSTGRES = get_env("USE_POSTGRES", "False") == "True"
+DATABASE_URL = get_env("DATABASE_URL", "postgresql://apex_db_f0dm_user:gbIVKITYQY694qvYwSOSeMruvhLrRroK@dpg-d6gsd2pr0fns739h58k0-a.virginia-postgres.render.com/apex_db_f0dm")
 
 if USE_POSTGRES:
     DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME":     get_env("DB_NAME",     "mbo_portfolio"),
-            "USER":     get_env("DB_USER",     "postgres"),
-            "PASSWORD": get_env("DB_PASSWORD", ""),
-            "HOST":     get_env("DB_HOST",     "localhost"),
-            "PORT":     get_env("DB_PORT",     "5432"),
-        }
+        "default": dj_database_url.parse(DATABASE_URL)
     }
 else:
     # SQLite — works out of the box, no setup needed
