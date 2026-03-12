@@ -97,24 +97,31 @@ WSGI_APPLICATION = "mbo_backend.wsgi.application"
 DATABASE_URL = get_env("DATABASE_URL") or os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
+    # Use parse() instead of config() for more direct control when providing the URL
     DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
-    # Render's PostgreSQL database uses the mbo_portfolio schema.
-    # We include 'public' as a fallback where standard Django tables often live.
-    if 'OPTIONS' not in DATABASES['default']:
-        DATABASES['default']['OPTIONS'] = {}
     
+    # Render's PostgreSQL database uses the mbo_portfolio schema.
+    # We include 'public' as a fallback.
+    DATABASES['default'].setdefault('OPTIONS', {})
     DATABASES['default']['OPTIONS']['options'] = "-c search_path=mbo_portfolio,public"
     
-    # Debug print for Render logs (will help diagnose connection issues)
-    import sys
-    db_host = DATABASES['default'].get('HOST', 'unknown')
-    print(f"DEBUG: Connecting to PostgreSQL at {db_host} with search_path=mbo_portfolio,public", file=sys.stderr)
+    # Verify connection and schema on startup (logs to Render console)
+    try:
+        import sys
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("SHOW search_path;")
+            path = cursor.fetchone()
+            print(f"DEBUG: Current search_path is {path}", file=sys.stderr)
+            
+            # Check if auth_user exists in any visible schema
+            cursor.execute("SELECT count(*) FROM information_schema.tables WHERE table_name = 'auth_user';")
+            exists = cursor.fetchone()[0] > 0
+            print(f"DEBUG: 'auth_user' table exists in search path: {exists}", file=sys.stderr)
+    except Exception as e:
+        print(f"DEBUG: Startup check failed: {e}", file=sys.stderr)
 else:
     # SQLite — works out of the box locally, no setup needed
     DATABASES = {
