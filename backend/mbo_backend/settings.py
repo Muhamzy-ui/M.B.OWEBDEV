@@ -98,12 +98,23 @@ DATABASE_URL = get_env("DATABASE_URL") or os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
     DATABASES = {
-        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-    # Render's PostgreSQL database uses the mbo_portfolio schema — this tells
-    # Django to look there first, then fall back to public (where auth tables live)
-    DATABASES["default"].setdefault("OPTIONS", {})
-    DATABASES["default"]["OPTIONS"]["options"] = "-c search_path=mbo_portfolio,public"
+    # Render's PostgreSQL database uses the mbo_portfolio schema.
+    # We include 'public' as a fallback where standard Django tables often live.
+    if 'OPTIONS' not in DATABASES['default']:
+        DATABASES['default']['OPTIONS'] = {}
+    
+    DATABASES['default']['OPTIONS']['options'] = "-c search_path=mbo_portfolio,public"
+    
+    # Debug print for Render logs (will help diagnose connection issues)
+    import sys
+    db_host = DATABASES['default'].get('HOST', 'unknown')
+    print(f"DEBUG: Connecting to PostgreSQL at {db_host} with search_path=mbo_portfolio,public", file=sys.stderr)
 else:
     # SQLite — works out of the box locally, no setup needed
     DATABASES = {
