@@ -157,12 +157,20 @@ REST_FRAMEWORK = {
 
 
 # ─── CORS ─────────────────────────────────────────────────────────────────────
-CORS_ALLOWED_ORIGINS = [
-    get_env("FRONTEND_URL", "http://localhost:5173"),
+_cors_origins = [
     "http://localhost:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
+_frontend_url = get_env("FRONTEND_URL", "").strip()
+_vercel_url   = get_env("VERCEL_URL", "").strip()
+if _frontend_url:
+    _cors_origins.append(_frontend_url)
+if _vercel_url:
+    _cors_origins.append(_vercel_url)
+
+# Remove duplicates while preserving order
+CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_cors_origins))
 CORS_ALLOW_CREDENTIALS = True
 
 
@@ -181,7 +189,7 @@ if email_user:
     EMAIL_USE_TLS       = True
     EMAIL_HOST_USER     = email_user
     EMAIL_HOST_PASSWORD = get_env("EMAIL_HOST_PASSWORD", "")
+    DEFAULT_FROM_EMAIL  = email_user
 else:
     # Fallback for local testing
-    EMAIL_BACKEND       = "django.core.mail.backends.console.EmailBackend"
-# DEFAULT_FROM_EMAIL  = EMAIL_HOST_USER
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
