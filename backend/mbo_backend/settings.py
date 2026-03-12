@@ -31,7 +31,7 @@ SECRET_KEY = get_env(
     "django-insecure-mbo-webdev-default-change-in-production-2025"
 )
 
-DEBUG = get_env("DEBUG", "True") == "True"
+DEBUG = get_env("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = get_env("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
@@ -93,22 +93,15 @@ WSGI_APPLICATION = "mbo_backend.wsgi.application"
 
 
 # ─── Database ─────────────────────────────────────────────────────────────────
-# Defaults to SQLite so you can run instantly without PostgreSQL
-# Change USE_POSTGRES=True in .env when you're ready for PostgreSQL
+# On Render, DATABASE_URL is automatically set. Locally we fall back to SQLite.
+DATABASE_URL = get_env("DATABASE_URL") or os.environ.get("DATABASE_URL")
 
-# Database URL provided by Render: postgresql://apex_db_f0dm_user:gbIVKITYQY694qvYwSOSeMruvhLrRroK@dpg-d6gsd2pr0fns739h58k0-a.virginia-postgres.render.com/apex_db_f0dm
-USE_POSTGRES = get_env("USE_POSTGRES", "False") == "True"
-DATABASE_URL = get_env("DATABASE_URL", "postgresql://apex_db_f0dm_user:gbIVKITYQY694qvYwSOSeMruvhLrRroK@dpg-d6gsd2pr0fns739h58k0-a.virginia-postgres.render.com/apex_db_f0dm")
-
-if USE_POSTGRES:
+if DATABASE_URL:
     DATABASES = {
-        "default": dj_database_url.parse(DATABASE_URL)
-    }
-    DATABASES["default"]["OPTIONS"] = {
-        "options": "-c search_path=mbo_portfolio,public"
+        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
 else:
-    # SQLite — works out of the box, no setup needed
+    # SQLite — works out of the box locally, no setup needed
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
