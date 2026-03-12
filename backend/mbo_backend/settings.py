@@ -97,33 +97,26 @@ WSGI_APPLICATION = "mbo_backend.wsgi.application"
 DATABASE_URL = get_env("DATABASE_URL") or os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
-    # Use parse() instead of config() for more direct control when providing the URL
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
     
-    # Render's PostgreSQL database uses the mbo_portfolio schema.
-    # We include 'public' as a fallback.
+    # ISOLATION: We use ONLY the mbo_portfolio schema.
+    # This ignores any existing tables in 'public' (from other projects) 
+    # and forces Django to create its own clean tables here.
     DATABASES['default'].setdefault('OPTIONS', {})
-    DATABASES['default']['OPTIONS']['options'] = "-c search_path=mbo_portfolio,public"
+    DATABASES['default']['OPTIONS']['options'] = "-c search_path=mbo_portfolio"
     
-    # Verify connection and schema on startup (logs to Render console)
+    # Quick health check (logs to Render console)
     try:
         import sys
         from django.db import connection
         with connection.cursor() as cursor:
             cursor.execute("SHOW search_path;")
             path = cursor.fetchone()
-            print(f"DEBUG: Current search_path is {path}", file=sys.stderr)
-            
-            # List all tables and their schemas to see where things are
-            cursor.execute("SELECT table_schema, table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog') ORDER BY table_schema, table_name;")
-            tables = cursor.fetchall()
-            print(f"DEBUG: Found {len(tables)} tables in DB:", file=sys.stderr)
-            for schema, name in tables:
-                print(f"   - {schema}.{name}", file=sys.stderr)
+            print(f"DEBUG: Connected! search_path is {path}", file=sys.stderr)
     except Exception as e:
-        print(f"DEBUG: Startup check failed: {e}", file=sys.stderr)
+        print(f"DEBUG: Startup connection check failed: {e}", file=sys.stderr)
 else:
     # SQLite — works out of the box locally, no setup needed
     DATABASES = {
