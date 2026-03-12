@@ -116,10 +116,12 @@ if DATABASE_URL:
             path = cursor.fetchone()
             print(f"DEBUG: Current search_path is {path}", file=sys.stderr)
             
-            # Check if auth_user exists in any visible schema
-            cursor.execute("SELECT count(*) FROM information_schema.tables WHERE table_name = 'auth_user';")
-            exists = cursor.fetchone()[0] > 0
-            print(f"DEBUG: 'auth_user' table exists in search path: {exists}", file=sys.stderr)
+            # List all tables and their schemas to see where things are
+            cursor.execute("SELECT table_schema, table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog') ORDER BY table_schema, table_name;")
+            tables = cursor.fetchall()
+            print(f"DEBUG: Found {len(tables)} tables in DB:", file=sys.stderr)
+            for schema, name in tables:
+                print(f"   - {schema}.{name}", file=sys.stderr)
     except Exception as e:
         print(f"DEBUG: Startup check failed: {e}", file=sys.stderr)
 else:
