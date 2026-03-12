@@ -9,6 +9,8 @@ from django.conf.urls.static import static
 from django.http import JsonResponse
 
 
+from django.shortcuts import redirect
+
 def health(request):
     """Simple health-check endpoint — visit /api/ to confirm Django is running."""
     return JsonResponse({
@@ -26,6 +28,9 @@ def health(request):
 
 
 urlpatterns = [
+    # Root redirect to API
+    path("", lambda r: redirect("api/", permanent=False)),
+
     # Health check
     path("api/", health),
 
