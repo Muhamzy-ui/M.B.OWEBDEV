@@ -100,6 +100,10 @@ if DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
+    # Render's PostgreSQL database uses the mbo_portfolio schema — this tells
+    # Django to look there first, then fall back to public (where auth tables live)
+    DATABASES["default"].setdefault("OPTIONS", {})
+    DATABASES["default"]["OPTIONS"]["options"] = "-c search_path=mbo_portfolio,public"
 else:
     # SQLite — works out of the box locally, no setup needed
     DATABASES = {
