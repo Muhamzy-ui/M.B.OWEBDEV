@@ -101,22 +101,7 @@ if DATABASE_URL:
         'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
     
-    # ISOLATION: We use mbo_portfolio schema first.
-    # This ensures all NEW tables (your portfolio data) go into a clean schema.
-    # We keep 'public' as a fallback to prevent "no schema selected" errors.
-    DATABASES['default'].setdefault('OPTIONS', {})
-    DATABASES['default']['OPTIONS']['options'] = "-c search_path=mbo_portfolio,public"
-    
     # Quick health check (logs to Render console)
-    try:
-        import sys
-        from django.db import connection
-        with connection.cursor() as cursor:
-            cursor.execute("SHOW search_path;")
-            path = cursor.fetchone()
-            print(f"DEBUG: Connected! search_path is {path}", file=sys.stderr)
-    except Exception as e:
-        print(f"DEBUG: Startup connection check failed: {e}", file=sys.stderr)
 else:
     # SQLite — works out of the box locally, no setup needed
     DATABASES = {
