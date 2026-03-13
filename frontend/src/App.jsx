@@ -361,8 +361,8 @@ const Hero = ({ go, t }) => (
 
         <div className="hero-right" style={{ display: "flex", justifyContent: "center", animation: "slideInRight .8s ease both" }}>
           <div style={{ position: "relative", width: "clamp(240px,30vw,320px)" }}>
-            <div style={{ position: "absolute", top: "50%", left: "50%", width: 220, height: 220, marginLeft: -110, marginTop: -110, borderRadius: "50%", border: `1px solid ${t.border}`, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
-               <img src={profileImg} alt="M.B.O Profile" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.8 }} />
+            <div style={{ position: "absolute", top: "50%", left: "50%", width: 220, height: 220, marginLeft: -110, marginTop: -110, borderRadius: "50%", border: `1px solid ${t.border}`, pointerEvents: "none", overflow: "hidden", zIndex: 0, background: `linear-gradient(135deg, ${t.accentDim}, ${t.card})`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+               <div style={{ fontSize: 40, color: t.accent, opacity: 0.5, fontFamily: "'Orbitron',monospace", fontWeight: 900 }}>M.B.O</div>
             </div>
             <div style={{ background: t.card, border: `1px solid ${t.borderHov}`, borderRadius: 22, padding: 24, boxShadow: `0 20px 70px ${t.shadow},0 0 36px ${t.accentGlow}`, animation: "floatY 5s ease-in-out infinite", position: "relative", zIndex: 1, marginTop: 140 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
