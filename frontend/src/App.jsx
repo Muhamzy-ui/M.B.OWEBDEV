@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 // ─── THEME ────────────────────────────────────────────────────────────────────
 const DARK = {
   bg: "#080e08", bg2: "#0b150b", surface: "#0d1a0d", card: "#0f1f0f",
@@ -740,7 +741,7 @@ const BookMeeting = ({ t }) => {
     setLoadingSlots(true);
     try {
       const formattedDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-      const res = await fetch(`http://localhost:8000/api/meetings/slots/?date=${formattedDate}`);
+      const res = await fetch(`${API_BASE}/api/meetings/slots/?date=${formattedDate}`);
       if (res.ok) {
         const data = await res.json();
         setAvailableSlots(data.available);
@@ -757,7 +758,7 @@ const BookMeeting = ({ t }) => {
     setSubmitting(true);
     const formattedDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(selDate).padStart(2, "0")}`;
     try {
-        const res = await fetch("http://localhost:8000/api/meetings/", {
+        const res = await fetch(`${API_BASE}/api/meetings/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -882,7 +883,7 @@ const Contact = ({ t }) => {
     if (!form.name || !form.email || !form.message) return;
     setL(true);
     try {
-      const res = await fetch("http://localhost:8000/api/contact/", {
+      const res = await fetch(`${API_BASE}/api/contact/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
@@ -946,7 +947,7 @@ const Footer = ({ go, t }) => {
   const cols = {
     "Quick Links": ["Home", "About", "Skills", "Projects", "Blog", "Book Meeting", "Contact"],
     "Services": ["Web Development", "Mobile Apps", "API Design", "Database Architecture", "Code Review"],
-    "Connect": ["GitHub / Muhamzy-ui", "LinkedIn / mahmud-olasunkanmi", "Upwork", "Freelancer.com"],
+    "Connect": ["GitHub / Muhamzy-ui", "LinkedIn / mahmud-olasunkanmi", "Upwork", "WhatsApp"],
   };
   return (
     <footer style={{ borderTop: `1px solid ${t.border}`, padding: "48px clamp(16px,5vw,72px) 26px", background: t.bg }}>

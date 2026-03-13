@@ -38,6 +38,23 @@ render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 if render_host:
     ALLOWED_HOSTS.append(render_host)
 
+# ─── CSRF / Security for production ──────────────────────────────────────────
+# Required so Django admin login works over HTTPS on Render
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+if render_host:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{render_host}")
+_frontend_csrf = os.environ.get("FRONTEND_URL", "")
+if _frontend_csrf:
+    CSRF_TRUSTED_ORIGINS.append(_frontend_csrf)
+
+# Use secure cookies in production (HTTPS)
+if render_host:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
 
 # ─── Apps ─────────────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
