@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import profileImg from "./assets/profile.jpg";
 // ─── THEME ────────────────────────────────────────────────────────────────────
 const DARK = {
   bg: "#080e08", bg2: "#0b150b", surface: "#0d1a0d", card: "#0f1f0f",
