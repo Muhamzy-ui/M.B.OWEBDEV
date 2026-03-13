@@ -101,11 +101,11 @@ if DATABASE_URL:
         'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
     
-    # ISOLATION: We use ONLY the mbo_portfolio schema.
-    # This ignores any existing tables in 'public' (from other projects) 
-    # and forces Django to create its own clean tables here.
+    # ISOLATION: We use mbo_portfolio schema first.
+    # This ensures all NEW tables (your portfolio data) go into a clean schema.
+    # We keep 'public' as a fallback to prevent "no schema selected" errors.
     DATABASES['default'].setdefault('OPTIONS', {})
-    DATABASES['default']['OPTIONS']['options'] = "-c search_path=mbo_portfolio"
+    DATABASES['default']['OPTIONS']['options'] = "-c search_path=mbo_portfolio,public"
     
     # Quick health check (logs to Render console)
     try:
