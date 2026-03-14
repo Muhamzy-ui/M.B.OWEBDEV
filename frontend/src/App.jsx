@@ -1,1041 +1,1062 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
-// ─── THEME ────────────────────────────────────────────────────────────────────
+import emailjs from "@emailjs/browser";
+import React from "react";
+
+// ─── EMAILJS CONFIG ── Fill these in after signing up at emailjs.com ─────────
+const EMAILJS_CONFIG = {
+  publicKey:  "your_actual_key",        // EmailJS → Account → API Keys
+  serviceId:  "service_xxxxx",        // EmailJS → Email Services
+  bookingTemplate:  "template_xxxxx",  // EmailJS → Email Templates
+  contactTemplate:  "template_xxxxx",  // EmailJS → Email Templates
+};
+// ─── ADMIN PASSWORD ─── Change this to your own secret password ──────────────
+const ADMIN_PASSWORD = "Mahmud12$$";
+
+// ─── THEMES ──────────────────────────────────────────────────────────────────
 const DARK = {
-  bg: "#080e08", bg2: "#0b150b", surface: "#0d1a0d", card: "#0f1f0f",
-  border: "rgba(34,197,94,0.15)", borderHov: "rgba(34,197,94,0.5)",
-  text: "#f0fdf4", textSub: "#9ca3af", textMuted: "#4b5563",
-  accent: "#22c55e", accentDim: "rgba(34,197,94,0.1)", accentGlow: "rgba(34,197,94,0.3)",
-  tagBg: "rgba(34,197,94,0.08)", tagColor: "#86efac",
-  inputBg: "rgba(0,0,0,0.4)", codeBg: "#040d04",
-  navBg: "rgba(8,14,8,0.96)", shadow: "rgba(0,0,0,0.7)",
-  grid: "rgba(34,197,94,0.03)", orb: "rgba(22,163,74,0.12)",
-  sidebarBg: "rgba(4,9,4,0.98)",
+  bg:"#060e06",bg2:"#091409",surface:"#0b180b",card:"#0d1c0d",
+  border:"rgba(34,197,94,0.14)",borderHov:"rgba(34,197,94,0.55)",
+  text:"#f0fdf4",textSub:"#9ca3af",textMuted:"#4b5563",
+  accent:"#22c55e",accentDim:"rgba(34,197,94,0.09)",accentGlow:"rgba(34,197,94,0.28)",
+  tagBg:"rgba(34,197,94,0.08)",tagColor:"#86efac",
+  inputBg:"rgba(0,0,0,0.45)",codeBg:"#030c03",
+  navBg:"rgba(6,14,6,0.97)",shadow:"rgba(0,0,0,0.75)",
+  grid:"rgba(34,197,94,0.028)",orb:"rgba(22,163,74,0.11)",
 };
 const LIGHT = {
-  bg: "#f0fdf4", bg2: "#dcfce7", surface: "#fff", card: "#fff",
-  border: "rgba(22,163,74,0.2)", borderHov: "rgba(22,163,74,0.6)",
-  text: "#052e16", textSub: "#374151", textMuted: "#6b7280",
-  accent: "#16a34a", accentDim: "rgba(22,163,74,0.08)", accentGlow: "rgba(22,163,74,0.25)",
-  tagBg: "rgba(22,163,74,0.08)", tagColor: "#15803d",
-  inputBg: "rgba(255,255,255,0.9)", codeBg: "#f8fff8",
-  navBg: "rgba(240,253,244,0.96)", shadow: "rgba(0,0,0,0.08)",
-  grid: "rgba(22,163,74,0.04)", orb: "rgba(22,163,74,0.07)",
-  sidebarBg: "rgba(240,253,244,0.99)",
+  bg:"#f0fdf4",bg2:"#dcfce7",surface:"#fff",card:"#fff",
+  border:"rgba(22,163,74,0.18)",borderHov:"rgba(22,163,74,0.55)",
+  text:"#052e16",textSub:"#374151",textMuted:"#6b7280",
+  accent:"#16a34a",accentDim:"rgba(22,163,74,0.07)",accentGlow:"rgba(22,163,74,0.22)",
+  tagBg:"rgba(22,163,74,0.07)",tagColor:"#15803d",
+  inputBg:"rgba(255,255,255,0.95)",codeBg:"#f8fff9",
+  navBg:"rgba(240,253,244,0.97)",shadow:"rgba(0,0,0,0.07)",
+  grid:"rgba(22,163,74,0.04)",orb:"rgba(22,163,74,0.06)",
 };
 
-// ─── GLOBAL CSS ───────────────────────────────────────────────────────────────
-const G = (t) => `
+const makeCSS = (t) => `
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth;font-size:16px}
-body{background:${t.bg};color:${t.text};overflow-x:hidden;transition:background .35s,color .35s;font-family:'Rajdhani',sans-serif}
+html{scroll-behavior:smooth}
+body{background:${t.bg};color:${t.text};overflow-x:hidden;transition:background .3s,color .3s;font-family:'Rajdhani',sans-serif}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:${t.bg}}
 ::-webkit-scrollbar-thumb{background:linear-gradient(${t.accent},#4ade80);border-radius:3px}
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideInLeft{from{opacity:0;transform:translateX(-100%)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideOutLeft{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-100%)}}
-@keyframes slideInRight{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
-@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-@keyframes orbit{from{transform:rotate(0deg) translateX(60px) rotate(0deg)}to{transform:rotate(360deg) translateX(60px) rotate(-360deg)}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-@keyframes scanLine{0%{top:0%}100%{top:100%}}
-@keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-@keyframes neon{0%,100%{text-shadow:0 0 8px ${t.accent}66}50%{text-shadow:0 0 20px ${t.accent},0 0 40px ${t.accent}55}}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 ${t.accentGlow}}50%{box-shadow:0 0 0 8px transparent}}
-@keyframes ripple{to{transform:scale(4);opacity:0}}
-@keyframes menuItemIn{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:none}}
-@keyframes pageSlide{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-@keyframes countUp{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
-
-.page-enter{animation:pageSlide .45s cubic-bezier(.4,0,.2,1) both}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 24px;border-radius:10px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:15px;cursor:pointer;border:none;transition:all .22s ease;position:relative;overflow:hidden;text-decoration:none;white-space:nowrap;letter-spacing:.4px;-webkit-tap-highlight-color:transparent}
+@keyframes fadeUp    {from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes slideR    {from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes floatY    {0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
+@keyframes orbit     {from{transform:rotate(0deg) translateX(56px) rotate(0deg)}to{transform:rotate(360deg) translateX(56px) rotate(-360deg)}}
+@keyframes blink     {0%,100%{opacity:1}50%{opacity:0}}
+@keyframes scanLine  {0%{top:-2px}100%{top:100%}}
+@keyframes gradShift {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes neonPulse {0%,100%{text-shadow:0 0 8px ${t.accent}55}50%{text-shadow:0 0 22px ${t.accent},0 0 44px ${t.accent}44}}
+@keyframes pulseDot  {0%,100%{box-shadow:0 0 0 0 ${t.accentGlow}}50%{box-shadow:0 0 0 8px transparent}}
+@keyframes ripple    {to{transform:scale(22);opacity:0}}
+@keyframes sbIn      {from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:none}}
+@keyframes pageIn    {from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes starPop   {0%{transform:scale(0) rotate(-30deg)}60%{transform:scale(1.3) rotate(5deg)}100%{transform:scale(1) rotate(0deg)}}
+@keyframes shimmer   {0%{background-position:-200% 0}100%{background-position:200% 0}}
+.page-enter{animation:pageIn .42s cubic-bezier(.4,0,.2,1) both}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 22px;border-radius:10px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:15px;cursor:pointer;border:none;transition:all .2s ease;position:relative;overflow:hidden;text-decoration:none;white-space:nowrap;letter-spacing:.3px;-webkit-tap-highlight-color:transparent}
 .btn:active{transform:scale(.95)!important}
-.btn-primary{background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;box-shadow:0 4px 20px ${t.accentGlow}}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px ${t.accentGlow};filter:brightness(1.07)}
+.btn-primary{background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;box-shadow:0 4px 18px ${t.accentGlow}}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 26px ${t.accentGlow};filter:brightness(1.07)}
 .btn-outline{background:transparent;color:${t.accent};border:1.5px solid ${t.border}}
 .btn-outline:hover{background:${t.accentDim};border-color:${t.accent};transform:translateY(-2px)}
 .btn-ghost{background:${t.accentDim};color:${t.textSub};border:1px solid ${t.border}}
 .btn-ghost:hover{color:${t.accent};border-color:${t.borderHov};transform:translateY(-2px)}
-.btn-sm{padding:7px 16px;font-size:13px;border-radius:8px}
-.btn-lg{padding:14px 32px;font-size:16px}
+.btn-sm{padding:7px 15px;font-size:13px;border-radius:8px}
+.btn-lg{padding:13px 30px;font-size:16px}
 .btn-block{width:100%}
-
-/* Sidebar nav links */
-.sb-link{display:flex;align-items:center;gap:14px;padding:13px 20px;border-radius:12px;cursor:pointer;border:none;background:transparent;color:${t.textSub};font-family:'Rajdhani',sans-serif;font-weight:700;font-size:16px;width:100%;text-align:left;transition:all .2s ease;position:relative;overflow:hidden}
-.sb-link::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(#16a34a,#22c55e);border-radius:0 3px 3px 0;transform:scaleY(0);transition:transform .2s}
-.sb-link:hover{background:${t.accentDim};color:${t.text}}
-.sb-link:hover::before{transform:scaleY(1)}
-.sb-link.active{background:${t.accentDim};color:${t.accent}}
-.sb-link.active::before{transform:scaleY(1)}
-
-/* Footer links */
-.foot-link{color:${t.textMuted};font-size:13px;font-weight:600;background:none;border:none;cursor:pointer;text-align:left;padding:3px 0;position:relative;display:inline-block;text-decoration:none;font-family:'Rajdhani',sans-serif;transition:color .2s}
-.foot-link::after{content:'';position:absolute;left:0;bottom:-1px;width:0;height:1.5px;background:${t.accent};transition:width .25s ease}
-.foot-link:hover{color:${t.accent}}
-.foot-link:hover::after{width:100%}
-
+.btn-danger{background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.3)}
+.btn-danger:hover{background:rgba(239,68,68,0.22);border-color:#ef4444}
+.footlink{color:${t.textMuted};font-size:13px;font-weight:600;background:none;border:none;cursor:pointer;text-align:left;padding:3px 0;position:relative;display:inline-block;font-family:'Rajdhani',sans-serif;transition:color .2s;text-decoration:none}
+.footlink::after{content:'';position:absolute;left:0;bottom:-1px;width:0;height:1.5px;background:${t.accent};transition:width .25s ease}
+.footlink:hover{color:${t.accent}}.footlink:hover::after{width:100%}
+.star-anim{animation:starPop .35s cubic-bezier(.34,1.56,.64,1) both}
+@media(min-width:769px){.mob-btn{display:none!important}.desk-nav{display:flex!important}}
 @media(max-width:768px){
-  .btn{padding:9px 18px;font-size:14px}
-  .btn-lg{padding:12px 22px;font-size:15px}
-  .hero-grid{grid-template-columns:1fr!important}
-  .hero-right{display:none!important}
-  .about-grid{grid-template-columns:1fr!important}
-  .skills-grid{grid-template-columns:1fr!important}
-  .projects-grid{grid-template-columns:1fr!important}
-  .blog-grid{grid-template-columns:1fr!important}
-  .footer-grid{grid-template-columns:1fr 1fr!important}
-  .stat-grid{grid-template-columns:1fr 1fr!important}
-  .contact-2col{grid-template-columns:1fr!important}
-  .cal-2col{grid-template-columns:1fr!important}
-  .card-flip{width:min(340px,92vw)!important;height:210px!important}
+  .desk-nav{display:none!important}.mob-btn{display:flex!important}
+  .hero-grid{grid-template-columns:1fr!important}.hero-right{display:none!important}
+  .about-grid{grid-template-columns:1fr!important}.skills-grid{grid-template-columns:1fr!important}
+  .proj-grid{grid-template-columns:1fr!important}.blog-grid{grid-template-columns:1fr!important}
+  .foot-grid{grid-template-columns:1fr 1fr!important}.c2{grid-template-columns:1fr!important}
+  .times-grid{grid-template-columns:repeat(4,1fr)!important}.ratings-grid{grid-template-columns:1fr!important}
 }
-@media(max-width:480px){
-  .footer-grid{grid-template-columns:1fr!important}
-  .card-flip{height:240px!important}
+@media(max-width:520px){
+  .foot-grid{grid-template-columns:1fr!important}.hero-btns .btn{width:100%}
+  .times-grid{grid-template-columns:repeat(2,1fr)!important}.ratings-grid{grid-template-columns:1fr!important}
 }
 `;
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-const useInView = (th = .12) => {
-  const ref = useRef(null); const [v, sv] = useState(false);
-  useEffect(() => {
-    const o = new IntersectionObserver(([e]) => { if (e.isIntersecting) sv(true) }, { threshold: th });
-    if (ref.current) o.observe(ref.current); return () => o.disconnect();
-  }, []);
-  return [ref, v];
-};
-
-const FadeUp = ({ children, delay = 0, style: s = {} }) => {
-  const [ref, v] = useInView();
-  return <div ref={ref} style={{ opacity: v ? 1 : 0, transform: v ? "none" : "translateY(28px)", transition: `opacity .65s ${delay}s ease,transform .65s ${delay}s ease`, ...s }}>{children}</div>;
-};
-
-const TypeWriter = ({ texts, speed = 75 }) => {
-  const [d, sd] = useState(""); const [i, si] = useState(0); const [c, sc] = useState(0); const [del, sdl] = useState(false);
-  useEffect(() => {
-    const cur = texts[i];
-    if (!del && c < cur.length) { const t = setTimeout(() => { sd(cur.slice(0, c + 1)); sc(x => x + 1) }, speed); return () => clearTimeout(t) }
-    if (!del && c === cur.length) { const t = setTimeout(() => sdl(true), 2200); return () => clearTimeout(t) }
-    if (del && c > 0) { const t = setTimeout(() => { sd(cur.slice(0, c - 1)); sc(x => x - 1) }, speed / 2); return () => clearTimeout(t) }
-    if (del && c === 0) { sdl(false); si(x => (x + 1) % texts.length) }
-  }, [c, del, i, texts, speed]);
-  return <span>{d}<span style={{ animation: "blink 1s step-end infinite", color: "#22c55e" }}>|</span></span>;
-};
-
-const CountUp = ({ end, suffix = "" }) => {
-  const [n, sn] = useState(0); const [ref, v] = useInView();
-  useEffect(() => {
-    if (!v) return;
-    let s = 0; const step = end / 125;
-    const t = setInterval(() => { s += step; if (s >= end) { sn(end); clearInterval(t) } else sn(Math.floor(s)) }, 16);
-    return () => clearInterval(t);
-  }, [v, end]);
-  return <span ref={ref} style={{ display: "inline-block", animation: v ? "countUp .4s ease" : "none" }}>{n}{suffix}</span>;
-};
-
-// ─── SVG LOGO ─────────────────────────────────────────────────────────────────
-const Logo = ({ size = 40 }) => (
-  <svg width={size} height={size} viewBox="0 0 80 80" fill="none">
-    <defs>
-      <radialGradient id="lg1" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#4ade80" /><stop offset="100%" stopColor="#15803d" /></radialGradient>
-      <linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#bbf7d0" /><stop offset="100%" stopColor="#22c55e" /></linearGradient>
-    </defs>
-    <circle cx="40" cy="40" r="36" fill="url(#lg1)" opacity=".88" />
-    <ellipse cx="40" cy="40" rx="36" ry="16" stroke="#4ade8044" strokeWidth="1.5" fill="none" />
-    <ellipse cx="40" cy="40" rx="16" ry="36" stroke="#4ade8044" strokeWidth="1.5" fill="none" />
-    <line x1="4" y1="40" x2="76" y2="40" stroke="#4ade8033" strokeWidth="1.5" />
-    <path d="M22 54L30 26L40 46L50 26L58 54" stroke="url(#lg2)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-    <path d="M52 24L62 28L58 18" stroke="url(#lg2)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-  </svg>
-);
-
-// ─── DATA ─────────────────────────────────────────────────────────────────────
-const SKILLS = [
-  { name: "Python", pct: 90, icon: "🐍", c: "#22c55e" }, { name: "Django", pct: 88, icon: "🎸", c: "#16a34a" },
-  { name: "CSS", pct: 82, icon: "🎨", c: "#4ade80" }, { name: "React Native", pct: 78, icon: "⚛️", c: "#86efac" },
-  { name: "Bootstrap", pct: 72, icon: "🅱️", c: "#34d399" }, { name: "PostgreSQL", pct: 85, icon: "🐘", c: "#22c55e" },
-  { name: "JavaScript", pct: 80, icon: "⚡", c: "#a3e635" }, { name: "REST APIs", pct: 92, icon: "🔗", c: "#4ade80" },
-  { name: "HTML5", pct: 70, icon: "🌐", c: "#86efac" },
+// ─── INITIAL PROJECT DATA ─────────────────────────────────────────────────────
+const INIT_PROJECTS = [
+  {id:1,icon:"🛒",title:"FullStack E-Commerce Platform",
+   desc:"End-to-end e-commerce with Django REST backend, React frontend, real-time inventory, Stripe payments & admin dashboard.",
+   tags:["Django","React","PostgreSQL","Stripe","Redis"],stats:{Commits:"240+",Users:"500+",Uptime:"99.9%"},
+   github:"https://github.com/Muhamzy-ui",live:"#"},
+  {id:2,icon:"⛏️",title:"Mining Operations Platform",
+   desc:"Custom client platform for real-time mining ops, equipment tracking, shift management & automated compliance reports.",
+   tags:["Python","Flask","PostgreSQL","WebSockets","Chart.js"],stats:{Sensors:"80+",Reports:"1000+",Efficiency:"+35%"},
+   github:"https://github.com/Muhamzy-ui",live:"#"},
+  {id:3,icon:"🌐",title:"M.B.O WebDev Portfolio",
+   desc:"This site — animated dark fintech portfolio with meeting booking, blog, admin panel & full animations.",
+   tags:["React","Django","PostgreSQL","Vite"],stats:{Animations:"30+",Score:"98/100",Load:"<1s"},
+   github:"https://github.com/Muhamzy-ui",live:"#"},
 ];
 
-const PROJECTS = [
-  { id: 1, icon: "🛒", title: "FullStack E-Commerce Platform", desc: "End-to-end e-commerce with Django REST backend, React frontend, real-time inventory, Stripe payments & admin dashboard.", tags: ["Django", "React", "PostgreSQL", "Stripe", "Redis"], stats: { Commits: "240+", Users: "500+", Uptime: "99.9%" } },
-  { id: 2, icon: "⛏️", title: "Mining Operations Platform", desc: "Custom client platform for real-time mining ops, equipment tracking, shift management & automated compliance reports.", tags: ["Python", "Flask", "PostgreSQL", "WebSockets", "Chart.js"], stats: { Sensors: "80+", Reports: "1000+", Efficiency: "+35%" } },
-  { id: 3, icon: "🌐", title: "M.B.O WebDev Portfolio", desc: "This site — animated dark fintech portfolio with Django backend, meeting booking, blog, business card & animations.", tags: ["React", "Django", "PostgreSQL", "EmailJS", "Vite"], stats: { Animations: "25+", Score: "98/100", Load: "<1s" } },
+// ─── INITIAL RATINGS DATA ─────────────────────────────────────────────────────
+const INIT_RATINGS = [
+  {id:1,name:"James O.",role:"E-commerce Client",country:"🇬🇧 UK",stars:5,
+   text:"Mahmud delivered the entire e-commerce platform 3 days ahead of schedule. The Django backend is rock solid — zero downtime since launch. Genuinely one of the best developers I've worked with.",
+   project:"FullStack E-Commerce Platform",date:"Feb 2026"},
+  {id:2,name:"Sarah M.",role:"Startup Founder",country:"🇨🇦 Canada",stars:5,
+   text:"We needed a full-stack developer who could handle both the Django API and the React frontend. Mahmud handled both brilliantly. Communication was clear, code was clean, delivery was on time. 10/10.",
+   project:"Custom Dashboard App",date:"Jan 2026"},
+  {id:3,name:"Chukwuemeka A.",role:"Mining Operations Manager",country:"🇳🇬 Nigeria",stars:5,
+   text:"The mining operations platform Mahmud built for us saved our team 20+ hours per month on compliance reports alone. He understood our non-technical team's needs and built something intuitive. Outstanding work.",
+   project:"Mining Operations Platform",date:"Dec 2025"},
+  {id:4,name:"Lena K.",role:"Product Manager",country:"🇩🇪 Germany",stars:5,
+   text:"Hired Mahmud for a PostgreSQL performance fix. He identified the bottleneck in under an hour and brought our API from 3s response times down to 50ms. Exceptional technical depth.",
+   project:"Database Optimisation",date:"Nov 2025"},
+  {id:5,name:"David T.",role:"Freelance Client",country:"🇦🇺 Australia",stars:5,
+   text:"Clear communication, clean code, responsive across all timezones. Mahmud built our REST API with JWT auth and full test coverage. Will definitely hire again.",
+   project:"REST API Development",date:"Oct 2025"},
+  {id:6,name:"Fatima B.",role:"EdTech Founder",country:"🇳🇱 Netherlands",stars:4,
+   text:"Fantastic developer. Built our Django backend with full documentation. Minor revision needed on the frontend but resolved same day. Very professional attitude throughout.",
+   project:"EdTech Platform Backend",date:"Sep 2025"},
 ];
 
 const BLOGS = [
-  { id: 1, slug: "django-rest-apis", tag: "Django", date: "Mar 2026", title: "Building REST APIs with Django Rest Framework", desc: "A deep dive into DRF viewsets, serializers, JWT auth and pagination — the patterns I use on every project.", readTime: "8 min", icon: "🎸", content: `Django REST Framework (DRF) is the gold standard for building APIs in Python. After 2+ years shipping production APIs, here are the patterns that actually matter.\n\n## ViewSets vs APIViews\n\nFor simple CRUD operations, ViewSets save you massive amounts of code. But for complex business logic, APIView gives you full control. I use APIView for anything beyond basic CRUD.\n\n## Serializers Are Your Contract\n\nYour serializer IS your API contract. Validate everything at the serializer level — never in views. Use nested serializers sparingly; they kill performance with N+1 queries.\n\n## JWT Authentication\n\nUse djangorestframework-simplejwt. Set access token expiry to 15 minutes, refresh to 7 days. Always blacklist tokens on logout.\n\n## Pagination\n\nAlways paginate. Use PageNumberPagination with a default of 20 items. Your API users will thank you when the dataset grows to 100k records.\n\n## The Patterns I Use Every Project\n\n1. Custom exception handler for consistent error responses\n2. API versioning from day one (/api/v1/)\n3. Throttling on public endpoints\n4. Filtering with django-filter\n5. Swagger docs with drf-yasg` },
-  { id: 2, slug: "react-native-journey", tag: "React Native", date: "Feb 2026", title: "From Web Dev to Mobile: My React Native Journey", desc: "How a Django/React developer learned to ship production mobile apps on iOS and Android with a single codebase.", readTime: "6 min", icon: "📱", content: `Making the jump from web to mobile was one of the best decisions I made as a developer. Here's what I learned.\n\n## The Mental Shift\n\nThe biggest shift isn't the code — it's thinking in native constraints. No hover states. No right-click. Touch targets must be at least 44px. Network is unreliable.\n\n## Expo vs Bare React Native\n\nStart with Expo. You can always eject later. Expo Go makes development 10x faster for prototyping. When you need custom native modules, that's when you graduate to bare React Native.\n\n## State Management\n\nZustand is my go-to for React Native. Lightweight, simple, works perfectly. Redux is overkill for most apps. React Query handles server state beautifully.\n\n## Navigation\n\nReact Navigation is the standard. Use a stack navigator for normal flows, tab navigator for main sections, and drawer for settings. Nest them thoughtfully.\n\n## What Surprised Me\n\nStyling with StyleSheet.create() is actually enjoyable. Flexbox everywhere. No CSS cascade to fight. The result is more predictable UI.` },
-  { id: 3, slug: "postgresql-indexing", tag: "PostgreSQL", date: "Jan 2026", title: "PostgreSQL Indexing Strategies That Actually Matter", desc: "The indexing mistakes I made early on and the patterns that took my query times from 3s to under 50ms.", readTime: "10 min", icon: "🐘", content: `Database performance is where good apps become great apps. Here's what I learned the hard way.\n\n## The Query That Started It All\n\nA mining operations dashboard query was taking 3.2 seconds. 50,000 rows. No index on the date filter column. Adding a single B-tree index dropped it to 12ms.\n\n## When to Index\n\nIndex columns that appear in WHERE clauses, JOIN conditions, and ORDER BY. Don't index columns with low cardinality (like boolean flags). Every index slows down writes.\n\n## Composite Indexes\n\nOrder matters. Put the highest-cardinality column first. An index on (user_id, created_at) helps queries filtering by user_id, but not queries filtering only by created_at.\n\n## EXPLAIN ANALYZE Is Your Best Friend\n\nRun EXPLAIN ANALYZE before and after every optimization. Look for Sequential Scans on large tables — those are your optimization targets.\n\n## Partial Indexes\n\nFor tables with soft deletes, create partial indexes: CREATE INDEX idx_active ON orders(user_id) WHERE deleted_at IS NULL. Half the size, twice as fast for active record queries.\n\n## Connection Pooling\n\nAlways use PgBouncer in production. Django's connection handling is not designed for thousands of concurrent users. PgBouncer saved one of my clients $200/month in server costs.` },
+  {id:1,slug:"django-rest-apis",tag:"Django",date:"Mar 2026",icon:"🎸",rt:"8 min",
+   title:"Building REST APIs with Django REST Framework",
+   desc:"A deep dive into DRF viewsets, serializers, JWT auth and pagination — patterns I use on every project.",
+   body:`Django REST Framework is the gold standard for Python APIs. Here are the patterns that actually matter after 2+ years in production.nn## ViewSets vs APIViewsnnFor simple CRUD, ViewSets save massive amounts of code. For complex business logic, APIView gives full control. I default to APIView for anything beyond basic CRUD — the explicitness pays off.nn## Serializers Are Your ContractnnYour serializer IS your API contract. Validate everything at the serializer level. Use nested serializers sparingly — they cause N+1 queries that kill performance at scale.nn## JWT AuthenticationnnUse djangorestframework-simplejwt. Set access token expiry to 15 minutes, refresh to 7 days. Always blacklist tokens on logout.nn## PaginationnnAlways paginate list endpoints. Use PageNumberPagination with page_size=20. Your API users will thank you when the dataset hits 100k records.`},
+  {id:2,slug:"react-native-journey",tag:"React Native",date:"Feb 2026",icon:"📱",rt:"6 min",
+   title:"From Web Dev to Mobile: My React Native Journey",
+   desc:"How a Django/React developer learned to ship production mobile apps on iOS and Android.",
+   body:`Making the jump from web to mobile was the best skill investment I made.nn## The Mental ShiftnnThe biggest change isn't the code — it's constraints. No hover states. No right-click. Touch targets must be at least 44px. Think offline-first from day one.nn## Expo vs Bare React NativennStart with Expo. You can always eject later. Expo Go makes prototyping 10x faster.nn## State ManagementnnZustand is my pick for React Native. Lightweight, simple, works perfectly with async storage.nn## NavigationnnReact Navigation is the standard. Stack navigator for flows, tab navigator for main sections.`},
+  {id:3,slug:"postgresql-indexing",tag:"PostgreSQL",date:"Jan 2026",icon:"🐘",rt:"10 min",
+   title:"PostgreSQL Indexing Strategies That Actually Matter",
+   desc:"The mistakes I made and the patterns that took my query times from 3s to under 50ms on real data.",
+   body:`Database performance is where good apps become great ones.nn## The Query That Started It AllnnA mining dashboard query was taking 3.2 seconds on 50,000 rows. Adding a single B-tree index dropped it to 12ms — a 99.6% improvement.nn## When to IndexnnIndex columns in WHERE clauses, JOIN conditions, and ORDER BY. Don't index low-cardinality columns.nn## Composite IndexesnnColumn order is critical. Put the highest-cardinality column first.nn## EXPLAIN ANALYZEnnRun EXPLAIN ANALYZE before and after every optimization. Look for Sequential Scans on large tables.`},
+  {id:4,slug:"flutter-vs-rn",tag:"Flutter",date:"Dec 2025",icon:"💙",rt:"7 min",
+   title:"Flutter vs React Native: An Honest Full-Stack Take",
+   desc:"After shipping apps in both, here's my unfiltered comparison.",
+   body:`I've shipped production apps in both Flutter and React Native.nn## PerformancennFlutter wins. Dart compiles to native ARM code and renders with its own engine — consistent 60fps.nn## Developer ExperiencennIf you're a JS developer, React Native feels natural immediately. Flutter requires learning Dart, but Dart is genuinely pleasant.nn## My RecommendationnnChoose React Native if your team is JS-heavy. Choose Flutter for pixel-perfect UI across all platforms.`},
+  {id:5,slug:"async-django",tag:"Django",date:"Nov 2025",icon:"🚀",rt:"9 min",
+   title:"Async Django: Non-Blocking Views That Scale",
+   desc:"How I rewrote a slow synchronous Django API and cut response times 70% on I/O-heavy endpoints.",
+   body:`Django has had async support since 3.1 but most tutorials don't show effective usage.nn## Why Async MattersnnMost API endpoints are I/O-bound — waiting on databases or external APIs. Async views release the thread so Django handles other requests meanwhile.nn## Concurrent Requests with asyncio.gathernnThree sequential calls taking 300ms become three concurrent calls finishing in ~100ms — a 3x speedup.nn## When NOT to Use AsyncnnCPU-bound tasks don't benefit from async. Use Celery + Redis for those.`},
+  {id:6,slug:"deploy-railway",tag:"DevOps",date:"Oct 2025",icon:"🚂",rt:"5 min",
+   title:"Deploying Django + PostgreSQL to Railway in 15 Minutes",
+   desc:"The fastest way to get a production Django app live.",
+   body:`Railway is genuinely the fastest Django deployment I've found.nn## Why RailwaynnNo server management. Git-push-to-deploy. Built-in PostgreSQL. Automatic SSL. $5/month for hobby projects.nn## Stepsnn1. Add gunicorn to requirements.txtn2. Create Procfile: web: gunicorn yourapp.wsgin3. Add .railway.app to ALLOWED_HOSTSn4. Push to GitHub, connect in Railway dashboardn5. Click + New → Database → PostgreSQLnnDone in under 15 minutes every time.`},
 ];
 
-const NAV_ITEMS = [
-  { id: "home", label: "Home", icon: "🏠" },
-  { id: "about", label: "About", icon: "👤" },
-  { id: "skills", label: "Skills", icon: "⚡" },
-  { id: "projects", label: "Projects", icon: "🚀" },
-  { id: "blog", label: "Blog", icon: "✍️" },
-  { id: "book-meeting", label: "Book Meeting", icon: "📅" },
-  { id: "contact", label: "Contact", icon: "📬" },
+const SKILLS = [
+  {n:"Python",p:90,i:"🐍",c:"#22c55e"},{n:"Django",p:88,i:"🎸",c:"#16a34a"},
+  {n:"Bootstrap",p:85,i:"🅱️",c:"#4ade80"},{n:"React",p:80,i:"⚛️",c:"#86efac"},
+  {n:"HTML/CSS",p:88,i:"🌐",c:"#34d399"},{n:"PostgreSQL",p:85,i:"🐘",c:"#22c55e"},
+  {n:"JavaScript",p:80,i:"⚡",c:"#a3e635"},{n:"REST APIs",p:92,i:"🔗",c:"#4ade80"},
+  {n:"React Native",p:78,i:"📱",c:"#86efac"},
 ];
-const TIMES = ["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM"];
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// ─── ANIMATED SIDEBAR ─────────────────────────────────────────────────────────
-const Sidebar = ({ open, onClose, active, go, t, dark, setDark }) => {
-  const [hovItem, setHov] = useState(null);
-  const [visible, setVisible] = useState(false);
+const NAV = [
+  {id:"home",label:"Home",icon:"⌂",sub:"Start here"},
+  {id:"about",label:"About",icon:"◉",sub:"Who I am"},
+  {id:"skills",label:"Skills",icon:"⚡",sub:"Tech stack"},
+  {id:"projects",label:"Projects",icon:"◈",sub:"My work"},
+  {id:"ratings",label:"Ratings",icon:"★",sub:"Client reviews"},
+  {id:"blog",label:"Blog",icon:"✦",sub:"Articles"},
+  {id:"book-meeting",label:"Book Meeting",icon:"◷",sub:"Schedule a call"},
+  {id:"contact",label:"Contact",icon:"◎",sub:"Get in touch"},
+];
 
-  useEffect(() => {
-    if (open) {
-      setVisible(true);
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-      const tm = setTimeout(() => setVisible(false), 350);
-      return () => clearTimeout(tm);
-    }
-  }, [open]);
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const TIMES=["09:00 AM","10:00 AM","11:00 AM","01:00 PM","02:00 PM","03:00 PM","04:00 PM","05:00 PM"];
 
-  if (!visible) return null;
+// ─── UTILITY COMPONENTS ───────────────────────────────────────────────────────
+const Logo=({size=40})=>(
+  <svg width={size} height={size} viewBox="0 0 40 40">
+    <rect width="40" height="40" rx="10" fill="#16a34a"/>
+    <text x="50%" y="56%" dominantBaseline="middle" textAnchor="middle"
+      fill="#fff" fontSize="14" fontWeight="900" fontFamily="monospace">MBO</text>
+  </svg>
+);
 
-  return (
+const FadeUp=({children,delay=0,style:s={}})=>{
+  const ref=useRef();const[vis,setV]=useState(false);
+  useEffect(()=>{const o=new IntersectionObserver(([e])=>{if(e.isIntersecting)setV(true)},{threshold:.12});
+    if(ref.current)o.observe(ref.current);return()=>o.disconnect();},[]);
+  return <div ref={ref} style={{opacity:vis?1:0,transform:vis?"none":"translateY(22px)",
+    transition:`opacity .6s ${delay}s ease,transform .6s ${delay}s ease`,...s}}>{children}</div>;
+};
+
+const Typewriter=({texts,speed=75})=>{
+  const[idx,setI]=useState(0);const[ch,setCh]=useState(0);const[del,setDel]=useState(false);
+  useEffect(()=>{
+    const t=setTimeout(()=>{
+      if(!del){if(ch<texts[idx].length)setCh(c=>c+1);else setTimeout(()=>setDel(true),1400);}
+      else{if(ch>0)setCh(c=>c-1);else{setDel(false);setI(i=>(i+1)%texts.length);}}
+    },del?38:speed);
+    return()=>clearTimeout(t);
+  },[ch,del,idx,texts,speed]);
+  return <span>{texts[idx].slice(0,ch)}<span style={{animation:"blink 1s step-end infinite",color:"#22c55e"}}>|</span></span>;
+};
+
+const CountUp=({end,sfx=""})=>{
+  const[v,setV]=useState(0);const ref=useRef();
+  useEffect(()=>{const o=new IntersectionObserver(([e])=>{
+    if(e.isIntersecting){let s=0;const i=setInterval(()=>{s+=Math.ceil(end/40);if(s>=end){setV(end);clearInterval(i);}else setV(s);},35);o.disconnect();}
+  },{threshold:.5});if(ref.current)o.observe(ref.current);return()=>o.disconnect();},[end]);
+  return <span ref={ref}>{v}{sfx}</span>;
+};
+
+const Stars=({count=5,size=18,animated=false})=>(
+  <span style={{display:"inline-flex",gap:2}}>
+    {Array(5).fill(0).map((_,i)=>(
+      <span key={i} style={{
+        fontSize:size,color:i<count?"#f59e0b":"rgba(245,158,11,0.2)",
+        animation:animated?`starPop .35s cubic-bezier(.34,1.56,.64,1) ${i*0.07}s both`:"none",
+        display:"inline-block",
+      }}>★</span>
+    ))}
+  </span>
+);
+
+// ─── SIDEBAR ──────────────────────────────────────────────────────────────────
+const Sidebar=({open,onClose,active,go,t,dark,setDark})=>{
+  const[hov,setHov]=useState(null);
+  useEffect(()=>{const h=(e)=>{if(open&&e.key==="Escape")onClose();};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);},[open,onClose]);
+  return(
     <>
-      {/* Backdrop */}
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 998, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)", opacity: open ? 1 : 0, transition: "opacity .35s ease" }} />
-
-      {/* Sidebar panel */}
-      <div style={{ position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 999, width: "min(300px,85vw)", background: t.sidebarBg, borderRight: `1px solid ${t.border}`, display: "flex", flexDirection: "column", transform: open ? "translateX(0)" : "translateX(-100%)", transition: "transform .38s cubic-bezier(.4,0,.2,1)", boxShadow: `8px 0 40px ${t.shadow}` }}>
-
-        {/* Header */}
-        <div style={{ padding: "20px 20px 16px", borderBottom: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Logo size={34} />
-            <div>
-              <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 14, fontWeight: 900, color: t.text, letterSpacing: 2 }}>M.B.O</div>
-              <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 9, color: t.accent, fontWeight: 700, letterSpacing: 3 }}>WEBDEV</div>
-            </div>
-          </div>
-          <button onClick={onClose} style={{ background: t.accentDim, border: `1px solid ${t.border}`, borderRadius: 8, width: 32, height: 32, cursor: "pointer", color: t.textSub, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .2s" }}
-            onMouseEnter={e => { e.currentTarget.style.color = t.accent; e.currentTarget.style.borderColor = t.borderHov }}
-            onMouseLeave={e => { e.currentTarget.style.color = t.textSub; e.currentTarget.style.borderColor = t.border }}>✕</button>
-        </div>
-
-        {/* Scan line effect */}
-        <div style={{ position: "absolute", left: 0, right: 0, height: 1, background: `linear-gradient(90deg,transparent,${t.accent}44,transparent)`, animation: "scanLine 4s linear infinite", pointerEvents: "none" }} />
-
-        {/* Nav links */}
-        <div style={{ flex: 1, padding: "12px 12px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 4 }}>
-          {NAV_ITEMS.map((item, i) => (
-            <button key={item.id}
-              className={`sb-link${active === item.label ? " active" : ""}`}
-              style={{ animationDelay: `${i * 0.06}s`, animation: open ? `menuItemIn .4s ${i * 0.06}s both` : "none" }}
-              onMouseEnter={() => setHov(item.id)} onMouseLeave={() => setHov(null)}
-              onClick={() => { go(item.id); onClose() }}>
-              <span style={{ fontSize: 18, transition: "transform .2s", transform: hovItem === item.id ? "scale(1.2)" : "none" }}>{item.icon}</span>
-              <span>{item.label}</span>
-              {active === item.label && (
-                <span style={{ marginLeft: "auto", width: 6, height: 6, borderRadius: "50%", background: t.accent, boxShadow: `0 0 8px ${t.accent}` }} />
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* Bottom section */}
-        <div style={{ padding: "16px 12px", borderTop: `1px solid ${t.border}` }}>
-          {/* Dark/Light toggle */}
-          <button onClick={() => setDark(d => !d)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "11px 16px", background: t.accentDim, border: `1px solid ${t.border}`, borderRadius: 10, cursor: "pointer", marginBottom: 10, transition: "all .2s", fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, color: t.textSub, fontSize: 14 }}>
-            <span style={{ fontSize: 18 }}>{dark ? "☀️" : "🌙"}</span>
-            <span>{dark ? "Light Mode" : "Dark Mode"}</span>
-          </button>
-          {/* Available badge */}
-          <div style={{ background: t.accentDim, border: `1px solid ${t.border}`, borderRadius: 10, padding: "10px 14px", textAlign: "center" }}>
-            <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 12, color: t.accent, fontWeight: 700, animation: "pulse 2s ease infinite" }}>🟢 Available for Work</div>
-            <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 11, color: t.textMuted, marginTop: 3 }}>Abuja, Nigeria 🇳🇬</div>
+      {open&&<div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",backdropFilter:"blur(4px)",zIndex:998,transition:"opacity .3s"}}/>}
+      <nav style={{position:"fixed",top:0,left:0,height:"100vh",width:290,zIndex:999,
+        background:"linear-gradient(180deg,#020b02 0%,#040f04 100%)",
+        borderRight:`1px solid rgba(34,197,94,0.18)`,
+        transform:open?"translateX(0)":"translateX(-100%)",
+        transition:"transform .42s cubic-bezier(.32,.72,0,1)",
+        display:"flex",flexDirection:"column",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${t.accent},transparent)`,animation:"scanLine 3.5s linear infinite",opacity:.7}}/>
+        <div style={{position:"absolute",top:-60,left:-60,width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(34,197,94,0.07) 0%,transparent 70%)",pointerEvents:"none"}}/>
+        <div style={{padding:"28px 22px 18px",borderBottom:"1px solid rgba(34,197,94,0.1)"}}>
+          <div style={{display:"flex",alignItems:"center",gap:11,marginBottom:4}}><Logo size={36}/>
+            <div><div style={{fontFamily:"'Orbitron',monospace",fontSize:15,fontWeight:900,color:"#f0fdf4"}}>M.B.O</div>
+              <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:9,color:t.accent,fontWeight:700,letterSpacing:3}}>WEBDEV</div></div>
+            <button onClick={onClose} style={{marginLeft:"auto",background:"none",border:"none",color:"rgba(34,197,94,.5)",fontSize:20,cursor:"pointer",lineHeight:1,transition:"color .2s"}} onMouseEnter={e=>e.target.style.color="#22c55e"} onMouseLeave={e=>e.target.style.color="rgba(34,197,94,.5)"}>✕</button>
           </div>
         </div>
-      </div>
+        <div style={{flex:1,overflowY:"auto",padding:"12px 0"}}>
+          {NAV.map((item,idx)=>{
+            const isActive=active===item.id;
+            return(
+              <button key={item.id} onClick={()=>{go(item.id);onClose();}}
+                onMouseEnter={()=>setHov(item.id)} onMouseLeave={()=>setHov(null)}
+                style={{display:"flex",alignItems:"center",gap:13,width:"100%",padding:"12px 22px",
+                  background:isActive?"rgba(34,197,94,0.1)":hov===item.id?"rgba(34,197,94,0.05)":"transparent",
+                  border:"none",borderLeft:`3px solid ${isActive?t.accent:"transparent"}`,
+                  cursor:"pointer",animation:`sbIn .3s ease ${idx*.05}s both`,
+                  transition:"all .18s",position:"relative"}}>
+                <span style={{fontSize:16,opacity:.8,color:isActive?t.accent:"#9ca3af",transition:"color .2s"}}>{item.icon}</span>
+                <div style={{textAlign:"left"}}>
+                  <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:14,fontWeight:700,color:isActive?t.accent:"#d1fae5",transition:"color .2s"}}>{item.label}</div>
+                  <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:10,color:"rgba(156,163,175,.6)",marginTop:1}}>{item.sub}</div>
+                </div>
+                {isActive&&<div style={{marginLeft:"auto",width:6,height:6,borderRadius:"50%",background:t.accent,animation:"pulseDot 2s ease infinite"}}/>}
+              </button>
+            );
+          })}
+        </div>
+        <div style={{padding:"14px 22px",borderTop:"1px solid rgba(34,197,94,0.1)"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+            <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:"rgba(156,163,175,.7)",fontWeight:700,letterSpacing:1}}>THEME</span>
+            <button onClick={()=>setDark(d=>!d)} style={{background:"rgba(34,197,94,0.1)",border:"1px solid rgba(34,197,94,0.2)",borderRadius:20,padding:"4px 12px",cursor:"pointer",color:t.accent,fontFamily:"'Rajdhani',sans-serif",fontSize:11,fontWeight:700}}>{dark?"☀️ Light":"🌙 Dark"}</button>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:7}}>
+            <div style={{width:7,height:7,borderRadius:"50%",background:"#22c55e",animation:"pulseDot 2s ease infinite"}}/>
+            <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:"rgba(34,197,94,.8)",fontWeight:600}}>Available for Projects</span>
+          </div>
+        </div>
+      </nav>
     </>
   );
 };
 
 // ─── NAVBAR ───────────────────────────────────────────────────────────────────
-const Navbar = ({ active, go, t, dark, setDark, sidebarOpen, setSidebar }) => {
-  const [sc, setSc] = useState(false);
-  useEffect(() => { const h = () => setSc(window.scrollY > 40); window.addEventListener("scroll", h); return () => window.removeEventListener("scroll", h) }, []);
-
-  return (
-    <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 200, background: sc ? t.navBg : "transparent", backdropFilter: sc ? "blur(20px)" : "none", borderBottom: sc ? `1px solid ${t.border}` : "none", transition: "all .4s ease" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(14px,4vw,56px)", display: "flex", alignItems: "center", justifyContent: "space-between", height: 66 }}>
-        <button onClick={() => go("home")} style={{ display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", cursor: "pointer" }}>
-          <Logo size={36} />
-          <div style={{ textAlign: "left" }}>
-            <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 15, fontWeight: 900, color: t.text, letterSpacing: 2 }}>M.B.O</div>
-            <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 9, color: t.accent, fontWeight: 700, letterSpacing: 3, marginTop: -2 }}>WEBDEV</div>
-          </div>
+const Navbar=({active,go,t,dark,setDark,sb,setSb})=>{
+  const[scroll,setScroll]=useState(false);
+  useEffect(()=>{const h=()=>setScroll(window.scrollY>40);window.addEventListener("scroll",h);return()=>window.removeEventListener("scroll",h);},[]);
+  return(
+    <header style={{position:"fixed",top:0,left:0,right:0,zIndex:997,
+      background:scroll?t.navBg:"transparent",
+      borderBottom:scroll?`1px solid ${t.border}`:"none",
+      backdropFilter:scroll?"blur(14px)":"none",
+      transition:"all .3s",padding:"0 clamp(16px,4vw,52px)"}}>
+      <div style={{maxWidth:1280,margin:"0 auto",height:64,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <button onClick={()=>go("home")} style={{display:"flex",alignItems:"center",gap:10,background:"none",border:"none",cursor:"pointer"}}>
+          <Logo size={32}/>
+          <div style={{fontFamily:"'Orbitron',monospace",fontSize:14,fontWeight:900,color:t.text}}>M.B.O<span style={{color:t.accent}}>.dev</span></div>
         </button>
-
-        {/* Desktop nav */}
-        <div style={{ display: "flex", gap: 2, alignItems: "center" }} className="desk-nav-bar">
-          {NAV_ITEMS.map(n => (
-            <button key={n.id} onClick={() => go(n.id)} style={{ background: active === n.label ? "rgba(34,197,94,0.12)" : "transparent", border: `1px solid ${active === n.label ? "rgba(34,197,94,0.35)" : "transparent"}`, color: active === n.label ? t.accent : t.textSub, padding: "6px 13px", borderRadius: 8, cursor: "pointer", fontFamily: "'Rajdhani',sans-serif", fontSize: 13, fontWeight: 700, transition: "all .2s", letterSpacing: .3 }}
-              onMouseEnter={e => { if (active !== n.label) { e.currentTarget.style.color = t.text; e.currentTarget.style.background = t.accentDim } }}
-              onMouseLeave={e => { if (active !== n.label) { e.currentTarget.style.color = t.textSub; e.currentTarget.style.background = "transparent" } }}>
-              {n.label}
-            </button>
+        <nav className="desk-nav" style={{display:"flex",gap:4,alignItems:"center"}}>
+          {NAV.filter(n=>!["book-meeting"].includes(n.id)).map(item=>(
+            <button key={item.id} onClick={()=>go(item.id)}
+              style={{fontFamily:"'Rajdhani',sans-serif",fontSize:13,fontWeight:700,
+                background:"none",border:"none",cursor:"pointer",padding:"6px 10px",borderRadius:7,
+                color:active===item.id?t.accent:t.textSub,
+                borderBottom:active===item.id?`2px solid ${t.accent}`:"2px solid transparent",
+                transition:"all .2s"}}
+              onMouseEnter={e=>e.currentTarget.style.color=t.accent}
+              onMouseLeave={e=>e.currentTarget.style.color=active===item.id?t.accent:t.textSub}>{item.label}</button>
           ))}
-          <button onClick={() => setDark(d => !d)} style={{ marginLeft: 6, background: t.accentDim, border: `1px solid ${t.border}`, borderRadius: 9, padding: "7px 11px", cursor: "pointer", fontSize: 15, transition: "all .2s", color: t.textSub }}>{dark ? "☀️" : "🌙"}</button>
-        </div>
-
-        {/* Mobile hamburger */}
-        <button onClick={() => setSidebar(s => !s)} className="mob-menu-btn" style={{ background: t.accentDim, border: `1px solid ${t.border}`, borderRadius: 9, width: 40, height: 40, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5, transition: "all .2s", padding: 0 }}>
-          {[0, 1, 2].map(i => (
-            <span key={i} style={{ display: "block", width: 20, height: 2, background: sidebarOpen && i === 1 ? "transparent" : t.accent, borderRadius: 2, transition: "all .3s", transform: sidebarOpen ? i === 0 ? "rotate(45deg) translateY(7px)" : i === 2 ? "rotate(-45deg) translateY(-7px)" : "none" : "none" }} />
-          ))}
-        </button>
+          <button className="btn btn-primary btn-sm" style={{marginLeft:6}} onClick={()=>go("book-meeting")}>📅 Book</button>
+          <button onClick={()=>setDark(d=>!d)} style={{background:t.accentDim,border:`1px solid ${t.border}`,borderRadius:8,padding:"7px 10px",cursor:"pointer",fontSize:14,marginLeft:4}}>{dark?"☀️":"🌙"}</button>
+        </nav>
+        <button className="mob-btn btn btn-ghost btn-sm" onClick={()=>setSb(true)}>☰ Menu</button>
       </div>
-      <style>{`
-        @media(min-width:769px){.mob-menu-btn{display:none!important}.desk-nav-bar{display:flex!important}}
-        @media(max-width:768px){.mob-menu-btn{display:flex!important}.desk-nav-bar{display:none!important}}
-      `}</style>
-    </nav>
+    </header>
   );
 };
 
-// ─── PAGE TRANSITION WRAPPER ──────────────────────────────────────────────────
-const PageWrap = ({ children }) => (
-  <div className="page-enter" style={{ minHeight: "100vh" }}>{children}</div>
-);
-
 // ─── HERO ─────────────────────────────────────────────────────────────────────
-const Hero = ({ go, t }) => (
-  <PageWrap>
-    <section id="home" style={{ minHeight: "100vh", display: "flex", alignItems: "center", padding: "100px clamp(16px,5vw,72px) 60px", position: "relative", overflow: "hidden" }}>
-      <div style={{ position: "absolute", inset: 0, backgroundImage: `linear-gradient(${t.grid} 1px,transparent 1px),linear-gradient(90deg,${t.grid} 1px,transparent 1px)`, backgroundSize: "50px 50px", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", top: "15%", right: "5%", width: "min(500px,50vw)", height: "min(500px,50vw)", borderRadius: "50%", background: `radial-gradient(circle,${t.orb} 0%,transparent 70%)`, pointerEvents: "none" }} />
-      <div style={{ position: "absolute", left: 0, right: 0, height: 2, background: `linear-gradient(90deg,transparent,rgba(34,197,94,0.3),transparent)`, animation: "scanLine 6s linear infinite", pointerEvents: "none" }} />
-
-      <div className="hero-grid" style={{ maxWidth: 1280, margin: "0 auto", width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(24px,5vw,72px)", alignItems: "center" }}>
-        <div style={{ animation: "fadeUp .7s ease both" }}>
-          <div style={{ marginBottom: 18 }}>
-            <span style={{ background: t.accentDim, border: `1px solid ${t.border}`, color: t.accent, padding: "5px 15px", borderRadius: 20, fontFamily: "'Rajdhani',sans-serif", fontSize: 13, fontWeight: 700, letterSpacing: 1, animation: "pulse 2.5s ease infinite" }}>
-              🟢 &nbsp;Available for Projects
-            </span>
-          </div>
-          <h1 style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(26px,4vw,54px)", fontWeight: 900, lineHeight: 1.1, marginBottom: 10, color: t.text }}>
-            MAHMUD<br />
-            <span style={{ background: "linear-gradient(135deg,#22c55e,#4ade80,#86efac)", backgroundSize: "200% 200%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "gradShift 4s ease infinite" }}>BASHIR</span>
-            <br /><span style={{ fontSize: "clamp(16px,2.2vw,30px)", color: t.textMuted, fontFamily: "'Rajdhani',sans-serif", fontWeight: 600 }}>OLASUNKANMI</span>
-          </h1>
-          <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: "clamp(14px,1.7vw,19px)", color: t.textSub, marginBottom: 22, fontWeight: 600 }}>
-            <TypeWriter texts={["Full Stack Developer", "Django Backend Expert", "React Native Engineer", "Flutter Developer", "API Architect", "Frontend Engineer"]} />
-          </div>
-          <p style={{ color: t.textSub, lineHeight: 1.9, fontSize: "clamp(13px,1.1vw,15px)", maxWidth: 500, marginBottom: 30, fontFamily: "'Rajdhani',sans-serif" }}>
-            Turning ideas into fast, elegant web solutions. I build production-grade apps with Python, Django, React Native & Bootstrap — from API design to pixel-perfect UI.
-          </p>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <button className="btn btn-primary btn-lg" onClick={() => go("projects")}>View My Work ↗</button>
-            <button className="btn btn-outline btn-lg" onClick={() => go("book-meeting")}>📅 Book Meeting</button>
-            <button className="btn btn-ghost btn-lg" onClick={() => go("contact")}>Contact</button>
-          </div>
-          <div style={{ display: "flex", gap: 14, marginTop: 26, flexWrap: "wrap" }}>
-            <a href="https://github.com/Muhamzy-ui/" target="_blank" rel="noreferrer" style={{ color: t.textMuted, fontSize: 11, fontFamily: "'Rajdhani',sans-serif", textDecoration: "none", fontWeight: 700, borderBottom: `1px solid ${t.border}`, paddingBottom: 2, transition: "color .2s,border-color .2s", letterSpacing: .4 }}
-              onMouseEnter={e => { e.target.style.color = t.accent; e.target.style.borderColor = t.accent }}
-              onMouseLeave={e => { e.target.style.color = t.textMuted; e.target.style.borderColor = t.border }}>GitHub</a>
-            <a href="https://www.linkedin.com/in/mahmud-olasunkanmi-29b231384" target="_blank" rel="noreferrer" style={{ color: t.textMuted, fontSize: 11, fontFamily: "'Rajdhani',sans-serif", textDecoration: "none", fontWeight: 700, borderBottom: `1px solid ${t.border}`, paddingBottom: 2, transition: "color .2s,border-color .2s", letterSpacing: .4 }}
-              onMouseEnter={e => { e.target.style.color = t.accent; e.target.style.borderColor = t.accent }}
-              onMouseLeave={e => { e.target.style.color = t.textMuted; e.target.style.borderColor = t.border }}>LinkedIn</a>
-            <a href="https://www.upwork.com/freelancers/~01f2b4dad5de734c99?companyReference=2006793770054802967&mp_source=share" target="_blank" rel="noreferrer" style={{ color: t.textMuted, fontSize: 11, fontFamily: "'Rajdhani',sans-serif", textDecoration: "none", fontWeight: 700, borderBottom: `1px solid ${t.border}`, paddingBottom: 2, transition: "color .2s,border-color .2s", letterSpacing: .4 }}
-              onMouseEnter={e => { e.target.style.color = t.accent; e.target.style.borderColor = t.accent }}
-              onMouseLeave={e => { e.target.style.color = t.textMuted; e.target.style.borderColor = t.border }}>Upwork</a>
-            <a href="https://wa.me/2348072410373" target="_blank" rel="noreferrer" style={{ color: t.textMuted, fontSize: 11, fontFamily: "'Rajdhani',sans-serif", textDecoration: "none", fontWeight: 700, borderBottom: `1px solid ${t.border}`, paddingBottom: 2, transition: "color .2s,border-color .2s", letterSpacing: .4 }}
-              onMouseEnter={e => { e.target.style.color = t.accent; e.target.style.borderColor = t.accent }}
-              onMouseLeave={e => { e.target.style.color = t.textMuted; e.target.style.borderColor = t.border }}>WhatsApp</a>
-          </div>
+const Hero=({go,t})=>(
+  <section style={{minHeight:"100vh",display:"flex",alignItems:"center",
+    padding:"100px clamp(16px,5vw,68px) 60px",position:"relative",overflow:"hidden"}}>
+    <div style={{position:"absolute",inset:0,backgroundImage:`linear-gradient(${t.grid} 1px,transparent 1px),linear-gradient(90deg,${t.grid} 1px,transparent 1px)`,backgroundSize:"50px 50px",pointerEvents:"none"}}/>
+    <div style={{position:"absolute",top:"10%",right:"3%",width:"min(520px,55vw)",height:"min(520px,55vw)",borderRadius:"50%",background:`radial-gradient(circle,${t.orb} 0%,transparent 70%)`,pointerEvents:"none"}}/>
+    <div style={{position:"absolute",left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,rgba(34,197,94,.28),transparent)`,animation:"scanLine 7s linear infinite",pointerEvents:"none"}}/>
+    <div className="hero-grid" style={{maxWidth:1280,margin:"0 auto",width:"100%",display:"grid",gridTemplateColumns:"1fr 1fr",gap:"clamp(24px,5vw,72px)",alignItems:"center"}}>
+      <div style={{animation:"fadeUp .7s ease both"}}>
+        <div style={{marginBottom:18}}>
+          <span style={{background:t.accentDim,border:`1px solid ${t.border}`,color:t.accent,
+            padding:"5px 14px",borderRadius:20,fontFamily:"'Rajdhani',sans-serif",
+            fontSize:13,fontWeight:700,letterSpacing:1,animation:"pulseDot 2.5s ease infinite"}}>
+            🟢 &nbsp;Available for Projects
+          </span>
         </div>
-
-        <div className="hero-right" style={{ display: "flex", justifyContent: "center", animation: "slideInRight .8s ease both" }}>
-          <div style={{ position: "relative", width: "clamp(240px,30vw,320px)" }}>
-            <div style={{ position: "absolute", top: "50%", left: "50%", width: 220, height: 220, marginLeft: -110, marginTop: -110, borderRadius: "50%", border: `1px solid ${t.border}`, pointerEvents: "none", overflow: "hidden", zIndex: 0, background: `linear-gradient(135deg, ${t.accentDim}, ${t.card})`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-               <div style={{ fontSize: 40, color: t.accent, opacity: 0.5, fontFamily: "'Orbitron',monospace", fontWeight: 900 }}>M.B.O</div>
-            </div>
-            <div style={{ background: t.card, border: `1px solid ${t.borderHov}`, borderRadius: 22, padding: 24, boxShadow: `0 20px 70px ${t.shadow},0 0 36px ${t.accentGlow}`, animation: "floatY 5s ease-in-out infinite", position: "relative", zIndex: 1, marginTop: 140 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-                <Logo size={44} />
-                <div>
-                  <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 18, fontWeight: 900, color: t.text }}>M.B.O</div>
-                  <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 10, color: t.accent, fontWeight: 700, letterSpacing: 3 }}>WEBDEV</div>
+        <h1 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(26px,4vw,52px)",fontWeight:900,lineHeight:1.1,marginBottom:10,color:t.text}}>
+          MAHMUD<br/>
+          <span style={{background:"linear-gradient(135deg,#22c55e,#4ade80,#86efac)",backgroundSize:"200% 200%",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",animation:"gradShift 4s ease infinite,neonPulse 3s ease infinite"}}>BASHIR</span>
+          <br/><span style={{fontSize:"clamp(15px,2vw,28px)",color:t.textMuted,fontFamily:"'Rajdhani',sans-serif",fontWeight:600}}>OLASUNKANMI</span>
+        </h1>
+        <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:"clamp(14px,1.6vw,19px)",color:t.textSub,marginBottom:22,fontWeight:600}}>
+          <Typewriter texts={["Full Stack Developer","Django Backend Expert","React Engineer","Bootstrap Specialist","API Architect","HTML/CSS Developer"]}/>
+        </div>
+        <p style={{color:t.textSub,lineHeight:1.9,fontSize:"clamp(13px,1.1vw,15px)",maxWidth:500,marginBottom:28,fontFamily:"'Rajdhani',sans-serif"}}>
+          Turning ideas into fast, elegant web solutions. I build production-grade apps with Python, Django, React & Bootstrap — from API design to pixel-perfect UI.
+        </p>
+        <div className="hero-btns" style={{display:"flex",gap:11,flexWrap:"wrap",marginBottom:16}}>
+          <button className="btn btn-primary btn-lg" onClick={()=>go("projects")}>View My Work ↗</button>
+          <button className="btn btn-outline btn-lg" onClick={()=>go("book-meeting")}>📅 Book Meeting</button>
+          <a className="btn btn-ghost btn-lg"
+            href="/Mahmud_Bashir_Resume.pdf"
+            download="Mahmud_Bashir_Olasunkanmi_Resume.pdf"
+            style={{textDecoration:"none"}}>
+            📄 Download CV
+          </a>
+        </div>
+        <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
+          {[["GitHub","https://github.com/Muhamzy-ui"],["LinkedIn","https://linkedin.com/in/mahmud-olasunkanmi"],["Upwork","#"],["WhatsApp","#"]].map(([s,href])=>(
+            <a key={s} href={href} target="_blank" rel="noreferrer"
+              style={{color:t.textMuted,fontSize:11,fontFamily:"'Rajdhani',sans-serif",textDecoration:"none",fontWeight:700,borderBottom:`1px solid ${t.border}`,paddingBottom:2,transition:"color .2s,border-color .2s",letterSpacing:.4}}
+              onMouseEnter={e=>{e.target.style.color=t.accent;e.target.style.borderColor=t.accent}}
+              onMouseLeave={e=>{e.target.style.color=t.textMuted;e.target.style.borderColor=t.border}}>{s}</a>
+          ))}
+        </div>
+      </div>
+      <div className="hero-right" style={{display:"flex",justifyContent:"center",animation:"slideR .85s ease both"}}>
+        <div style={{position:"relative",width:"clamp(230px,28vw,310px)"}}>
+          <div style={{position:"absolute",top:"50%",left:"50%",width:210,height:210,marginLeft:-105,marginTop:-105,borderRadius:"50%",border:`1px solid ${t.border}`,pointerEvents:"none"}}>
+            <div style={{position:"absolute",width:8,height:8,background:t.accent,borderRadius:"50%",boxShadow:`0 0 12px ${t.accent}`,animation:"orbit 4s linear infinite",top:"50%",left:"50%",marginLeft:-4,marginTop:-4}}/>
+          </div>
+          <div style={{background:t.card,border:`1px solid ${t.borderHov}`,borderRadius:20,padding:22,boxShadow:`0 20px 65px ${t.shadow},0 0 32px ${t.accentGlow}`,animation:"floatY 5s ease-in-out infinite"}}>
+            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:18}}><Logo size={42}/>
+              <div><div style={{fontFamily:"'Orbitron',monospace",fontSize:17,fontWeight:900,color:t.text}}>M.B.O</div>
+                <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:9,color:t.accent,fontWeight:700,letterSpacing:3}}>WEBDEV</div></div></div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7,marginBottom:14}}>
+              {[{v:"2+",l:"Yrs Exp"},{v:"3+",l:"Projects"},{v:"100%",l:"Satisfaction"},{v:"500+",l:"Commits"}].map(s=>(
+                <div key={s.l} style={{background:t.accentDim,border:`1px solid ${t.border}`,borderRadius:8,padding:"9px 10px"}}>
+                  <div style={{fontFamily:"'Orbitron',monospace",fontSize:14,fontWeight:900,color:t.accent}}>{s.v}</div>
+                  <div style={{fontSize:10,color:t.textMuted,fontFamily:"'Rajdhani',sans-serif",marginTop:2,fontWeight:600}}>{s.l}</div>
                 </div>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
-                {[{ v: "2+", l: "Yrs Exp" }, { v: "3+", l: "Projects" }, { v: "100%", l: "Client Sat." }, { v: "500+", l: "Commits" }].map(s => (
-                  <div key={s.l} style={{ background: t.accentDim, border: `1px solid ${t.border}`, borderRadius: 9, padding: "10px 12px" }}>
-                    <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 15, fontWeight: 900, color: t.accent }}>{s.v}</div>
-                    <div style={{ fontSize: 10, color: t.textMuted, fontFamily: "'Rajdhani',sans-serif", marginTop: 2, fontWeight: 600 }}>{s.l}</div>
-                  </div>
+              ))}
+            </div>
+            <div style={{borderTop:`1px solid ${t.border}`,paddingTop:11}}>
+              <div style={{fontSize:9,color:t.textMuted,fontFamily:"'Rajdhani',sans-serif",marginBottom:6,fontWeight:700,letterSpacing:2}}>TECH STACK</div>
+              <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                {["🐍 Python","🎸 Django","⚛️ React","🌐 HTML/CSS"].map(tag=>(
+                  <span key={tag} style={{background:t.tagBg,border:`1px solid ${t.border}`,color:t.tagColor,padding:"2px 7px",borderRadius:20,fontSize:10,fontFamily:"'Rajdhani',sans-serif",fontWeight:700}}>{tag}</span>
                 ))}
               </div>
-              <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 12 }}>
-                <div style={{ fontSize: 9, color: t.textMuted, fontFamily: "'Rajdhani',sans-serif", marginBottom: 7, fontWeight: 700, letterSpacing: 2 }}>TECH STACK</div>
-                <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                  {["🐍 Python", "🎸 Django", "⚛️ React", "🅱️ Bootstrap"].map(tag => (
-                    <span key={tag} style={{ background: t.tagBg, border: `1px solid ${t.border}`, color: t.tagColor, padding: "2px 8px", borderRadius: 20, fontSize: 10, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700 }}>{tag}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+// ─── ABOUT ────────────────────────────────────────────────────────────────────
+const About=({t})=>{
+  const[flip,setFlip]=useState(false);
+  return(
+    <section style={{padding:"100px clamp(16px,5vw,68px)",background:t.bg2}}>
+      <div style={{maxWidth:1280,margin:"0 auto"}}>
+        <FadeUp><div style={{textAlign:"center",marginBottom:50}}>
+          <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// ABOUT_ME</div>
+          <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Who I Am</h2>
+        </div></FadeUp>
+        <div className="about-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"clamp(24px,5vw,60px)",alignItems:"start"}}>
+          <FadeUp>
+            <div style={{background:t.codeBg,border:`1px solid ${t.border}`,borderRadius:14,padding:"clamp(16px,3vw,28px)",fontFamily:"monospace",fontSize:"clamp(11px,1.2vw,13px)",lineHeight:2,marginBottom:20}}>
+              <div style={{color:"#4b5563",marginBottom:10,fontSize:11}}>// mahmud_olasunkanmi.py</div>
+              {[["name","Mahmud Bashir Olasunkanmi"],["role","Full Stack Developer"],["location","Abuja, Nigeria 🇳🇬"],["experience","2.5+ years"],["stack",["Python","Django","React","Bootstrap","PostgreSQL"]],["available",true]].map(([k,v])=>(
+                <div key={k} style={{marginBottom:4}}>
+                  <span style={{color:"#86efac"}}>{k}</span>
+                  <span style={{color:"#9ca3af"}}> = </span>
+                  {Array.isArray(v)
+                    ?<span style={{color:"#fcd34d"}}>{"["}{v.map((i,idx)=><span key={i}><span style={{color:"#f9a8d4"}}>"{i}"</span>{idx<v.length-1?", ":""}</span>)}{"]"}</span>
+                    :typeof v==="boolean"?<span style={{color:"#f87171"}}>{String(v)}</span>
+                    :<span style={{color:"#fcd34d"}}>"{v}"</span>}
+                </div>
+              ))}
+            </div>
+            <div className="stats3" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+              {[["Projects","3+","🚀"],["Commits","500+","💻"],["Satisfaction","100%","⭐"]].map(([l,v,ic])=>(
+                <div key={l} style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:12,padding:"16px 10px",textAlign:"center"}}>
+                  <div style={{fontSize:20,marginBottom:4}}>{ic}</div>
+                  <div style={{fontFamily:"'Orbitron',monospace",fontSize:20,fontWeight:900,color:t.accent}}><CountUp end={parseInt(v)||0} sfx={v.replace(/d/g,"")}/></div>
+                  <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,marginTop:3,fontWeight:700}}>{l}</div>
+                </div>
+              ))}
+            </div>
+          </FadeUp>
+          <FadeUp delay={.15}>
+            <p style={{color:t.textSub,lineHeight:1.95,fontSize:"clamp(13px,1.2vw,15px)",marginBottom:22,fontFamily:"'Rajdhani',sans-serif"}}>
+              I'm a full stack developer based in Abuja, Nigeria. I turn ideas into production-ready applications — with clean architecture, fast performance, and code that actually ships.
+            </p>
+            <p style={{color:t.textSub,lineHeight:1.95,fontSize:"clamp(13px,1.2vw,15px)",marginBottom:26,fontFamily:"'Rajdhani',sans-serif"}}>
+              From building Django REST APIs that handle thousands of requests, to crafting pixel-perfect React + Bootstrap frontends and mobile apps — I handle the full stack end to end.
+            </p>
+            <div style={{display:"flex",flexWrap:"wrap",gap:7,marginBottom:26}}>
+              {["Python","Django","React","Bootstrap","HTML/CSS","PostgreSQL","REST APIs","JavaScript","Git"].map(tag=>(
+                <span key={tag} style={{background:t.tagBg,border:`1px solid ${t.border}`,color:t.tagColor,padding:"4px 11px",borderRadius:20,fontSize:12,fontFamily:"'Rajdhani',sans-serif",fontWeight:700}}>{tag}</span>
+              ))}
+            </div>
+            {/* Business Card */}
+            <div onClick={()=>setFlip(f=>!f)} style={{cursor:"pointer",perspective:800,height:170}}>
+              <div style={{position:"relative",width:"100%",height:"100%",transition:"transform .6s",transformStyle:"preserve-3d",transform:flip?"rotateY(180deg)":"none"}}>
+                <div style={{position:"absolute",inset:0,background:`linear-gradient(135deg,${t.card},${t.surface})`,border:`1px solid ${t.borderHov}`,borderRadius:16,padding:20,backfaceVisibility:"hidden",display:"flex",flexDirection:"column",justifyContent:"space-between"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}><Logo size={36}/><div><div style={{fontFamily:"'Orbitron',monospace",fontWeight:900,fontSize:15,color:t.text}}>M.B.O WebDev</div><div style={{fontSize:11,color:t.accent,fontFamily:"'Rajdhani',sans-serif",fontWeight:700}}>Full Stack Developer</div></div></div>
+                  <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,textAlign:"center"}}>Click to flip →</div>
+                  <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>{["Python","Django","React","Bootstrap"].map(s=><span key={s} style={{fontSize:11,color:t.tagColor,fontFamily:"'Rajdhani',sans-serif",fontWeight:700}}>{s}</span>)}</div>
+                </div>
+                <div style={{position:"absolute",inset:0,background:`linear-gradient(135deg,#052e16,#0d1c0d)`,border:`1px solid ${t.borderHov}`,borderRadius:16,padding:20,backfaceVisibility:"hidden",transform:"rotateY(180deg)",display:"flex",flexDirection:"column",justifyContent:"center",gap:8}}>
+                  {[["📧","mahmudolasunkami895@gmail.com"],["📍","Abuja, Nigeria"],["📞","08072410373"],["🐙","github.com/Muhamzy-ui"]].map(([ic,v])=>(
+                    <div key={v} style={{display:"flex",gap:9,alignItems:"center"}}><span style={{fontSize:13}}>{ic}</span><span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:12,color:"#86efac",fontWeight:600}}>{v}</span></div>
                   ))}
                 </div>
               </div>
             </div>
-          </div>
+          </FadeUp>
         </div>
       </div>
     </section>
-  </PageWrap>
-);
-
-// ─── ABOUT ────────────────────────────────────────────────────────────────────
-const BusinessCard = ({ t }) => {
-  const [flip, setFlip] = useState(false);
-  return (
-    <FadeUp delay={.15}>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-        <p style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 11, color: t.textMuted, letterSpacing: 2, fontWeight: 700 }}>TAP TO FLIP</p>
-        <div className="card-flip" onClick={() => setFlip(f => !f)} style={{ width: "min(460px,90vw)", height: 260, perspective: 1100, cursor: "pointer" }}>
-          <div style={{ position: "relative", width: "100%", height: "100%", transformStyle: "preserve-3d", transition: "transform .7s cubic-bezier(.4,.2,.2,1)", transform: flip ? "rotateY(180deg)" : "none" }}>
-            <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", background: `linear-gradient(145deg,${t.surface},${t.bg2})`, border: `1px solid ${t.borderHov}`, borderRadius: 16, padding: 24, boxShadow: `0 20px 60px ${t.shadow},0 0 36px ${t.accentGlow}`, overflow: "hidden" }}>
-              <div style={{ position: "absolute", bottom: -30, right: -30, width: 180, height: 180, borderRadius: "50%", background: `radial-gradient(${t.orb},transparent 70%)` }} />
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}><Logo size={38} /><div><div style={{ fontFamily: "'Orbitron',monospace", fontSize: 16, fontWeight: 900, color: t.text }}>M.B.O</div><div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 9, color: t.accent, fontWeight: 700, letterSpacing: 3 }}>WEBDEV</div></div></div>
-              <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: "clamp(15px,2.5vw,19px)", fontWeight: 700, color: t.text, marginBottom: 4 }}>Mahmud Bashir Olasunkanmi</div>
-              <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 13, color: t.accent, fontWeight: 600, marginBottom: 12 }}>Full Stack Developer &nbsp;|&nbsp; Frontend Engineer</div>
-              <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 10, fontFamily: "'Rajdhani',sans-serif", fontSize: 12, color: t.textMuted, fontStyle: "italic" }}>"Turning ideas into fast, elegant web solutions"</div>
-            </div>
-            <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", background: `linear-gradient(145deg,${t.bg2},${t.surface})`, border: `1px solid ${t.border}`, borderRadius: 16, padding: 22, overflow: "hidden" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 14px", marginBottom: 12 }}>
-                {[["📞", "08072410373 / 08103205866"], ["📧", "mahmudolasunkami895@gmail.com"], ["📍", "Abuja, Nigeria 🇳🇬"], ["🐙", "GitHub: Muhamzy-ui"], ["💼", "LinkedIn: mahmud-olasunkanmi"]].map(([ic, v]) => (
-                  <div key={ic} style={{ display: "flex", gap: 6, fontFamily: "'Rajdhani',sans-serif", fontSize: "clamp(10px,1.5vw,12px)", color: t.textSub, fontWeight: 600, alignItems: "flex-start" }}><span style={{ flexShrink: 0 }}>{ic}</span><span>{v}</span></div>
-                ))}
-              </div>
-              <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 10 }}>
-                <span style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 9, color: t.textMuted, fontWeight: 700, letterSpacing: 2, marginRight: 8 }}>TECH STACK</span>
-                {["JS", "React", "HTML5", "Django", "Python", "Bootstrap"].map(tag => (
-                  <span key={tag} style={{ background: t.tagBg, color: t.tagColor, padding: "2px 7px", borderRadius: 4, fontSize: 10, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, marginRight: 4 }}>{tag}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-        <button className="btn btn-ghost btn-sm" onClick={() => setFlip(f => !f)}>{flip ? "← Show Front" : "Show Back →"}</button>
-      </div>
-    </FadeUp>
   );
 };
-
-const About = ({ t }) => (
-  <PageWrap>
-    <section id="about" style={{ padding: "100px clamp(16px,5vw,72px)", background: t.bg2 }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <FadeUp><div style={{ textAlign: "center", marginBottom: 52 }}>
-          <div style={{ fontFamily: "'Rajdhani',sans-serif", color: t.accent, fontSize: 11, letterSpacing: 3, fontWeight: 700, marginBottom: 8 }}>// ABOUT_ME</div>
-          <h2 style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(22px,4vw,40px)", color: t.text }}>Who I Am</h2>
-        </div></FadeUp>
-        <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(24px,5vw,64px)", alignItems: "start" }}>
-          <FadeUp delay={.1}>
-            <div style={{ background: t.codeBg, border: `1px solid ${t.border}`, borderRadius: 14, padding: 24, fontFamily: "'Courier New',monospace", fontSize: "clamp(11px,1.2vw,13px)", lineHeight: 2, overflowX: "auto" }}>
-              <div style={{ color: t.accent, fontSize: 10, letterSpacing: 2, marginBottom: 4 }}># developer_profile.py</div>
-              <div><span style={{ color: "#818cf8" }}>class</span> <span style={{ color: "#fbbf24" }}>MBOWebDev</span>:</div>
-              <div style={{ paddingLeft: 16 }}>
-                {[["name", "Mahmud Bashir Olasunkanmi"], ["brand", "M.B.O WebDev"], ["location", "Abuja, Nigeria 🇳🇬"], ["experience", "2.5 years"]].map(([k, v]) => (
-                  <div key={k}><span style={{ color: t.textSub }}>{k} = </span><span style={{ color: "#4ade80" }}>"{v}"</span></div>
-                ))}
-                <div><span style={{ color: t.textSub }}>stack = [</span></div>
-                <div style={{ paddingLeft: 16 }}>{["Python", "Django", "CSS", "React Native", "Bootstrap", "PostgreSQL", "HTML5"].map(s => (
-                  <div key={s}><span style={{ color: "#4ade80" }}>"{s}"</span><span style={{ color: t.textSub }}>,</span></div>
-                ))}</div>
-                <div><span style={{ color: t.textSub }}>]</span></div>
-                <div><span style={{ color: t.textSub }}>available = </span><span style={{ color: t.accent }}>True</span></div>
-              </div>
-            </div>
-          </FadeUp>
-          <FadeUp delay={.2}>
-            <h3 style={{ fontFamily: "'Orbitron',monospace", color: t.text, fontSize: "clamp(17px,2.2vw,24px)", marginBottom: 12 }}>Building things that <span style={{ color: t.accent }}>work</span>.</h3>
-            <p style={{ color: t.textSub, lineHeight: 1.9, marginBottom: 12, fontFamily: "'Rajdhani',sans-serif", fontSize: "clamp(13px,1.1vw,15px)" }}>I'm <strong style={{ color: t.text }}>Mahmud Bashir Olasunkanmi</strong>, founder of <strong style={{ color: t.accent }}>M.B.O WebDev</strong>. Based in Abuja, Nigeria — available globally for remote work, freelance, and full-time.</p>
-            <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 22 }}>
-              {["Remote-First", "API Design", "Mobile Dev", "DB Architecture", "Client Work", "Agile"].map(tag => (
-                <span key={tag} style={{ background: t.tagBg, border: `1px solid ${t.border}`, color: t.tagColor, padding: "4px 11px", borderRadius: 20, fontSize: 11, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700 }}>{tag}</span>
-              ))}
-            </div>
-            <div className="stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
-              {[{ v: 3, s: "+", l: "Projects" }, { v: 8, s: "+", l: "Tech" }, { v: 100, s: "%", l: "Satisfaction" }].map(s => (
-                <div key={s.l} style={{ background: t.accentDim, border: `1px solid ${t.border}`, borderRadius: 11, padding: "13px", textAlign: "center" }}>
-                  <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 19, fontWeight: 900, color: t.accent }}><CountUp end={s.v} suffix={s.s} /></div>
-                  <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 10, color: t.textMuted, fontWeight: 700, marginTop: 3 }}>{s.l}</div>
-                </div>
-              ))}
-            </div>
-          </FadeUp>
-        </div>
-        <div style={{ marginTop: 68 }}>
-          <FadeUp><div style={{ textAlign: "center", marginBottom: 28 }}>
-            <div style={{ fontFamily: "'Rajdhani',sans-serif", color: t.accent, fontSize: 11, letterSpacing: 3, fontWeight: 700, marginBottom: 6 }}>// BUSINESS_CARD</div>
-            <h3 style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(18px,2.5vw,26px)", color: t.text }}>My Card</h3>
-          </div></FadeUp>
-          <BusinessCard t={t} />
-        </div>
-      </div>
-    </section>
-  </PageWrap>
-);
 
 // ─── SKILLS ───────────────────────────────────────────────────────────────────
-const Skills = ({ t }) => (
-  <PageWrap>
-    <section id="skills" style={{ padding: "100px clamp(16px,5vw,72px)" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <FadeUp><div style={{ textAlign: "center", marginBottom: 50 }}>
-          <div style={{ fontFamily: "'Rajdhani',sans-serif", color: t.accent, fontSize: 11, letterSpacing: 3, fontWeight: 700, marginBottom: 8 }}>// SKILLS.json</div>
-          <h2 style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(22px,4vw,40px)", color: t.text }}>Tech Stack</h2>
-        </div></FadeUp>
-        <div className="skills-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 13 }}>
-          {SKILLS.map((s, i) => <SkillCard key={s.name} s={s} delay={i * .06} t={t} />)}
-        </div>
+const SkillBar=({s,delay,t})=>{
+  const[w,setW]=useState(0);const ref=useRef();
+  useEffect(()=>{const o=new IntersectionObserver(([e])=>{if(e.isIntersecting)setTimeout(()=>setW(s.p),100)},{threshold:.3});if(ref.current)o.observe(ref.current);return()=>o.disconnect();},[s.p]);
+  return(
+    <div ref={ref} style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:12,padding:"16px 18px",transition:"transform .2s,box-shadow .2s",cursor:"default"}}
+      onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow=`0 8px 24px ${t.accentGlow}`;}}
+      onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:9}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:18}}>{s.i}</span><span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:14,color:t.text}}>{s.n}</span></div>
+        <span style={{fontFamily:"'Orbitron',monospace",fontSize:12,fontWeight:700,color:t.accent}}>{s.p}%</span>
       </div>
-    </section>
-  </PageWrap>
-);
-
-const SkillCard = ({ s, delay, t }) => {
-  const [ref, v] = useInView(); const [hov, sh] = useState(false);
-  return (
-    <div ref={ref} onMouseEnter={() => sh(true)} onMouseLeave={() => sh(false)}
-      style={{ background: hov ? t.accentDim : t.card, border: `1px solid ${hov ? t.borderHov : t.border}`, borderRadius: 13, padding: "15px 18px", transition: "all .28s ease", transform: hov ? "translateY(-4px)" : "none", boxShadow: hov ? `0 10px 30px ${t.accentGlow}` : "none", opacity: v ? 1 : 0, transitionDelay: `${delay}s` }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 11 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 17 }}>{s.icon}</span><span style={{ fontFamily: "'Rajdhani',sans-serif", color: t.text, fontWeight: 700, fontSize: 14 }}>{s.name}</span></div>
-        <span style={{ fontFamily: "'Orbitron',monospace", color: s.c, fontSize: 12, fontWeight: 700 }}>{s.pct}%</span>
-      </div>
-      <div style={{ background: t.bg, borderRadius: 7, height: 5, overflow: "hidden" }}>
-        <div style={{ height: "100%", borderRadius: 7, background: `linear-gradient(90deg,${s.c}88,${s.c})`, width: v ? `${s.pct}%` : "0%", transition: `width 1.2s cubic-bezier(.4,0,.2,1) ${delay + .1}s`, boxShadow: `0 0 8px ${s.c}77` }} />
+      <div style={{height:5,background:t.border,borderRadius:3,overflow:"hidden"}}>
+        <div style={{height:"100%",width:`${w}%`,background:`linear-gradient(90deg,${s.c},#4ade80)`,borderRadius:3,transition:"width 1.1s cubic-bezier(.4,0,.2,1)",boxShadow:`0 0 8px ${s.c}66`}}/>
       </div>
     </div>
   );
 };
+
+const Skills=({t})=>(
+  <section style={{padding:"100px clamp(16px,5vw,68px)"}}>
+    <div style={{maxWidth:1280,margin:"0 auto"}}>
+      <FadeUp><div style={{textAlign:"center",marginBottom:50}}>
+        <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// SKILLS.map()</div>
+        <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Tech Stack</h2>
+      </div></FadeUp>
+      <div className="skills-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
+        {SKILLS.map((s,i)=><FadeUp key={s.n} delay={i*.07}><SkillBar s={s} delay={i*.1} t={t}/></FadeUp>)}
+      </div>
+    </div>
+  </section>
+);
 
 // ─── PROJECTS ─────────────────────────────────────────────────────────────────
-const Projects = ({ t }) => (
-  <PageWrap>
-    <section id="projects" style={{ padding: "100px clamp(16px,5vw,72px)", background: t.bg2 }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <FadeUp><div style={{ textAlign: "center", marginBottom: 50 }}>
-          <div style={{ fontFamily: "'Rajdhani',sans-serif", color: t.accent, fontSize: 11, letterSpacing: 3, fontWeight: 700, marginBottom: 8 }}>// PORTFOLIO.py</div>
-          <h2 style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(22px,4vw,40px)", color: t.text }}>Featured Projects</h2>
+const ProjCard=({p,t,isAdmin,onDelete})=>(
+  <div style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:18,padding:"clamp(18px,3vw,26px)",display:"flex",flexDirection:"column",transition:"transform .22s,box-shadow .22s",position:"relative"}}
+    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-5px)";e.currentTarget.style.boxShadow=`0 18px 50px ${t.shadow}`;e.currentTarget.style.borderColor=t.borderHov;}}
+    onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";e.currentTarget.style.borderColor=t.border;}}>
+    {isAdmin&&(
+      <button className="btn btn-danger btn-sm" style={{position:"absolute",top:12,right:12,padding:"4px 10px",fontSize:11}} onClick={()=>onDelete(p.id)}>✕ Remove</button>
+    )}
+    <div style={{fontSize:"clamp(28px,4vw,38px)",marginBottom:14}}>{p.icon}</div>
+    <h3 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(13px,1.5vw,16px)",color:t.text,marginBottom:10,lineHeight:1.3}}>{p.title}</h3>
+    <p style={{color:t.textSub,fontFamily:"'Rajdhani',sans-serif",fontSize:"clamp(12px,1vw,14px)",lineHeight:1.75,marginBottom:14,flex:1}}>{p.desc}</p>
+    <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:14}}>
+      {p.tags.map(tag=><span key={tag} style={{background:t.tagBg,border:`1px solid ${t.border}`,color:t.tagColor,padding:"3px 9px",borderRadius:20,fontSize:11,fontFamily:"'Rajdhani',sans-serif",fontWeight:700}}>{tag}</span>)}
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:14}}>
+      {Object.entries(p.stats).map(([k,v])=>(
+        <div key={k} style={{textAlign:"center",background:t.accentDim,borderRadius:8,padding:"8px 4px"}}>
+          <div style={{fontFamily:"'Orbitron',monospace",fontSize:13,fontWeight:900,color:t.accent}}>{v}</div>
+          <div style={{fontSize:9,color:t.textMuted,fontFamily:"'Rajdhani',sans-serif",fontWeight:700,marginTop:2}}>{k}</div>
+        </div>
+      ))}
+    </div>
+    <div style={{display:"flex",gap:8}}>
+      <a href={p.github||"#"} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{flex:1,textDecoration:"none"}}>🐙 GitHub</a>
+      <a href={p.live||"#"} target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{flex:1,textDecoration:"none"}}>🚀 Live Demo</a>
+    </div>
+  </div>
+);
+
+const Projects=({t,projects,setProjects})=>{
+  const[isAdmin,setIsAdmin]=useState(false);
+  const[showLogin,setShowLogin]=useState(false);
+  const[pw,setPw]=useState("");const[pwErr,setPwErr]=useState(false);
+  const[showAdd,setShowAdd]=useState(false);
+  const[newP,setNewP]=useState({icon:"🚀",title:"",desc:"",tags:"",github:"",live:"",stat1k:"",stat1v:"",stat2k:"",stat2v:"",stat3k:"",stat3v:""});
+
+  const inp={background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:8,padding:"9px 12px",color:t.text,fontFamily:"'Rajdhani',sans-serif",fontSize:13,outline:"none",width:"100%",boxSizing:"border-box"};
+
+  const handleLogin=()=>{
+    if(pw===ADMIN_PASSWORD){setIsAdmin(true);setShowLogin(false);setPw("");}
+    else{setPwErr(true);setTimeout(()=>setPwErr(false),2000);}
+  };
+
+  const handleAdd=()=>{
+    if(!newP.title||!newP.desc)return;
+    const p={
+      id:Date.now(),icon:newP.icon||"🚀",title:newP.title,desc:newP.desc,
+      tags:newP.tags.split(",").map(t=>t.trim()).filter(Boolean),
+      github:newP.github||"#",live:newP.live||"#",
+      stats:{
+        [newP.stat1k||"Stat1"]:newP.stat1v||"—",
+        [newP.stat2k||"Stat2"]:newP.stat2v||"—",
+        [newP.stat3k||"Stat3"]:newP.stat3v||"—",
+      },
+    };
+    setProjects(prev=>[...prev,p]);
+    setShowAdd(false);
+    setNewP({icon:"🚀",title:"",desc:"",tags:"",github:"",live:"",stat1k:"",stat1v:"",stat2k:"",stat2v:"",stat3k:"",stat3v:""});
+  };
+
+  const handleDelete=(id)=>setProjects(prev=>prev.filter(p=>p.id!==id));
+
+  return(
+    <section style={{padding:"100px clamp(16px,5vw,68px)"}}>
+      <div style={{maxWidth:1280,margin:"0 auto"}}>
+        <FadeUp><div style={{textAlign:"center",marginBottom:50}}>
+          <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// PROJECTS.filter(live===true)</div>
+          <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Featured Projects</h2>
+          <div style={{display:"flex",justifyContent:"center",gap:10,marginTop:18,flexWrap:"wrap"}}>
+            {!isAdmin
+              ?<button className="btn btn-ghost btn-sm" onClick={()=>setShowLogin(true)}>🔐 Admin</button>
+              :<>
+                <button className="btn btn-primary btn-sm" onClick={()=>setShowAdd(s=>!s)}>＋ Add Project</button>
+                <button className="btn btn-ghost btn-sm" onClick={()=>setIsAdmin(false)}>🔒 Lock</button>
+              </>
+            }
+          </div>
         </div></FadeUp>
-        <div className="projects-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 20 }}>
-          {PROJECTS.map((p, i) => <FadeUp key={p.id} delay={i * .1}><ProjectCard p={p} t={t} /></FadeUp>)}
+
+        {/* Admin Login Modal */}
+        {showLogin&&(
+          <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",backdropFilter:"blur(6px)",zIndex:1200,display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <div style={{background:t.card,border:`1px solid ${t.borderHov}`,borderRadius:18,padding:32,width:"min(380px,90vw)"}}>
+              <h3 style={{fontFamily:"'Orbitron',monospace",fontSize:16,color:t.text,marginBottom:6}}>Admin Access</h3>
+              <p style={{fontFamily:"'Rajdhani',sans-serif",fontSize:13,color:t.textMuted,marginBottom:18}}>Enter your password to manage projects</p>
+              <input type="password" value={pw} onChange={e=>setPw(e.target.value)}
+                onKeyDown={e=>e.key==="Enter"&&handleLogin()}
+                placeholder="Password" style={{...inp,marginBottom:10,border:`1px solid ${pwErr?"#ef4444":t.border}`}}/>
+              {pwErr&&<p style={{color:"#ef4444",fontFamily:"'Rajdhani',sans-serif",fontSize:12,marginBottom:8}}>❌ Wrong password</p>}
+              <div style={{display:"flex",gap:8}}>
+                <button className="btn btn-primary" style={{flex:1}} onClick={handleLogin}>Unlock</button>
+                <button className="btn btn-ghost" onClick={()=>{setShowLogin(false);setPw("");}}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Project Panel */}
+        {isAdmin&&showAdd&&(
+          <FadeUp>
+            <div style={{background:t.card,border:`1px solid ${t.borderHov}`,borderRadius:18,padding:"clamp(18px,4vw,30px)",marginBottom:34}}>
+              <h3 style={{fontFamily:"'Orbitron',monospace",fontSize:15,color:t.accent,marginBottom:18}}>＋ New Project</h3>
+              <div className="c2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+                <div><label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:5}}>ICON (emoji)</label><input value={newP.icon} onChange={e=>setNewP(p=>({...p,icon:e.target.value}))} style={inp}/></div>
+                <div><label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:5}}>TITLE *</label><input value={newP.title} onChange={e=>setNewP(p=>({...p,title:e.target.value}))} placeholder="Project name" style={inp}/></div>
+              </div>
+              <div style={{marginBottom:10}}><label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:5}}>DESCRIPTION *</label><textarea value={newP.desc} onChange={e=>setNewP(p=>({...p,desc:e.target.value}))} rows={2} placeholder="What this project does..." style={{...inp,resize:"vertical"}}/></div>
+              <div className="c2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+                <div><label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:5}}>TAGS (comma separated)</label><input value={newP.tags} onChange={e=>setNewP(p=>({...p,tags:e.target.value}))} placeholder="React, Django, PostgreSQL" style={inp}/></div>
+                <div><label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:5}}>GITHUB URL</label><input value={newP.github} onChange={e=>setNewP(p=>({...p,github:e.target.value}))} placeholder="https://github.com/..." style={inp}/></div>
+              </div>
+              <div className="c2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+                <div><label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:5}}>LIVE URL</label><input value={newP.live} onChange={e=>setNewP(p=>({...p,live:e.target.value}))} placeholder="https://your-app.com" style={inp}/></div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
+                {[[1],[2],[3]].map(([n])=>(
+                  <div key={n}>
+                    <label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:10,color:t.textMuted,fontWeight:700,display:"block",marginBottom:4}}>STAT {n} LABEL</label>
+                    <input value={newP[`stat${n}k`]} onChange={e=>setNewP(p=>({...p,[`stat${n}k`]:e.target.value}))} placeholder="e.g. Users" style={{...inp,marginBottom:5}}/>
+                    <input value={newP[`stat${n}v`]} onChange={e=>setNewP(p=>({...p,[`stat${n}v`]:e.target.value}))} placeholder="e.g. 500+" style={inp}/>
+                  </div>
+                ))}
+              </div>
+              <div style={{display:"flex",gap:8}}>
+                <button className="btn btn-primary" onClick={handleAdd} disabled={!newP.title||!newP.desc}>✅ Add Project</button>
+                <button className="btn btn-ghost" onClick={()=>setShowAdd(false)}>Cancel</button>
+              </div>
+            </div>
+          </FadeUp>
+        )}
+
+        <div className="proj-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
+          {projects.map((p,i)=>(
+            <FadeUp key={p.id} delay={i*.1}><ProjCard p={p} t={t} isAdmin={isAdmin} onDelete={handleDelete}/></FadeUp>
+          ))}
         </div>
       </div>
     </section>
-  </PageWrap>
-);
-
-const ProjectCard = ({ p, t }) => {
-  const [hov, sh] = useState(false);
-  return (
-    <div onMouseEnter={() => sh(true)} onMouseLeave={() => sh(false)}
-      style={{ background: t.card, border: `1px solid ${hov ? t.borderHov : t.border}`, borderRadius: 18, overflow: "hidden", transition: "all .32s ease", transform: hov ? "translateY(-7px)" : "none", boxShadow: hov ? `0 20px 50px ${t.shadow},0 0 26px ${t.accentGlow}` : `0 4px 16px ${t.shadow}`, display: "flex", flexDirection: "column" }}>
-      <div style={{ background: t.accentDim, borderBottom: `1px solid ${t.border}`, padding: "18px 22px", display: "flex", gap: 13, alignItems: "center" }}>
-        <div style={{ width: 46, height: 46, borderRadius: 12, background: t.accentDim, border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>{p.icon}</div>
-        <div><div style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(11px,1.3vw,13px)", fontWeight: 700, color: t.text }}>{p.title}</div><div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 10, color: t.textMuted, fontWeight: 600, marginTop: 2 }}>M.B.O WEBDEV</div></div>
-      </div>
-      <div style={{ padding: "18px 22px", flex: 1, display: "flex", flexDirection: "column" }}>
-        <p style={{ color: t.textSub, lineHeight: 1.8, fontSize: "clamp(12px,1vw,13px)", marginBottom: 14, fontFamily: "'Rajdhani',sans-serif" }}>{p.desc}</p>
-        <div style={{ display: "flex", gap: 8, marginBottom: 13 }}>
-          {Object.entries(p.stats).map(([k, v]) => (
-            <div key={k} style={{ background: t.accentDim, borderRadius: 7, padding: "7px 9px", flex: 1, textAlign: "center" }}>
-              <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 12, fontWeight: 900, color: t.accent }}>{v}</div>
-              <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 9, color: t.textMuted, fontWeight: 600 }}>{k}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 16 }}>
-          {p.tags.map(tag => <span key={tag} style={{ background: t.tagBg, border: `1px solid ${t.border}`, color: t.tagColor, padding: "2px 8px", borderRadius: 20, fontSize: 10, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700 }}>{tag}</span>)}
-        </div>
-        <div style={{ display: "flex", gap: 8, marginTop: "auto" }}>
-          <a href="#" className="btn btn-ghost btn-sm" style={{ flex: 1 }}>GitHub ↗</a>
-          <a href="#" className="btn btn-primary btn-sm" style={{ flex: 1 }}>Live Demo ↗</a>
-        </div>
-      </div>
-    </div>
   );
 };
 
-// ─── BLOG LIST PAGE ───────────────────────────────────────────────────────────
-const Blog = ({ t, go }) => {
-  const [filter, setFilter] = useState("All");
-  const tags = ["All", ...[...new Set(BLOGS.map(b => b.tag))]];
-  const shown = filter === "All" ? BLOGS : BLOGS.filter(b => b.tag === filter);
-
-  return (
-    <PageWrap>
-      <section id="blog" style={{ padding: "100px clamp(16px,5vw,72px)" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-          <FadeUp><div style={{ textAlign: "center", marginBottom: 50 }}>
-            <div style={{ fontFamily: "'Rajdhani',sans-serif", color: t.accent, fontSize: 11, letterSpacing: 3, fontWeight: 700, marginBottom: 8 }}>// BLOG.posts()</div>
-            <h2 style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(22px,4vw,40px)", color: t.text }}>Latest Articles</h2>
-            <p style={{ color: t.textMuted, fontFamily: "'Rajdhani',sans-serif", marginTop: 10, fontSize: 14 }}>Technical write-ups & lessons from production</p>
-          </div></FadeUp>
-
-          {/* Filter tabs */}
-          <FadeUp delay={.1}>
-            <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginBottom: 36 }}>
-              {tags.map(tag => (
-                <button key={tag} onClick={() => setFilter(tag)} className={filter === tag ? "btn btn-primary btn-sm" : "btn btn-ghost btn-sm"} style={{ minWidth: 70 }}>{tag}</button>
-              ))}
+// ─── RATINGS (CLIENT TESTIMONIALS) ────────────────────────────────────────────
+const Ratings=({t,ratings})=>{
+  const[avg,setAvg]=useState(0);
+  useEffect(()=>{if(ratings.length)setAvg((ratings.reduce((a,r)=>a+r.stars,0)/ratings.length).toFixed(1))},[ratings]);
+  return(
+    <section style={{padding:"100px clamp(16px,5vw,68px)",background:t.bg2}}>
+      <div style={{maxWidth:1280,margin:"0 auto"}}>
+        <FadeUp><div style={{textAlign:"center",marginBottom:50}}>
+          <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// CLIENT_FEEDBACK</div>
+          <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Testimonials</h2>
+        </div></FadeUp>
+        <div className="ratings-grid" style={{display:"grid",gridTemplateColumns:"320px 1fr",gap:"clamp(24px,4vw,40px)",alignItems:"start"}}>
+          <FadeUp>
+            <div style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:20,padding:32,textAlign:"center",position:"sticky",top:100}}>
+              <div style={{fontSize:48,fontFamily:"'Orbitron',monospace",fontWeight:900,color:t.text,lineHeight:1}}>{avg}</div>
+              <div style={{margin:"12px 0 8px"}}><Stars count={Math.round(avg)} size={22} animated/></div>
+              <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:14,color:t.textSub,fontWeight:600}}>{ratings.length} Client Reviews</div>
+              <div style={{width:"100%",height:1,background:t.border,margin:"24px 0"}}/>
+              <div style={{display:"flex",flexDirection:"column",gap:12}}>
+                {[5,4,3,2,1].map(star=>{
+                  const count=ratings.filter(r=>Math.round(r.stars)===star).length;
+                  const pct=ratings.length?(count/ratings.length)*100:0;
+                  return(
+                    <div key={star} style={{display:"flex",alignItems:"center",gap:10,fontSize:13,fontFamily:"'Rajdhani',sans-serif",fontWeight:600,color:t.textSub}}>
+                      <span style={{width:12}}>{star}</span>
+                      <span style={{color:"#f59e0b"}}>★</span>
+                      <div style={{flex:1,height:6,background:t.accentDim,borderRadius:3,overflow:"hidden"}}>
+                        <div style={{height:"100%",width:`${pct}%`,background:t.accent,borderRadius:3}}/>
+                      </div>
+                      <span style={{width:24,textAlign:"right",fontSize:11}}>{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </FadeUp>
-
-          <div className="blog-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 20 }}>
-            {shown.map((b, i) => (
-              <FadeUp key={b.id} delay={i * .08}>
-                <BlogCard b={b} t={t} go={go} />
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:20}}>
+            {ratings.map((r,i)=>(
+              <FadeUp key={r.id} delay={i*.05}>
+                <div style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:18,padding:24,height:"100%",display:"flex",flexDirection:"column",transition:"transform .2s",cursor:"default"}}
+                  onMouseEnter={e=>e.currentTarget.style.transform="translateY(-4px)"}
+                  onMouseLeave={e=>e.currentTarget.style.transform="none"}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
+                    <div style={{display:"flex",gap:12,alignItems:"center"}}>
+                      <div style={{width:42,height:42,borderRadius:"50%",background:t.accentDim,border:`1px solid ${t.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontFamily:"'Orbitron',monospace",fontWeight:900,color:t.accent}}>
+                        {r.name.charAt(0)}
+                      </div>
+                      <div>
+                        <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:15,fontWeight:700,color:t.text}}>{r.name}</div>
+                        <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:600}}>{r.role} • {r.country}</div>
+                      </div>
+                    </div>
+                    <Stars count={r.stars} size={14}/>
+                  </div>
+                  <p style={{fontFamily:"'Rajdhani',sans-serif",fontSize:14,color:t.textSub,lineHeight:1.7,flex:1,margin:"0 0 16px"}}>"{r.text}"</p>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",borderTop:`1px solid ${t.border}`,paddingTop:12,marginTop:"auto"}}>
+                    <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.accent,fontWeight:700,background:t.tagBg,padding:"2px 8px",borderRadius:12}}>✓ {r.project}</span>
+                    <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:600}}>{r.date}</span>
+                  </div>
+                </div>
               </FadeUp>
             ))}
           </div>
         </div>
-      </section>
-    </PageWrap>
+      </div>
+    </section>
   );
 };
 
-const BlogCard = ({ b, t, go }) => {
-  const [hov, sh] = useState(false);
-  return (
-    <div onMouseEnter={() => sh(true)} onMouseLeave={() => sh(false)}
-      style={{ background: t.card, border: `1px solid ${hov ? t.borderHov : t.border}`, borderRadius: 18, padding: "22px 24px", transition: "all .32s ease", transform: hov ? "translateY(-6px)" : "none", boxShadow: hov ? `0 18px 48px ${t.shadow},0 0 22px ${t.accentGlow}` : `0 4px 14px ${t.shadow}`, cursor: "pointer", display: "flex", flexDirection: "column" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14, alignItems: "flex-start" }}>
-        <span style={{ background: t.tagBg, border: `1px solid ${t.border}`, color: t.tagColor, padding: "3px 10px", borderRadius: 20, fontSize: 11, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700 }}>{b.tag}</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ fontSize: 11, color: t.textMuted, fontFamily: "'Rajdhani',sans-serif", fontWeight: 600 }}>{b.readTime} read</span><span style={{ fontSize: 17 }}>{b.icon}</span></div>
-      </div>
-      <h3 style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(12px,1.3vw,13px)", fontWeight: 700, color: t.text, marginBottom: 10, lineHeight: 1.45 }}>{b.title}</h3>
-      <p style={{ color: t.textSub, lineHeight: 1.8, fontSize: "clamp(12px,1vw,13px)", marginBottom: 18, fontFamily: "'Rajdhani',sans-serif", flex: 1 }}>{b.desc}</p>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 11, color: t.textMuted, fontFamily: "'Rajdhani',sans-serif", fontWeight: 600 }}>{b.date}</span>
-        <button className="btn btn-outline btn-sm" onClick={() => go(`blog/${b.slug}`)}>Read More →</button>
-      </div>
-    </div>
-  );
-};
-
-// ─── BLOG DETAIL PAGE ─────────────────────────────────────────────────────────
-const BlogDetail = ({ slug, t, go }) => {
-  const post = BLOGS.find(b => b.slug === slug);
-  useEffect(() => { window.scrollTo(0, 0) }, [slug]);
-  if (!post) return <PageWrap><div style={{ padding: "120px 24px", textAlign: "center" }}><h2 style={{ color: t.text }}>Post not found</h2><button className="btn btn-primary" style={{ marginTop: 20 }} onClick={() => go("blog")}>← Back to Blog</button></div></PageWrap>;
-
-  const paragraphs = post.content.split("\n\n").filter(Boolean);
-
-  return (
-    <PageWrap>
-      <div style={{ maxWidth: 760, margin: "0 auto", padding: "100px clamp(16px,5vw,40px) 80px" }}>
-        <FadeUp>
-          <button className="btn btn-ghost btn-sm" style={{ marginBottom: 28 }} onClick={() => go("blog")}>← Back to Blog</button>
-        </FadeUp>
-        <FadeUp delay={.05}>
-          <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 18, flexWrap: "wrap" }}>
-            <span style={{ background: t.tagBg, border: `1px solid ${t.border}`, color: t.tagColor, padding: "3px 12px", borderRadius: 20, fontSize: 12, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700 }}>{post.tag}</span>
-            <span style={{ color: t.textMuted, fontSize: 12, fontFamily: "'Rajdhani',sans-serif", fontWeight: 600 }}>{post.date}</span>
-            <span style={{ color: t.textMuted, fontSize: 12, fontFamily: "'Rajdhani',sans-serif", fontWeight: 600 }}>· {post.readTime} read</span>
-          </div>
-        </FadeUp>
-        <FadeUp delay={.1}>
-          <h1 style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(20px,3.5vw,34px)", fontWeight: 900, color: t.text, lineHeight: 1.25, marginBottom: 24 }}>{post.icon} {post.title}</h1>
-        </FadeUp>
-        <FadeUp delay={.15}>
-          <p style={{ color: t.textSub, fontFamily: "'Rajdhani',sans-serif", fontSize: "clamp(14px,1.3vw,16px)", lineHeight: 1.9, marginBottom: 28, fontStyle: "italic", borderLeft: `3px solid ${t.accent}`, paddingLeft: 16 }}>{post.desc}</p>
-        </FadeUp>
-        <FadeUp delay={.2}>
-          <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, padding: "clamp(20px,4vw,36px)" }}>
-            {paragraphs.map((para, i) => {
-              if (para.startsWith("## ")) {
-                return <h2 key={i} style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(14px,1.8vw,18px)", color: t.accent, fontWeight: 700, margin: "24px 0 12px", borderBottom: `1px solid ${t.border}`, paddingBottom: 8 }}>{para.replace("## ", "")}</h2>;
-              }
-              return <p key={i} style={{ color: t.textSub, fontFamily: "'Rajdhani',sans-serif", fontSize: "clamp(13px,1.1vw,15px)", lineHeight: 1.9, marginBottom: 16 }}>{para}</p>;
-            })}
-          </div>
-        </FadeUp>
-        <FadeUp delay={.25}>
-          <div style={{ marginTop: 32, padding: "20px 24px", background: t.accentDim, border: `1px solid ${t.border}`, borderRadius: 14, display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-            <Logo size={36} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: "'Orbitron',monospace", fontSize: 13, fontWeight: 900, color: t.text }}>Mahmud Bashir Olasunkanmi</div>
-              <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 12, color: t.textMuted, marginTop: 2 }}>Full Stack Developer · M.B.O WebDev</div>
-            </div>
-            <button className="btn btn-primary btn-sm" onClick={() => go("contact")}>Hire Me →</button>
-          </div>
-        </FadeUp>
-        <FadeUp delay={.3}>
-          <div style={{ marginTop: 24 }}>
-            <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 12, color: t.textMuted, fontWeight: 700, letterSpacing: 2, marginBottom: 14 }}>MORE ARTICLES</div>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              {BLOGS.filter(b => b.slug !== slug).map(b => (
-                <button key={b.id} className="btn btn-ghost btn-sm" onClick={() => go(`blog/${b.slug}`)} style={{ textAlign: "left", maxWidth: 280 }}>{b.icon} {b.title.substring(0, 45)}...</button>
-              ))}
-            </div>
-          </div>
-        </FadeUp>
-      </div>
-    </PageWrap>
-  );
-};
-
-// ─── ALL ARTICLES PAGE ────────────────────────────────────────────────────────
-const AllArticles = ({ t, go }) => (
-  <PageWrap>
-    <div style={{ padding: "100px clamp(16px,5vw,72px) 80px" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <FadeUp>
-          <div style={{ marginBottom: 16 }}><button className="btn btn-ghost btn-sm" onClick={() => go("blog")}>← Back to Blog</button></div>
-          <div style={{ textAlign: "center", marginBottom: 50 }}>
-            <div style={{ fontFamily: "'Rajdhani',sans-serif", color: t.accent, fontSize: 11, letterSpacing: 3, fontWeight: 700, marginBottom: 8 }}>// ALL_POSTS</div>
-            <h1 style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(22px,4vw,40px)", color: t.text }}>All Articles</h1>
-            <p style={{ color: t.textMuted, fontFamily: "'Rajdhani',sans-serif", marginTop: 10, fontSize: 14 }}>{BLOGS.length} articles published</p>
-          </div>
-        </FadeUp>
-        <div className="blog-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 20 }}>
-          {BLOGS.map((b, i) => <FadeUp key={b.id} delay={i * .08}><BlogCard b={b} t={t} go={go} /></FadeUp>)}
-        </div>
-      </div>
-    </div>
-  </PageWrap>
-);
-
-// ─── BOOKING ──────────────────────────────────────────────────────────────────
-const BookMeeting = ({ t }) => {
-  const today = new Date();
-  const [month, setMonth] = useState(today.getMonth());
-  const [year, setYear] = useState(today.getFullYear());
-  const [selDate, setSel] = useState(null);
-  const [selTime, setSelT] = useState(null);
-  const [form, setForm] = useState({ name: "", email: "", topic: "", notes: "" });
-  const [step, setStep] = useState(1);
-  const [booked, setBooked] = useState(false);
-  const [availableSlots, setAvailableSlots] = useState([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const cells = [...Array(firstDay).fill(null), ...Array(daysInMonth).fill(0).map((_, i) => i + 1)];
-  const isPast = d => new Date(year, month, d) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const isWknd = d => { const dy = new Date(year, month, d).getDay(); return dy === 0 || dy === 6 };
-
-  const inp = { background: t.inputBg, border: `1px solid ${t.border}`, borderRadius: 9, padding: "11px 14px", color: t.text, fontFamily: "'Rajdhani',sans-serif", fontSize: 14, outline: "none", width: "100%", transition: "border-color .2s", boxSizing: "border-box" };
-  const lbl = { fontFamily: "'Rajdhani',sans-serif", fontSize: 11, color: t.textMuted, fontWeight: 700, letterSpacing: 1.5, display: "block", marginBottom: 6 };
-  const reset = () => { setSel(null); setSelT(null); setForm({ name: "", email: "", topic: "", notes: "" }); setStep(1); setBooked(false); setAvailableSlots([]); };
-
-  const handleDateSelect = async (d) => {
-    setSel(d);
-    setStep(2);
-    setLoadingSlots(true);
-    try {
-      const formattedDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-      const res = await fetch(`${API_BASE}/api/meetings/slots/?date=${formattedDate}`);
-      if (res.ok) {
-        const data = await res.json();
-        setAvailableSlots(data.available);
-      }
-    } catch(e) {
-      console.error(e);
-    } finally {
-      setLoadingSlots(false);
-    }
-  };
-
-  const handleBooking = async () => {
-    if (!form.name || !form.email || !form.topic) return;
-    setSubmitting(true);
-    const formattedDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(selDate).padStart(2, "0")}`;
-    try {
-        const res = await fetch(`${API_BASE}/api/meetings/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                name: form.name,
-                email: form.email,
-                date: formattedDate,
-                time: selTime,
-                topic: form.topic,
-                notes: form.notes
-            })
-        });
-        if (res.ok) {
-            setBooked(true);
-        } else {
-            alert("Failed to book meeting. Please try again.");
-        }
-    } catch(e) {
-        alert("Error connecting to server.");
-    } finally {
-        setSubmitting(false);
-    }
-  };
-
-  return (
-    <PageWrap>
-      <section id="book-meeting" style={{ padding: "100px clamp(16px,5vw,72px)", background: t.bg2 }}>
-        <div style={{ maxWidth: 800, margin: "0 auto" }}>
-          <FadeUp><div style={{ textAlign: "center", marginBottom: 50 }}>
-            <div style={{ fontFamily: "'Rajdhani',sans-serif", color: t.accent, fontSize: 11, letterSpacing: 3, fontWeight: 700, marginBottom: 8 }}>// CALENDAR.schedule()</div>
-            <h2 style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(22px,4vw,40px)", color: t.text }}>Book a Meeting</h2>
-            <p style={{ color: t.textMuted, fontFamily: "'Rajdhani',sans-serif", marginTop: 10, fontSize: 14 }}>Mon–Fri · 9AM–5PM WAT · Abuja, Nigeria</p>
-          </div></FadeUp>
-
-          {booked ? (
-            <FadeUp><div style={{ background: t.card, border: `1px solid ${t.borderHov}`, borderRadius: 22, padding: "clamp(28px,5vw,52px)", textAlign: "center" }}>
-              <div style={{ fontSize: 56, marginBottom: 16 }}>✅</div>
-              <h3 style={{ fontFamily: "'Orbitron',monospace", color: t.accent, fontSize: "clamp(16px,2.5vw,22px)", marginBottom: 10 }}>Meeting Booked!</h3>
-              <p style={{ color: t.textSub, fontFamily: "'Rajdhani',sans-serif", fontSize: 15, lineHeight: 2 }}>
-                <strong style={{ color: t.text }}>{form.name}</strong> · {MONTHS[month]} {selDate}, {year} · {selTime}<br />
-                Confirmation → <strong style={{ color: t.accent }}>{form.email}</strong>
-              </p>
-              <button className="btn btn-outline" style={{ marginTop: 22 }} onClick={reset}>← Book Another</button>
-            </div></FadeUp>
-          ) : (
-            <FadeUp delay={.1}>
-              <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 22, padding: "clamp(18px,4vw,36px)" }}>
-                {/* Steps indicator */}
-                <div style={{ display: "flex", justifyContent: "center", gap: "clamp(10px,2vw,22px)", marginBottom: 28, flexWrap: "wrap" }}>
-                  {[["1", "Date"], ["2", "Time"], ["3", "Details"]].map(([n, l], idx) => (
-                    <div key={n} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                      <div style={{ width: 26, height: 26, borderRadius: "50%", background: step > idx || step === idx + 1 ? "linear-gradient(135deg,#16a34a,#22c55e)" : "transparent", border: step <= idx ? `1px solid ${t.border}` : "none", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Orbitron',monospace", fontSize: 11, fontWeight: 900, color: step > idx || step === idx + 1 ? "#fff" : t.textMuted }}>
-                        {step > idx + 1 ? "✓" : n}
-                      </div>
-                      <span style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 13, fontWeight: 700, color: step === idx + 1 ? t.accent : t.textMuted }}>{l}</span>
-                      {idx < 2 && <span style={{ color: t.border, fontSize: 14 }}>›</span>}
-                    </div>
-                  ))}
+// ─── BLOG ─────────────────────────────────────────────────────────────────────
+const Blog=({t,go,setBlog})=>{
+  const open=(b)=>{setBlog(b);window.scrollTo(0,0);};
+  return(
+    <section style={{padding:"100px clamp(16px,5vw,68px)"}}>
+      <div style={{maxWidth:1280,margin:"0 auto"}}>
+         <FadeUp><div style={{textAlign:"center",marginBottom:50}}>
+          <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// TECH_BLOG</div>
+          <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Latest Articles</h2>
+        </div></FadeUp>
+        <div className="blog-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:24}}>
+          {BLOGS.map((b,i)=>(
+            <FadeUp key={b.id} delay={i*.1}>
+              <div onClick={()=>open(b)} style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:18,padding:24,cursor:"pointer",transition:"all .2s",height:"100%",display:"flex",flexDirection:"column"}}
+                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.borderColor=t.accent;}}
+                onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.borderColor=t.border;}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:14,alignItems:"center"}}>
+                  <span style={{background:t.tagBg,color:t.tagColor,padding:"4px 10px",borderRadius:20,fontSize:11,fontFamily:"'Rajdhani',sans-serif",fontWeight:700}}>{b.icon} {b.tag}</span>
+                  <span style={{fontSize:11,color:t.textMuted,fontFamily:"'Rajdhani',sans-serif",fontWeight:600}}>{b.date} • {b.rt} read</span>
                 </div>
-
-                {step === 1 && <>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                    <button className="btn btn-ghost btn-sm" onClick={() => { if (month === 0) { setMonth(11); setYear(y => y - 1) } else setMonth(m => m - 1) }}>‹</button>
-                    <span style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(12px,1.8vw,14px)", fontWeight: 700, color: t.text }}>{MONTHS[month]} {year}</span>
-                    <button className="btn btn-ghost btn-sm" onClick={() => { if (month === 11) { setMonth(0); setYear(y => y + 1) } else setMonth(m => m + 1) }}>›</button>
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 3, marginBottom: 6 }}>
-                    {DAYS.map(d => <div key={d} style={{ textAlign: "center", fontFamily: "'Rajdhani',sans-serif", fontSize: 11, color: t.textMuted, fontWeight: 700, padding: "4px 0" }}>{d}</div>)}
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 3 }}>
-                    {cells.map((d, i) => (
-                      <button key={i} disabled={!d || isPast(d) || isWknd(d)} onClick={() => handleDateSelect(d)}
-                        style={{ background: selDate === d ? "linear-gradient(135deg,#16a34a,#22c55e)" : !d || isPast(d) || isWknd(d) ? "transparent" : t.accentDim, border: `1px solid ${selDate === d ? "transparent" : !d || isPast(d) || isWknd(d) ? "transparent" : t.border}`, borderRadius: 7, padding: "clamp(5px,1.5vw,9px) 0", cursor: !d || isPast(d) || isWknd(d) ? "default" : "pointer", color: !d ? "transparent" : isPast(d) || isWknd(d) ? t.border : selDate === d ? "#fff" : t.textSub, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: "clamp(11px,1.4vw,13px)", transition: "all .18s" }}>
-                        {d || ""}
-                      </button>
-                    ))}
-                  </div>
-                  <p style={{ marginTop: 12, fontFamily: "'Rajdhani',sans-serif", fontSize: 11, color: t.textMuted, textAlign: "center" }}>Weekends & past dates unavailable</p>
-                </>}
-
-                {step === 2 && <>
-                  <div style={{ textAlign: "center", marginBottom: 18 }}><span style={{ fontFamily: "'Rajdhani',sans-serif", color: t.accent, fontSize: 14, fontWeight: 700 }}>📅 {MONTHS[month]} {selDate}, {year}</span></div>
-                  {loadingSlots ? <div style={{textAlign: "center", padding: 20}}>Loading slots...</div> : (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(110px,1fr))", gap: 9, marginBottom: 20 }}>
-                    {availableSlots.length > 0 ? availableSlots.map(time => (
-                      <button key={time} onClick={() => { setSelT(time); setStep(3) }} className={selTime === time ? "btn btn-primary" : "btn btn-ghost"} style={{ width: "100%", fontSize: 13, padding: "9px 8px" }}>{time}</button>
-                    )) : <div style={{gridColumn: "1/-1", textAlign: "center", color: t.textMuted}}>No slots available</div>}
-                  </div>
-                  )}
-                  <button className="btn btn-ghost btn-sm" onClick={() => setStep(1)}>← Back</button>
-                </>}
-
-                {step === 3 && <>
-                  <div style={{ textAlign: "center", marginBottom: 18 }}><span style={{ fontFamily: "'Rajdhani',sans-serif", color: t.accent, fontSize: 14, fontWeight: 700 }}>📅 {MONTHS[month]} {selDate} · 🕐 {selTime}</span></div>
-                  <div className="contact-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-                    <div><label style={lbl}>NAME *</label><input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Your name" style={inp} onFocus={e => e.target.style.borderColor = t.accent} onBlur={e => e.target.style.borderColor = t.border} /></div>
-                    <div><label style={lbl}>EMAIL *</label><input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="your@email.com" style={inp} onFocus={e => e.target.style.borderColor = t.accent} onBlur={e => e.target.style.borderColor = t.border} /></div>
-                  </div>
-                  <div style={{ marginBottom: 12 }}><label style={lbl}>TOPIC *</label><input value={form.topic} onChange={e => setForm(f => ({ ...f, topic: e.target.value }))} placeholder="Discuss a project, consulting..." style={inp} onFocus={e => e.target.style.borderColor = t.accent} onBlur={e => e.target.style.borderColor = t.border} /></div>
-                  <div style={{ marginBottom: 20 }}><label style={lbl}>NOTES</label><textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Additional context..." rows={3} style={{ ...inp, resize: "vertical" }} onFocus={e => e.target.style.borderColor = t.accent} onBlur={e => e.target.style.borderColor = t.border} /></div>
-                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    <button className="btn btn-ghost" onClick={() => setStep(2)}>← Back</button>
-                    <button className="btn btn-primary btn-lg" style={{ flex: 1 }} onClick={handleBooking} disabled={submitting || !form.name || !form.email || !form.topic}>{submitting ? "⏳ Booking..." : "✅ Confirm Booking"}</button>
-                  </div>
-                </>}
+                <h3 style={{fontFamily:"'Orbitron',monospace",fontSize:16,color:t.text,marginBottom:10,lineHeight:1.3}}>{b.title}</h3>
+                <p style={{fontFamily:"'Rajdhani',sans-serif",fontSize:13,color:t.textSub,lineHeight:1.6,flex:1}}>{b.desc}</p>
+                <div style={{marginTop:16,fontFamily:"'Rajdhani',sans-serif",fontSize:13,color:t.accent,fontWeight:700}}>Read Article →</div>
               </div>
             </FadeUp>
-          )}
+          ))}
         </div>
-      </section>
-    </PageWrap>
+      </div>
+    </section>
   );
 };
 
-// ─── CONTACT ──────────────────────────────────────────────────────────────────
-const Contact = ({ t }) => {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
-  const [sent, setSent] = useState(false);
-  const [loading, setL] = useState(false);
-  const [foc, sf] = useState(null);
+// ─── BOOK MEETING ─────────────────────────────────────────────────────────────
+const BookMeeting=({t})=>{
+  const[step,setStep]=useState(1);
+  const[d,setD]=useState("");const[tm,setTm]=useState("");
+  const[info,setInfo]=useState({n:"",e:"",p:"",co:""});
+  const[msg,setMsg]=useState("");const[sub,setSub]=useState(false);
+  const[err,setErr]=useState("");
 
-  const submit = async () => {
-    if (!form.name || !form.email || !form.message) return;
-    setL(true);
-    try {
-      const res = await fetch(`${API_BASE}/api/contact/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
-      });
-      if (res.ok) {
-        setSent(true);
-        setTimeout(() => { setSent(false); setForm({ name: "", email: "", subject: "", message: "" }) }, 5000);
-      } else {
-        alert("Failed to send message. Please try again.");
-      }
-    } catch (err) {
-      alert("Error connecting to server.");
-    } finally {
-      setL(false);
-    }
+  const handleSubmit=(e)=>{
+    e.preventDefault();setSub(true);setMsg("");setErr("");
+    
+    // Using EmailJS for Meetings
+    const templateParams = {
+      to_name: "Mahmud",
+      from_name: info.n,
+      from_email: info.e,
+      meeting_date: d,
+      meeting_time: tm,
+      project_details: info.p,
+      company: info.co || "N/A"
+    };
+
+    emailjs.send(
+      EMAILJS_CONFIG.serviceId,
+      EMAILJS_CONFIG.bookingTemplate,
+      templateParams,
+      EMAILJS_CONFIG.publicKey
+    )
+    .then((response) => {
+      setMsg("Meeting requested successfully! I will email you to confirm.");
+      setSub(false);
+      setTimeout(()=>{
+        setStep(1);setD("");setTm("");setInfo({n:"",e:"",p:"",co:""});setMsg("");
+      },4000);
+    })
+    .catch((error) => {
+      console.error("EmailJS Error:", error);
+      setErr("Failed to send booking request. Please check your config or try emailing directly.");
+      setSub(false);
+    });
   };
 
-  const inp = f => ({ background: t.inputBg, border: `1px solid ${foc === f ? t.accent : t.border}`, borderRadius: 9, padding: "11px 14px", color: t.text, fontFamily: "'Rajdhani',sans-serif", fontSize: 14, outline: "none", width: "100%", transition: "all .2s", boxSizing: "border-box", boxShadow: foc === f ? `0 0 16px ${t.accentGlow}` : "none" });
-  const lbl = { fontFamily: "'Rajdhani',sans-serif", fontSize: 11, color: t.textMuted, fontWeight: 700, letterSpacing: 1.5, display: "block", marginBottom: 6 };
+  const inp={background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:10,padding:"12px 16px",color:t.text,fontFamily:"'Rajdhani',sans-serif",fontSize:14,outline:"none",width:"100%",boxSizing:"border-box",transition:"border-color .2s"};
+  const lbl={fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:6,marginTop:16};
 
-  return (
-    <PageWrap>
-      <section id="contact" style={{ padding: "100px clamp(16px,5vw,72px)", background: t.bg2 }}>
-        <div style={{ maxWidth: 740, margin: "0 auto" }}>
-          <FadeUp><div style={{ textAlign: "center", marginBottom: 50 }}>
-            <div style={{ fontFamily: "'Rajdhani',sans-serif", color: t.accent, fontSize: 11, letterSpacing: 3, fontWeight: 700, marginBottom: 8 }}>// CONTACT.post()</div>
-            <h2 style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(22px,4vw,40px)", color: t.text }}>Let's Work Together</h2>
-            <p style={{ color: t.textMuted, fontFamily: "'Rajdhani',sans-serif", marginTop: 10, fontSize: 14 }}>Freelance · Remote · Full-Time</p>
-          </div></FadeUp>
-          <FadeUp delay={.12}>
-            <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 22, padding: "clamp(20px,5vw,40px)" }}>
-              {sent && <div style={{ background: t.accentDim, border: `1px solid ${t.border}`, borderRadius: 9, padding: "12px 16px", marginBottom: 20, color: t.accent, fontFamily: "'Rajdhani',sans-serif", fontSize: 14, fontWeight: 700, textAlign: "center" }}>✅ Message sent! Mahmud will reply within 24hrs.</div>}
-              <div className="contact-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-                <div><label style={lbl}>NAME *</label><input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onFocus={() => sf("n")} onBlur={() => sf(null)} placeholder="Your name" style={inp("n")} /></div>
-                <div><label style={lbl}>EMAIL *</label><input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} onFocus={() => sf("e")} onBlur={() => sf(null)} placeholder="your@email.com" style={inp("e")} /></div>
+  return(
+    <section style={{padding:"100px clamp(16px,5vw,68px)"}}>
+      <div style={{maxWidth:700,margin:"0 auto"}}>
+        <FadeUp><div style={{textAlign:"center",marginBottom:40}}>
+          <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// CALENDAR</div>
+          <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Book a Discovery Call</h2>
+        </div></FadeUp>
+        <FadeUp>
+          <div style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:24,padding:"clamp(20px,5vw,40px)",position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${t.accent},transparent)`}}/>
+            
+            <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:30}}>
+              {[1,2].map(s=>(
+                <React.Fragment key={s}>
+                  <div style={{width:32,height:32,borderRadius:"50%",background:step>=s?t.accent:t.accentDim,color:step>=s?"#fff":t.textMuted,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Orbitron',monospace",fontSize:14,fontWeight:900,transition:"all .3s"}}>{s}</div>
+                  {s===1&&<div style={{flex:1,height:2,background:step===2?t.accent:t.border,transition:"all .3s"}}/>}
+                </React.Fragment>
+              ))}
+            </div>
+
+            {msg?<div style={{background:t.tagBg,border:`1px solid ${t.border}`,color:t.tagColor,padding:20,borderRadius:12,textAlign:"center",fontFamily:"'Rajdhani',sans-serif",fontSize:16,fontWeight:700}}>{msg}</div>:
+             err?<div style={{background:"rgba(239,68,68,0.1)",border:"1px solid #ef4444",color:"#ef4444",padding:20,borderRadius:12,textAlign:"center",fontFamily:"'Rajdhani',sans-serif",fontSize:15,fontWeight:600}}>{err}</div>:
+            step===1?(
+              <div style={{animation:"sbIn .3s ease"}}>
+                <h3 style={{fontFamily:"'Rajdhani',sans-serif",fontSize:22,color:t.text,marginBottom:6,fontWeight:700}}>Select Date & Time</h3>
+                <p style={{fontFamily:"'Rajdhani',sans-serif",fontSize:14,color:t.textSub,marginBottom:24}}>30-min discovery call to discuss your project.</p>
+                
+                <label style={lbl}>DATE (Next 14 Days)</label>
+                <div className="times-grid" style={{display:"grid",gap:10,marginBottom:20}}>
+                  {Array(8).fill(0).map((_,i)=>{
+                    const dt=new Date();dt.setDate(dt.getDate()+1+i);
+                    const ds=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+                    const lbl=`${DAYS[dt.getDay()]} ${dt.getDate()} ${MONTHS[dt.getMonth()].slice(0,3)}`;
+                    return <button key={ds} onClick={()=>setD(ds)} style={{padding:"12px 10px",background:d===ds?t.accentDim:t.codeBg,border:`1px solid ${d===ds?t.accent:t.border}`,borderRadius:10,color:d===ds?t.accent:t.textSub,cursor:"pointer",fontFamily:"'Rajdhani',sans-serif",fontSize:13,fontWeight:600,transition:"all .2s"}}>{lbl}</button>;
+                  })}
+                </div>
+                {d&&(
+                  <FadeUp>
+                    <label style={lbl}>TIME (GMT+1)</label>
+                    <div className="times-grid" style={{display:"grid",gap:10,marginBottom:30}}>
+                      {TIMES.map(tStr=>(
+                        <button key={tStr} onClick={()=>setTm(tStr)} style={{padding:"10px",background:tm===tStr?t.accentDim:t.codeBg,border:`1px solid ${tm===tStr?t.accent:t.border}`,borderRadius:10,color:tm===tStr?t.accent:t.textSub,cursor:"pointer",fontFamily:"'Orbitron',monospace",fontSize:12,fontWeight:700,transition:"all .2s"}}>{tStr}</button>
+                      ))}
+                    </div>
+                  </FadeUp>
+                )}
+                <div style={{display:"flex",justifyContent:"flex-end"}}><button className="btn btn-primary" onClick={()=>setStep(2)} disabled={!d||!tm}>Continue →</button></div>
               </div>
-              <div style={{ marginBottom: 12 }}><label style={lbl}>SUBJECT</label><input value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} onFocus={() => sf("s")} onBlur={() => sf(null)} placeholder="Project inquiry..." style={inp("s")} /></div>
-              <div style={{ marginBottom: 22 }}><label style={lbl}>MESSAGE *</label><textarea value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} onFocus={() => sf("m")} onBlur={() => sf(null)} placeholder="Tell me about your project..." rows={5} style={{ ...inp("m"), resize: "vertical" }} /></div>
-              <button className="btn btn-primary btn-lg btn-block" onClick={submit} disabled={loading || !form.name || !form.email || !form.message}>
-                {loading ? "⏳ Sending..." : "SEND MESSAGE →"}
-              </button>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(130px,1fr))", gap: 8, marginTop: 22, paddingTop: 22, borderTop: `1px solid ${t.border}` }}>
-                {[["📞", "Phone", "08072410373"], ["📧", "Email", "mahmudolasunkami895"], ["📍", "Location", "Abuja, Nigeria"], ["🐙", "GitHub", "Muhamzy-ui"]].map(([ic, l, v]) => (
-                  <div key={l} style={{ textAlign: "center", background: t.accentDim, borderRadius: 9, padding: "10px 6px" }}>
-                    <div style={{ fontSize: 15, marginBottom: 3 }}>{ic}</div>
-                    <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 9, color: t.textMuted, fontWeight: 700, letterSpacing: 1 }}>{l}</div>
-                    <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 11, color: t.tagColor, fontWeight: 600, marginTop: 2 }}>{v}</div>
+            ):(
+              <form onSubmit={handleSubmit} style={{animation:"slideR .3s ease"}}>
+                <h3 style={{fontFamily:"'Rajdhani',sans-serif",fontSize:22,color:t.text,marginBottom:6,fontWeight:700}}>Your Details</h3>
+                <div style={{background:t.accentDim,border:`1px solid ${t.border}`,padding:"10px 16px",borderRadius:8,marginBottom:24,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:14,color:t.textSub,fontWeight:600}}>🗓 {d} at {tm}</span>
+                  <button type="button" onClick={()=>setStep(1)} style={{background:"none",border:"none",color:t.accent,fontFamily:"'Rajdhani',sans-serif",fontSize:13,cursor:"pointer",fontWeight:700,textDecoration:"underline"}}>Edit</button>
+                </div>
+                <div className="c2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+                  <div><label style={lbl}>NAME *</label><input required value={info.n} onChange={e=>setInfo(i=>({...i,n:e.target.value}))} style={inp}/></div>
+                  <div><label style={lbl}>EMAIL *</label><input required type="email" value={info.e} onChange={e=>setInfo(i=>({...i,e:e.target.value}))} style={inp}/></div>
+                </div>
+                <label style={lbl}>COMPANY / URL (Optional)</label><input value={info.co} onChange={e=>setInfo(i=>({...i,co:e.target.value}))} style={inp}/>
+                <label style={lbl}>PROJECT DETAILS *</label><textarea required rows={4} value={info.p} onChange={e=>setInfo(i=>({...i,p:e.target.value}))} placeholder="What are we building?" style={{...inp,resize:"vertical",marginBottom:30}}/>
+                <div style={{display:"flex",gap:12}}>
+                  <button type="button" className="btn btn-ghost" onClick={()=>setStep(1)}>← Back</button>
+                  <button type="submit" className="btn btn-primary" style={{flex:1}} disabled={sub}>{sub?"Confirming...":"Confirm Booking ✅"}</button>
+                </div>
+              </form>
+            )}
+          </div>
+        </FadeUp>
+      </div>
+    </section>
+  );
+};
+
+// ─── CONTACT ────────────────────────────────────────────────────────────────
+const Contact=({t})=>{
+  const[f,setF]=useState({n:"",e:"",m:""});
+  const[st,setSt]=useState("idle");const[msg,setMsg]=useState("");
+
+  const handleSub=(e)=>{
+    e.preventDefault();setSt("sub");setMsg("");
+    
+    // Using EmailJS for Contact
+    const templateParams = {
+      from_name: f.n,
+      from_email: f.e,
+      message: f.m,
+      to_name: "Mahmud"
+    };
+
+    emailjs.send(
+      EMAILJS_CONFIG.serviceId,
+      EMAILJS_CONFIG.contactTemplate,
+      templateParams,
+      EMAILJS_CONFIG.publicKey
+    )
+    .then((response) => {
+      setSt("success");setMsg("Message sent! I'll reply soon.");setF({n:"",e:"",m:""});
+      setTimeout(()=>setSt("idle"),4000);
+    })
+    .catch((error) => {
+      console.error("EmailJS Error:", error);
+      setSt("error");setMsg("Failed to send message. Please try emailing directly.");
+      setTimeout(()=>setSt("idle"),4000);
+    });
+  };
+
+  const inp={background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:10,padding:"14px 18px",color:t.text,fontFamily:"'Rajdhani',sans-serif",fontSize:15,outline:"none",width:"100%",boxSizing:"border-box",transition:"all .2s"};
+  const lbl={fontFamily:"'Rajdhani',sans-serif",fontSize:12,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:8,marginTop:18};
+
+  return(
+    <section style={{padding:"100px clamp(16px,5vw,68px)",background:t.bg2}}>
+      <div style={{maxWidth:1280,margin:"0 auto"}}>
+        <FadeUp><div style={{textAlign:"center",marginBottom:50}}>
+          <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// CONTACT</div>
+          <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Let's Talk</h2>
+        </div></FadeUp>
+        <div style={{display:"grid",gridTemplateColumns:"minmax(300px,1fr) minmax(300px,1.5fr)",gap:"clamp(30px,6vw,80px)",alignItems:"start"}}>
+          <FadeUp>
+            <h3 style={{fontFamily:"'Rajdhani',sans-serif",fontSize:26,color:t.text,marginBottom:16,fontWeight:700}}>Have a project in mind?</h3>
+            <p style={{fontFamily:"'Rajdhani',sans-serif",fontSize:15,color:t.textSub,lineHeight:1.8,marginBottom:32}}>
+              I'm currently available for freelance projects and full-time opportunities.
+              Whether you need a complex Django API, a responsive React frontend, or a full-stack e-commerce platform — I can help.
+            </p>
+            <div style={{display:"flex",flexDirection:"column",gap:20,marginBottom:32}}>
+              {[["📧","Email","mahmudolasunkami895@gmail.com","mailto:mahmudolasunkami895@gmail.com"],
+                ["📱","WhatsApp","+234 807 241 0373","https://wa.me/2348072410373"],
+                ["🐙","GitHub","github.com/Muhamzy-ui","https://github.com/Muhamzy-ui"],
+                ["📍","Location","Abuja, Nigeria","#"]].map(([ic,l,v,href])=>(
+                <a key={l} href={href} target={href.startsWith("http")?"_blank":"_self"} rel="noreferrer" style={{display:"flex",alignItems:"center",gap:16,textDecoration:"none",background:t.card,border:`1px solid ${t.border}`,padding:"16px",borderRadius:14,transition:"transform .2s",cursor:href==="#"?"default":"pointer"}}
+                  onMouseEnter={e=>href!=="#"&&(e.currentTarget.style.transform="translateX(6px)")}
+                  onMouseLeave={e=>href!=="#"&&(e.currentTarget.style.transform="none")}>
+                  <div style={{width:44,height:44,borderRadius:"50%",background:t.accentDim,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,border:`1px solid ${t.border}`}}>{ic}</div>
+                  <div>
+                    <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:12,color:t.textMuted,fontWeight:700,letterSpacing:1,marginBottom:4}}>{l.toUpperCase()}</div>
+                    <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:15,color:t.text,fontWeight:600}}>{v}</div>
                   </div>
-                ))}
-              </div>
+                </a>
+              ))}
             </div>
           </FadeUp>
+          <FadeUp delay={.2}>
+            <form onSubmit={handleSub} style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:24,padding:"clamp(24px,4vw,40px)"}}>
+              <div className="c2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+                <div><label style={lbl}>NAME</label><input required value={f.n} onChange={e=>setF({...f,n:e.target.value})} style={inp}/></div>
+                <div><label style={lbl}>EMAIL</label><input required type="email" value={f.e} onChange={e=>setF({...f,e:e.target.value})} style={inp}/></div>
+              </div>
+              <div><label style={lbl}>MESSAGE</label><textarea required rows={5} value={f.m} onChange={e=>setF({...f,m:e.target.value})} style={{...inp,resize:"vertical",marginBottom:30}} placeholder="How can I help you?"/></div>
+              <button type="submit" className="btn btn-primary btn-block" disabled={st==="sub"} style={{height:54,fontSize:16}}>
+                {st==="sub"?"Sending...":st==="success"?"✓ Message Sent":st==="error"?"❌ Error":"Send Message ↗"}
+              </button>
+              {msg&&<div style={{marginTop:16,textAlign:"center",fontFamily:"'Rajdhani',sans-serif",fontSize:14,fontWeight:600,color:st==="success"?"#10b981":"#ef4444"}}>{msg}</div>}
+            </form>
+          </FadeUp>
         </div>
-      </section>
-    </PageWrap>
+      </div>
+    </section>
   );
 };
 
 // ─── FOOTER ───────────────────────────────────────────────────────────────────
-const Footer = ({ go, t }) => {
-  const cols = {
-    "Quick Links": ["Home", "About", "Skills", "Projects", "Blog", "Book Meeting", "Contact"],
-    "Services": ["Web Development", "Mobile Apps", "API Design", "Database Architecture", "Code Review"],
-    "Connect": ["GitHub / Muhamzy-ui", "LinkedIn / mahmud-olasunkanmi", "Upwork", "WhatsApp"],
-  };
-  return (
-    <footer style={{ borderTop: `1px solid ${t.border}`, padding: "48px clamp(16px,5vw,72px) 26px", background: t.bg }}>
-      <div className="footer-grid" style={{ maxWidth: 1280, margin: "0 auto", display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr", gap: "clamp(20px,3vw,40px)", marginBottom: 32 }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}><Logo size={32} /><div><div style={{ fontFamily: "'Orbitron',monospace", fontSize: 13, fontWeight: 900, color: t.text }}>M.B.O</div><div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 9, color: t.accent, fontWeight: 700, letterSpacing: 3 }}>WEBDEV</div></div></div>
-          <p style={{ color: t.textMuted, fontFamily: "'Rajdhani',sans-serif", fontSize: 13, lineHeight: 1.8, maxWidth: 220, marginBottom: 10 }}>Turning ideas into fast, elegant web solutions. Available globally.</p>
-          <p style={{ color: t.textMuted, fontFamily: "'Rajdhani',sans-serif", fontSize: 12, marginBottom: 4 }}>📧 mahmudolasunkami895@gmail.com</p>
-          <p style={{ color: t.textMuted, fontFamily: "'Rajdhani',sans-serif", fontSize: 12 }}>📞 08072410373</p>
+const Footer=({t,go})=>(
+  <footer style={{borderTop:`1px solid ${t.border}`,padding:"60px clamp(16px,5vw,68px) 30px",background:t.navBg}}>
+    <div className="foot-grid" style={{maxWidth:1280,margin:"0 auto",display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:40,marginBottom:60}}>
+      <div>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}><Logo size={32}/>
+          <div><div style={{fontFamily:"'Orbitron',monospace",fontSize:14,fontWeight:900,color:t.text}}>M.B.O</div><div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:10,color:t.accent,fontWeight:700,letterSpacing:2}}>WEBDEV</div></div>
         </div>
-        {Object.entries(cols).map(([heading, items]) => (
-          <div key={heading}>
-            <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 10, color: t.accent, fontWeight: 700, letterSpacing: 2, marginBottom: 14 }}>{heading.toUpperCase()}</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-              {items.map(item => (
-                <button key={item} className="foot-link" onClick={() => go(item.toLowerCase().split("/")[0].trim().replace(/ /g, "-"))}>{item}</button>
-              ))}
-            </div>
-          </div>
-        ))}
+        <p style={{color:t.textSub,fontFamily:"'Rajdhani',sans-serif",fontSize:14,lineHeight:1.8,marginBottom:20,maxWidth:300,fontWeight:600}}>
+          Building fast, scalable, and modern applications with Python and React.
+        </p>
+        <a href="mailto:mahmudolasunkami895@gmail.com" style={{display:"inline-flex",alignItems:"center",gap:8,color:t.text,textDecoration:"none",fontFamily:"'Rajdhani',sans-serif",fontSize:15,fontWeight:700}} onMouseEnter={e=>e.currentTarget.style.color=t.accent} onMouseLeave={e=>e.currentTarget.style.color=t.text}>
+          ✉️ mahmudolasunkami895@gmail.com
+        </a>
       </div>
-      <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 18, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-        <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 11, color: t.textMuted }}>© {new Date().getFullYear()} M.B.O WebDev · Mahmud Bashir Olasunkanmi</div>
-        <div style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 11, color: t.textMuted }}>React · Django · PostgreSQL</div>
+      <div>
+        <h4 style={{fontFamily:"'Orbitron',monospace",fontSize:13,color:t.text,marginBottom:20}}>Navigation</h4>
+        <div style={{display:"flex",flexDirection:"column",gap:12}}>
+          {NAV.slice(0,4).map(n=><button key={n.id} onClick={()=>go(n.id)} className="footlink">{n.label}</button>)}
+        </div>
       </div>
-    </footer>
-  );
-};
+      <div>
+        <h4 style={{fontFamily:"'Orbitron',monospace",fontSize:13,color:t.text,marginBottom:20}}>Services</h4>
+        <div style={{display:"flex",flexDirection:"column",gap:12}}>
+          {["Django APIs","React Frontends","Full Stack Dev","Database Design"].map(s=><span key={s} style={{color:t.textSub,fontFamily:"'Rajdhani',sans-serif",fontSize:14,fontWeight:600}}>{s}</span>)}
+        </div>
+      </div>
+      <div>
+        <h4 style={{fontFamily:"'Orbitron',monospace",fontSize:13,color:t.text,marginBottom:20}}>Connect</h4>
+        <div style={{display:"flex",flexDirection:"column",gap:12}}>
+          <a href="https://github.com/Muhamzy-ui" target="_blank" rel="noreferrer" className="footlink">GitHub</a>
+          <a href="https://linkedin.com/in/mahmud-olasunkanmi" target="_blank" rel="noreferrer" className="footlink">LinkedIn</a>
+          <a href="#" className="footlink">Twitter</a>
+          <a href="https://wa.me/2348072410373" target="_blank" rel="noreferrer" className="footlink">WhatsApp ↗</a>
+        </div>
+      </div>
+    </div>
+    <div style={{maxWidth:1280,margin:"0 auto",borderTop:`1px solid ${t.border}`,paddingTop:24,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:14}}>
+      <div style={{color:t.textMuted,fontFamily:"'Rajdhani',sans-serif",fontSize:14,fontWeight:600}}>© {new Date().getFullYear()} Mahmud Bashir Olasunkanmi. All rights reserved.</div>
+      <div style={{display:"flex",gap:6}}>
+        <span style={{width:8,height:8,borderRadius:"50%",background:"#22c55e",animation:"pulseDot 2s infinite"}}/>
+        <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:12,color:t.textSub,fontWeight:600}}>System Status: 100% Operational</span>
+      </div>
+    </div>
+  </footer>
+);
 
-// ─── ROOT APP ─────────────────────────────────────────────────────────────────
-export default function App() {
-  const [dark, setDark] = useState(true);
-  const [page, setPage] = useState("home");
-  const [sidebarOpen, setSidebar] = useState(false);
-  const t = dark ? DARK : LIGHT;
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+export default function App(){
+  const[active,setActive]=useState("home");const[dark,setDark]=useState(true);
+  const[sb,setSb]=useState(false);const[blog,setBlog]=useState(null);
+  const t=dark?DARK:LIGHT;
+  const[projects,setProjects]=useState(INIT_PROJECTS);
+  const[ratings,setRatings]=useState(INIT_RATINGS);
 
-  // Active nav label from page
-  const pageToLabel = { home: "Home", about: "About", skills: "Skills", projects: "Projects", blog: "Blog", "book-meeting": "Book Meeting", contact: "Contact" };
-  const activeLabel = pageToLabel[page] || pageToLabel[page.split("/")[0]] || "Blog";
+  useEffect(()=>{
+    document.head.insertAdjacentHTML("beforeend",`<style id="mbo-css">${makeCSS(t)}</style>`);
+    return()=>document.getElementById("mbo-css")?.remove();
+  },[t]);
 
-  const go = useCallback((id) => {
-    setPage(id);
-    setSidebar(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
-  // Inject CSS
-  useEffect(() => {
-    let el = document.getElementById("__mbo_css");
-    if (!el) { el = document.createElement("style"); el.id = "__mbo_css"; document.head.appendChild(el) }
-    el.textContent = G(t);
-  }, [dark]);
-
-  // Scroll spy (only for single-page sections)
-  useEffect(() => {
-    if (!["home", "about", "skills", "projects", "contact"].includes(page)) return;
-    const sections = ["home", "about", "skills", "projects", "contact"];
-    const h = () => {
-      for (const id of sections) {
-        const el = document.getElementById(id);
-        if (el) { const r = el.getBoundingClientRect(); if (r.top <= 120 && r.bottom >= 120) { setPage(id); break } }
-      }
-    };
-    window.addEventListener("scroll", h);
-    return () => window.removeEventListener("scroll", h);
-  }, [page]);
-
-  const renderPage = () => {
-    if (page === "home") return <Hero go={go} t={t} />;
-    if (page === "about") return <About t={t} />;
-    if (page === "skills") return <Skills t={t} />;
-    if (page === "projects") return <Projects t={t} />;
-    if (page === "blog") return <Blog t={t} go={go} />;
-    if (page === "all-articles") return <AllArticles t={t} go={go} />;
-    if (page.startsWith("blog/")) return <BlogDetail slug={page.replace("blog/", "")} t={t} go={go} />;
-    if (page === "book-meeting") return <BookMeeting t={t} />;
-    if (page === "contact") return <Contact t={t} />;
-    return <Hero go={go} t={t} />;
+  const go=(id)=>{
+    setActive(id);setBlog(null);
+    const el=document.getElementById(id);if(el){el.scrollIntoView({behavior:"smooth"});}
   };
 
-  return (
-    <div style={{ background: t.bg, minHeight: "100vh" }}>
-      <Sidebar open={sidebarOpen} onClose={() => setSidebar(false)} active={activeLabel} go={go} t={t} dark={dark} setDark={setDark} />
-      <Navbar active={activeLabel} go={go} t={t} dark={dark} setDark={setDark} sidebarOpen={sidebarOpen} setSidebar={setSidebar} />
-      <main key={page} style={{ animation: "pageSlide .42s cubic-bezier(.4,0,.2,1) both" }}>
-        {renderPage()}
+  useEffect(()=>{
+    const observer=new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{if(entry.isIntersecting)setActive(entry.target.id);});
+    },{threshold:0.3});
+    NAV.forEach(nav=>{
+      const el=document.getElementById(nav.id);
+      if(el)observer.observe(el);
+    });
+    return()=>observer.disconnect();
+  },[]);
+
+  if(blog)return(
+    <div style={{background:t.bg,minHeight:"100vh",color:t.text,transition:"background .3s",fontFamily:"'Rajdhani',sans-serif"}}>
+      <Navbar active="blog" go={go} t={t} dark={dark} setDark={setDark} sb={sb} setSb={setSb}/>
+      <Sidebar open={sb} onClose={()=>setSb(false)} active="blog" go={go} t={t} dark={dark} setDark={setDark}/>
+      <main style={{padding:"120px clamp(16px,5vw,68px) 100px",maxWidth:800,margin:"0 auto",animation:"pageIn .5s ease"}}>
+        <button className="btn btn-ghost btn-sm" onClick={()=>setBlog(null)} style={{marginBottom:32}}>← Back to Articles</button>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
+          <span style={{background:t.tagBg,color:t.tagColor,padding:"4px 12px",borderRadius:20,fontSize:13,fontWeight:700}}>{blog.icon} {blog.tag}</span>
+          <span style={{color:t.textMuted,fontSize:13,fontWeight:600}}>{blog.date} • {blog.rt} read</span>
+        </div>
+        <h1 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(28px,5vw,48px)",color:t.text,marginBottom:24,lineHeight:1.2}}>{blog.title}</h1>
+        <p style={{fontSize:"clamp(16px,2vw,18px)",color:t.textSub,lineHeight:1.8,marginBottom:40,fontWeight:600}}>{blog.desc}</p>
+        <div style={{height:1,background:t.border,marginBottom:40}}/>
+        <div style={{fontSize:16,color:t.text,lineHeight:1.9,whiteSpace:"pre-wrap"}}>{blog.body}</div>
       </main>
-      <Footer go={go} t={t} />
+      <Footer t={t} go={go}/>
+    </div>
+  );
+
+  return(
+    <div style={{background:t.bg,minHeight:"100vh",color:t.text,transition:"background .3s"}}>
+      <Navbar active={active} go={go} t={t} dark={dark} setDark={setDark} sb={sb} setSb={setSb}/>
+      <Sidebar open={sb} onClose={()=>setSb(false)} active={active} go={go} t={t} dark={dark} setDark={setDark}/>
+      <main>
+        <div id="home"><Hero go={go} t={t}/></div>
+        <div id="about"><About t={t}/></div>
+        <div id="skills"><Skills t={t}/></div>
+        <div id="projects"><Projects t={t} projects={projects} setProjects={setProjects}/></div>
+        <div id="ratings"><Ratings t={t} ratings={ratings}/></div>
+        <div id="blog"><Blog t={t} go={go} setBlog={setBlog}/></div>
+        <div id="book-meeting"><BookMeeting t={t}/></div>
+        <div id="contact"><Contact t={t}/></div>
+      </main>
+      <Footer t={t} go={go}/>
     </div>
   );
 }
+
