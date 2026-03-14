@@ -78,12 +78,16 @@ body{background:${t.bg};color:${t.text};overflow-x:hidden;transition:background 
 @media(min-width:769px){.mob-btn{display:none!important}.desk-nav{display:flex!important}}
 @media(max-width:768px){
   .desk-nav{display:none!important}.mob-btn{display:flex!important}
-  .hero-grid{grid-template-columns:1fr!important}.hero-right{display:none!important}
+  .hero-grid{grid-template-columns:1fr!important}
+  .hero-right{display:flex!important;justify-content:center;margin-top:28px}
+  .hero-right > div{width:min(290px,80vw)!important}
   .about-grid{grid-template-columns:1fr!important}.skills-grid{grid-template-columns:1fr 1fr!important}
   .proj-grid{grid-template-columns:1fr!important}.blog-grid{grid-template-columns:1fr!important}
   .foot-grid{grid-template-columns:1fr 1fr!important}.c2{grid-template-columns:1fr!important}
   .times-grid{grid-template-columns:repeat(4,1fr)!important}.ratings-grid{grid-template-columns:1fr!important}
   .stats3{grid-template-columns:repeat(3,1fr)!important}
+  .contact-grid{grid-template-columns:1fr!important}
+  body{overflow-x:hidden}
 }
 @media(max-width:520px){
   .foot-grid{grid-template-columns:1fr!important}
@@ -647,8 +651,41 @@ const Projects=({t,projects,setProjects})=>{
   );
 };
 
+// ─── REVIEW FORM ──────────────────────────────────────────────────────────────
+const ReviewForm=({t,onAdd})=>{
+  const[rv,setRv]=useState({name:"",role:"",country:"",stars:5,text:"",project:""});
+  const[hov,setHov]=useState(0);const[done,setDone]=useState(false);
+  const inp2={background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:9,padding:"11px 14px",color:t.text,fontFamily:"'Rajdhani',sans-serif",fontSize:14,outline:"none",width:"100%",boxSizing:"border-box"};
+  const lbl2={fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:6,marginTop:14};
+  const sub=(e)=>{e.preventDefault();if(!rv.name||!rv.text)return;onAdd({...rv});setDone(true);setRv({name:"",role:"",country:"",stars:5,text:"",project:""});setTimeout(()=>setDone(false),3500);};
+  if(done)return <div style={{background:t.tagBg,border:`1px solid ${t.border}`,padding:24,borderRadius:14,textAlign:"center",color:t.tagColor,fontFamily:"'Rajdhani',sans-serif",fontSize:16,fontWeight:700}}>❤️ Thank you! Your review has been added.</div>;
+  return(
+    <form onSubmit={sub}>
+      <div style={{marginBottom:14}}>
+        <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,marginRight:10}}>YOUR RATING</span>
+        {[1,2,3,4,5].map(s=>(
+          <span key={s} onClick={()=>setRv(r=>({...r,stars:s}))} onMouseEnter={()=>setHov(s)} onMouseLeave={()=>setHov(0)}
+            style={{fontSize:28,cursor:"pointer",color:(hov||rv.stars)>=s?"#f59e0b":"rgba(245,158,11,0.18)",transition:"color .15s",display:"inline-block"}}>★</span>
+        ))}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+        <div><label style={lbl2}>YOUR NAME *</label><input required value={rv.name} onChange={e=>setRv(r=>({...r,name:e.target.value}))} placeholder="John D." style={inp2}/></div>
+        <div><label style={lbl2}>ROLE / TITLE</label><input value={rv.role} onChange={e=>setRv(r=>({...r,role:e.target.value}))} placeholder="Startup Founder" style={inp2}/></div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+        <div><label style={lbl2}>COUNTRY</label><input value={rv.country} onChange={e=>setRv(r=>({...r,country:e.target.value}))} placeholder="🇺🇸 USA" style={inp2}/></div>
+        <div><label style={lbl2}>PROJECT / SERVICE</label><input value={rv.project} onChange={e=>setRv(r=>({...r,project:e.target.value}))} placeholder="React App" style={inp2}/></div>
+      </div>
+      <label style={lbl2}>YOUR REVIEW *</label>
+      <textarea required rows={3} value={rv.text} onChange={e=>setRv(r=>({...r,text:e.target.value}))} placeholder="Share your honest experience..." style={{...inp2,resize:"vertical",marginBottom:18}}/>
+      <button type="submit" className="btn btn-primary btn-block" style={{fontSize:15}}>Submit Review ★</button>
+    </form>
+  );
+};
+
 // ─── RATINGS (CLIENT TESTIMONIALS) ────────────────────────────────────────────
-const Ratings=({t,ratings})=>{
+const Ratings=({t,ratings:initRatings})=>{
+  const[ratings,setRatings]=useState(initRatings);
   const[avg,setAvg]=useState(0);
   const[showAll,setShowAll]=useState(false);
   const[isMobile,setIsMobile]=useState(window.innerWidth<=768);
@@ -658,7 +695,7 @@ const Ratings=({t,ratings})=>{
     return()=>window.removeEventListener("resize",h);
   },[]);
   useEffect(()=>{if(ratings.length)setAvg((ratings.reduce((a,r)=>a+r.stars,0)/ratings.length).toFixed(1))},[ratings]);
-  const visible = isMobile && !showAll ? ratings.slice(0,3) : ratings;
+  const visible=isMobile&&!showAll?ratings.slice(0,3):ratings;
   return(
     <section style={{padding:"100px clamp(16px,5vw,68px)",background:t.bg2}}>
       <div style={{maxWidth:1280,margin:"0 auto"}}>
@@ -727,9 +764,21 @@ const Ratings=({t,ratings})=>{
           )}
         </div>
       </div>
+
+      {/* ─ Leave a Review ─ */}
+      <FadeUp>
+        <div style={{maxWidth:680,margin:"60px auto 0",background:t.card,border:`1px solid ${t.borderHov}`,borderRadius:20,padding:"clamp(20px,4vw,36px)"}}>
+          <h3 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(15px,2vw,20px)",color:t.text,marginBottom:6}}>Leave a Review</h3>
+          <p style={{fontFamily:"'Rajdhani',sans-serif",fontSize:13,color:t.textMuted,marginBottom:24,fontWeight:600}}>Worked with me? Share your honest experience — it helps others find the right developer.</p>
+          <ReviewForm t={t} onAdd={(rev)=>{
+            setRatings(prev=>[{...rev,id:Date.now(),date:new Date().toLocaleString("en-US",{month:"short",year:"numeric"})},...prev]);
+          }}/>
+        </div>
+      </FadeUp>
     </section>
   );
 };
+
 
 // ─── BLOG ─────────────────────────────────────────────────────────────────────
 const Blog=({t,go,setBlog})=>{
@@ -742,7 +791,7 @@ const Blog=({t,go,setBlog})=>{
           <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Latest Articles</h2>
         </div></FadeUp>
         <div className="blog-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:24}}>
-          {BLOGS.map((b,i)=>(
+          {visible.map((b,i)=>(
             <FadeUp key={b.id} delay={i*.1}>
               <div onClick={()=>open(b)} style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:18,padding:24,cursor:"pointer",transition:"all .2s",height:"100%",display:"flex",flexDirection:"column"}}
                 onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.borderColor=t.accent;}}
@@ -758,6 +807,13 @@ const Blog=({t,go,setBlog})=>{
             </FadeUp>
           ))}
         </div>
+        {isMobile&&BLOGS.length>2&&(
+          <div style={{textAlign:"center",marginTop:20}}>
+            <button className="btn btn-outline" onClick={()=>setShowAll(s=>!s)}>
+              {showAll?"Show Less ↑":`View All ${BLOGS.length} Articles ↓`}
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -925,7 +981,7 @@ const Contact=({t})=>{
           <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// CONTACT</div>
           <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Let's Talk</h2>
         </div></FadeUp>
-        <div style={{display:"grid",gridTemplateColumns:"minmax(300px,1fr) minmax(300px,1.5fr)",gap:"clamp(30px,6vw,80px)",alignItems:"start"}}>
+        <div className="contact-grid" style={{display:"grid",gridTemplateColumns:"minmax(280px,1fr) minmax(280px,1.5fr)",gap:"clamp(28px,6vw,80px)",alignItems:"start"}}>
           <FadeUp>
             <h3 style={{fontFamily:"'Rajdhani',sans-serif",fontSize:26,color:t.text,marginBottom:16,fontWeight:700}}>Have a project in mind?</h3>
             <p style={{fontFamily:"'Rajdhani',sans-serif",fontSize:15,color:t.textSub,lineHeight:1.8,marginBottom:32}}>
