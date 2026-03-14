@@ -783,6 +783,14 @@ const Ratings=({t,ratings:initRatings})=>{
 // ─── BLOG ─────────────────────────────────────────────────────────────────────
 const Blog=({t,go,setBlog})=>{
   const open=(b)=>{setBlog(b);window.scrollTo(0,0);};
+  const [showAll, setShowAll] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth <= 768);
+  useEffect(() => {
+    const handle = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
+  }, []);
+  const visible = isMobile && !showAll ? BLOGS.slice(0, 2) : BLOGS;
   return(
     <section style={{padding:"100px clamp(16px,5vw,68px)"}}>
       <div style={{maxWidth:1280,margin:"0 auto"}}>
