@@ -5,9 +5,10 @@ import React from "react";
 // ─── EMAILJS CONFIG ── Fill these in after signing up at emailjs.com ─────────
 const EMAILJS_CONFIG = {
   publicKey:  "your_actual_key",        // EmailJS → Account → API Keys
-  serviceId:  "service_xxxxx",        // EmailJS → Email Services
-  bookingTemplate:  "template_xxxxx",  // EmailJS → Email Templates
-  contactTemplate:  "template_xxxxx",  // EmailJS → Email Templates
+  bookingServiceId:  "service_bqb0xyg", // Your "Booking" Email Service
+  contactServiceId:  "service_49my69t", // Your "Contact" Email Service
+  bookingTemplate:  "template_xxxxx",  // EmailJS → Email Templates (for bookings)
+  contactTemplate:  "template_xxxxx",  // EmailJS → Email Templates (for contact)
 };
 // ─── ADMIN PASSWORD ─── Change this to your own secret password ──────────────
 const ADMIN_PASSWORD = "Mahmud12$$";
@@ -764,7 +765,7 @@ const BookMeeting=({t})=>{
     };
 
     emailjs.send(
-      EMAILJS_CONFIG.serviceId,
+      EMAILJS_CONFIG.bookingServiceId,
       EMAILJS_CONFIG.bookingTemplate,
       templateParams,
       EMAILJS_CONFIG.publicKey
@@ -877,7 +878,7 @@ const Contact=({t})=>{
     };
 
     emailjs.send(
-      EMAILJS_CONFIG.serviceId,
+      EMAILJS_CONFIG.contactServiceId,
       EMAILJS_CONFIG.contactTemplate,
       templateParams,
       EMAILJS_CONFIG.publicKey
