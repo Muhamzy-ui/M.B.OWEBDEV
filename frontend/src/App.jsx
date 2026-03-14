@@ -4,11 +4,11 @@ import React from "react";
 
 // ─── EMAILJS CONFIG ── Fill these in after signing up at emailjs.com ─────────
 const EMAILJS_CONFIG = {
-  publicKey:  "your_actual_key",        // EmailJS → Account → API Keys
+  publicKey:  "oF4s91skxW3nTyOvG",        // EmailJS → Account → API Keys
   bookingServiceId:  "service_bqb0xyg", // Your "Booking" Email Service
   contactServiceId:  "service_49my69t", // Your "Contact" Email Service
-  bookingTemplate:  "template_xxxxx",  // EmailJS → Email Templates (for bookings)
-  contactTemplate:  "template_xxxxx",  // EmailJS → Email Templates (for contact)
+  bookingTemplate:  "template_2eld4xb",  // EmailJS → Email Templates (for bookings)
+  contactTemplate:  "template_e2ss93g",  // EmailJS → Email Templates (for contact)
 };
 // ─── ADMIN PASSWORD ─── Change this to your own secret password ──────────────
 const ADMIN_PASSWORD = "Mahmud12$$";
@@ -79,14 +79,20 @@ body{background:${t.bg};color:${t.text};overflow-x:hidden;transition:background 
 @media(max-width:768px){
   .desk-nav{display:none!important}.mob-btn{display:flex!important}
   .hero-grid{grid-template-columns:1fr!important}.hero-right{display:none!important}
-  .about-grid{grid-template-columns:1fr!important}.skills-grid{grid-template-columns:1fr!important}
+  .about-grid{grid-template-columns:1fr!important}.skills-grid{grid-template-columns:1fr 1fr!important}
   .proj-grid{grid-template-columns:1fr!important}.blog-grid{grid-template-columns:1fr!important}
   .foot-grid{grid-template-columns:1fr 1fr!important}.c2{grid-template-columns:1fr!important}
   .times-grid{grid-template-columns:repeat(4,1fr)!important}.ratings-grid{grid-template-columns:1fr!important}
+  .stats3{grid-template-columns:repeat(3,1fr)!important}
 }
 @media(max-width:520px){
-  .foot-grid{grid-template-columns:1fr!important}.hero-btns .btn{width:100%}
-  .times-grid{grid-template-columns:repeat(2,1fr)!important}.ratings-grid{grid-template-columns:1fr!important}
+  .foot-grid{grid-template-columns:1fr!important}
+  .hero-btns{flex-direction:column!important}
+  .hero-btns .btn{width:100%;justify-content:center}
+  .times-grid{grid-template-columns:repeat(2,1fr)!important}
+  .ratings-grid{grid-template-columns:1fr!important}
+  .skills-grid{grid-template-columns:1fr!important}
+  .stats3{grid-template-columns:repeat(3,1fr)!important}
 }
 `;
 
@@ -102,8 +108,8 @@ const INIT_PROJECTS = [
    github:"https://github.com/Muhamzy-ui",live:"#"},
   {id:3,icon:"🌐",title:"M.B.O WebDev Portfolio",
    desc:"This site — animated dark fintech portfolio with meeting booking, blog, admin panel & full animations.",
-   tags:["React","Django","PostgreSQL","Vite"],stats:{Animations:"30+",Score:"98/100",Load:"<1s"},
-   github:"https://github.com/Muhamzy-ui",live:"#"},
+   tags:["React","Vite","EmailJS","CSS"],stats:{Animations:"30+",Score:"98/100",Load:"<1s"},
+   github:"https://github.com/Muhamzy-ui",live:"https://m-b-owebdev.vercel.app/"},
 ];
 
 // ─── INITIAL RATINGS DATA ─────────────────────────────────────────────────────
@@ -351,8 +357,8 @@ const Hero=({go,t})=>(
           <button className="btn btn-primary btn-lg" onClick={()=>go("projects")}>View My Work ↗</button>
           <button className="btn btn-outline btn-lg" onClick={()=>go("book-meeting")}>📅 Book Meeting</button>
           <a className="btn btn-ghost btn-lg"
-            href="/Mahmud_Bashir_Resume.pdf"
-            download="Mahmud_Bashir_Olasunkanmi_Resume.pdf"
+            href="/Mahmud_Bashir_Resume_v2.docx"
+            download="Mahmud_Bashir_Olasunkanmi_Resume.docx"
             style={{textDecoration:"none"}}>
             📄 Download CV
           </a>
@@ -427,7 +433,7 @@ const About=({t})=>{
               {[["Projects","3+","🚀"],["Commits","500+","💻"],["Satisfaction","100%","⭐"]].map(([l,v,ic])=>(
                 <div key={l} style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:12,padding:"16px 10px",textAlign:"center"}}>
                   <div style={{fontSize:20,marginBottom:4}}>{ic}</div>
-                  <div style={{fontFamily:"'Orbitron',monospace",fontSize:20,fontWeight:900,color:t.accent}}><CountUp end={parseInt(v)||0} sfx={v.replace(/d/g,"")}/></div>
+                  <div style={{fontFamily:"'Orbitron',monospace",fontSize:20,fontWeight:900,color:t.accent}}><CountUp end={parseInt(v)||0} sfx={v.replace(/\d/g,"")}/></div>
                   <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,marginTop:3,fontWeight:700}}>{l}</div>
                 </div>
               ))}
@@ -644,7 +650,15 @@ const Projects=({t,projects,setProjects})=>{
 // ─── RATINGS (CLIENT TESTIMONIALS) ────────────────────────────────────────────
 const Ratings=({t,ratings})=>{
   const[avg,setAvg]=useState(0);
+  const[showAll,setShowAll]=useState(false);
+  const[isMobile,setIsMobile]=useState(window.innerWidth<=768);
+  useEffect(()=>{
+    const h=()=>setIsMobile(window.innerWidth<=768);
+    window.addEventListener("resize",h);
+    return()=>window.removeEventListener("resize",h);
+  },[]);
   useEffect(()=>{if(ratings.length)setAvg((ratings.reduce((a,r)=>a+r.stars,0)/ratings.length).toFixed(1))},[ratings]);
+  const visible = isMobile && !showAll ? ratings.slice(0,3) : ratings;
   return(
     <section style={{padding:"100px clamp(16px,5vw,68px)",background:t.bg2}}>
       <div style={{maxWidth:1280,margin:"0 auto"}}>
@@ -678,7 +692,7 @@ const Ratings=({t,ratings})=>{
             </div>
           </FadeUp>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:20}}>
-            {ratings.map((r,i)=>(
+            {visible.map((r,i)=>(
               <FadeUp key={r.id} delay={i*.05}>
                 <div style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:18,padding:24,height:"100%",display:"flex",flexDirection:"column",transition:"transform .2s",cursor:"default"}}
                   onMouseEnter={e=>e.currentTarget.style.transform="translateY(-4px)"}
@@ -704,6 +718,13 @@ const Ratings=({t,ratings})=>{
               </FadeUp>
             ))}
           </div>
+          {isMobile && ratings.length > 3 && (
+            <div style={{textAlign:"center",marginTop:20}}>
+              <button className="btn btn-outline" onClick={()=>setShowAll(s=>!s)}>
+                {showAll ? "Show Less ↑" : `View All ${ratings.length} Reviews ↓`}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </section>
