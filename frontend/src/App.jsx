@@ -1,1148 +1,2881 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import emailjs from "@emailjs/browser";
 import React from "react";
+import { motion, AnimatePresence, useScroll, useSpring, useReducedMotion } from "framer-motion";
 
-// ─── EMAILJS CONFIG ── Fill these in after signing up at emailjs.com ─────────
+// ─── EMAILJS CONFIG ──────────────────────────────────────────────────────────
 const EMAILJS_CONFIG = {
-  publicKey:  "oF4s91skxW3nTyOvG",        // EmailJS → Account → API Keys
-  bookingServiceId:  "service_bqb0xyg", // Your "Booking" Email Service
-  contactServiceId:  "service_49my69t", // Your "Contact" Email Service
-  bookingTemplate:  "template_2eld4xb",  // EmailJS → Email Templates (for bookings)
-  contactTemplate:  "template_e2ss93g",  // EmailJS → Email Templates (for contact)
+  publicKey: "oF4s91skxW3nTyOvG",
+  bookingServiceId: "service_bqb0xyg",
+  contactServiceId: "service_49my69t",
+  bookingTemplate: "template_2eld4xb",
+  contactTemplate: "template_e2ss93g",
 };
-// ─── ADMIN PASSWORD ─── Change this to your own secret password ──────────────
+
 const ADMIN_PASSWORD = "Mahmud12$$";
 
-// ─── THEMES ──────────────────────────────────────────────────────────────────
-const DARK = {
-  bg:"#060e06",bg2:"#091409",surface:"#0b180b",card:"#0d1c0d",
-  border:"rgba(34,197,94,0.14)",borderHov:"rgba(34,197,94,0.55)",
-  text:"#f0fdf4",textSub:"#9ca3af",textMuted:"#4b5563",
-  accent:"#22c55e",accentDim:"rgba(34,197,94,0.09)",accentGlow:"rgba(34,197,94,0.28)",
-  tagBg:"rgba(34,197,94,0.08)",tagColor:"#86efac",
-  inputBg:"rgba(0,0,0,0.45)",codeBg:"#030c03",
-  navBg:"rgba(6,14,6,0.97)",shadow:"rgba(0,0,0,0.75)",
-  grid:"rgba(34,197,94,0.028)",orb:"rgba(22,163,74,0.11)",
-};
-const LIGHT = {
-  bg:"#f0fdf4",bg2:"#dcfce7",surface:"#fff",card:"#fff",
-  border:"rgba(22,163,74,0.18)",borderHov:"rgba(22,163,74,0.55)",
-  text:"#052e16",textSub:"#374151",textMuted:"#6b7280",
-  accent:"#16a34a",accentDim:"rgba(22,163,74,0.07)",accentGlow:"rgba(22,163,74,0.22)",
-  tagBg:"rgba(22,163,74,0.07)",tagColor:"#15803d",
-  inputBg:"rgba(255,255,255,0.95)",codeBg:"#f8fff9",
-  navBg:"rgba(240,253,244,0.97)",shadow:"rgba(0,0,0,0.07)",
-  grid:"rgba(22,163,74,0.04)",orb:"rgba(22,163,74,0.06)",
-};
-
-const makeCSS = (t) => `
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{background:${t.bg};color:${t.text};overflow-x:hidden;transition:background .3s,color .3s;font-family:'Rajdhani',sans-serif}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:${t.bg}}
-::-webkit-scrollbar-thumb{background:linear-gradient(${t.accent},#4ade80);border-radius:3px}
-@keyframes fadeUp    {from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
-@keyframes slideR    {from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
-@keyframes floatY    {0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
-@keyframes orbit     {from{transform:rotate(0deg) translateX(56px) rotate(0deg)}to{transform:rotate(360deg) translateX(56px) rotate(-360deg)}}
-@keyframes blink     {0%,100%{opacity:1}50%{opacity:0}}
-@keyframes scanLine  {0%{top:-2px}100%{top:100%}}
-@keyframes gradShift {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-@keyframes neonPulse {0%,100%{text-shadow:0 0 8px ${t.accent}55}50%{text-shadow:0 0 22px ${t.accent},0 0 44px ${t.accent}44}}
-@keyframes pulseDot  {0%,100%{box-shadow:0 0 0 0 ${t.accentGlow}}50%{box-shadow:0 0 0 8px transparent}}
-@keyframes ripple    {to{transform:scale(22);opacity:0}}
-@keyframes sbIn      {from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:none}}
-@keyframes pageIn    {from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-@keyframes starPop   {0%{transform:scale(0) rotate(-30deg)}60%{transform:scale(1.3) rotate(5deg)}100%{transform:scale(1) rotate(0deg)}}
-@keyframes shimmer   {0%{background-position:-200% 0}100%{background-position:200% 0}}
-.page-enter{animation:pageIn .42s cubic-bezier(.4,0,.2,1) both}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 22px;border-radius:10px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:15px;cursor:pointer;border:none;transition:all .2s ease;position:relative;overflow:hidden;text-decoration:none;white-space:nowrap;letter-spacing:.3px;-webkit-tap-highlight-color:transparent}
-.btn:active{transform:scale(.95)!important}
-.btn-primary{background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;box-shadow:0 4px 18px ${t.accentGlow}}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 26px ${t.accentGlow};filter:brightness(1.07)}
-.btn-outline{background:transparent;color:${t.accent};border:1.5px solid ${t.border}}
-.btn-outline:hover{background:${t.accentDim};border-color:${t.accent};transform:translateY(-2px)}
-.btn-ghost{background:${t.accentDim};color:${t.textSub};border:1px solid ${t.border}}
-.btn-ghost:hover{color:${t.accent};border-color:${t.borderHov};transform:translateY(-2px)}
-.btn-sm{padding:7px 15px;font-size:13px;border-radius:8px}
-.btn-lg{padding:13px 30px;font-size:16px}
-.btn-block{width:100%}
-.btn-danger{background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.3)}
-.btn-danger:hover{background:rgba(239,68,68,0.22);border-color:#ef4444}
-.footlink{color:${t.textMuted};font-size:13px;font-weight:600;background:none;border:none;cursor:pointer;text-align:left;padding:3px 0;position:relative;display:inline-block;font-family:'Rajdhani',sans-serif;transition:color .2s;text-decoration:none}
-.footlink::after{content:'';position:absolute;left:0;bottom:-1px;width:0;height:1.5px;background:${t.accent};transition:width .25s ease}
-.footlink:hover{color:${t.accent}}.footlink:hover::after{width:100%}
-.star-anim{animation:starPop .35s cubic-bezier(.34,1.56,.64,1) both}
-@media(min-width:769px){.mob-btn{display:none!important}.desk-nav{display:flex!important}}
-@media(max-width:768px){
-  .desk-nav{display:none!important}.mob-btn{display:flex!important}
-  .hero-grid{grid-template-columns:1fr!important}
-  .hero-right{display:flex!important;justify-content:center;margin-top:28px}
-  .hero-right > div{width:min(290px,80vw)!important}
-  .about-grid{grid-template-columns:1fr!important}.skills-grid{grid-template-columns:1fr 1fr!important}
-  .proj-grid{grid-template-columns:1fr!important}.blog-grid{grid-template-columns:1fr!important}
-  .foot-grid{grid-template-columns:1fr 1fr!important}.c2{grid-template-columns:1fr!important}
-  .times-grid{grid-template-columns:repeat(4,1fr)!important}.ratings-grid{grid-template-columns:1fr!important}
-  .stats3{grid-template-columns:repeat(3,1fr)!important}
-  .contact-grid{grid-template-columns:1fr!important}
-  body{overflow-x:hidden}
-}
-@media(max-width:520px){
-  .foot-grid{grid-template-columns:1fr!important}
-  .hero-btns{flex-direction:column!important}
-  .hero-btns .btn{width:100%;justify-content:center}
-  .times-grid{grid-template-columns:repeat(2,1fr)!important}
-  .ratings-grid{grid-template-columns:1fr!important}
-  .skills-grid{grid-template-columns:1fr!important}
-  .stats3{grid-template-columns:repeat(3,1fr)!important}
-}
-`;
-
-// ─── INITIAL PROJECT DATA ─────────────────────────────────────────────────────
+// ─── DATA REPOSITORIES ───────────────────────────────────────────────────────
 const INIT_PROJECTS = [
-  {id:1,icon:"🛒",title:"FullStack E-Commerce Platform",
-   desc:"End-to-end e-commerce with Django REST backend, React frontend, real-time inventory, Stripe payments & admin dashboard.",
-   tags:["Django","React","PostgreSQL","Stripe","Redis"],stats:{Commits:"240+",Users:"500+",Uptime:"99.9%"},
-   github:"https://github.com/Muhamzy-ui",live:"#"},
-  {id:2,icon:"⛏️",title:"Mining Operations Platform",
-   desc:"Custom client platform for real-time mining ops, equipment tracking, shift management & automated compliance reports.",
-   tags:["Python","Flask","PostgreSQL","WebSockets","Chart.js"],stats:{Sensors:"80+",Reports:"1000+",Efficiency:"+35%"},
-   github:"https://github.com/Muhamzy-ui",live:"#"},
-  {id:3,icon:"🌐",title:"M.B.O WebDev Portfolio",
-   desc:"This site — animated dark fintech portfolio with meeting booking, blog, admin panel & full animations.",
-   tags:["React","Vite","EmailJS","CSS"],stats:{Animations:"30+",Score:"98/100",Load:"<1s"},
-   github:"https://github.com/Muhamzy-ui",live:"https://m-b-owebdev.vercel.app/"},
+  {
+    id: 1,
+    category: "Full Stack",
+    title: "E-Commerce UI & API",
+    tagline: "End-to-End Enterprise Commerce Engine",
+    desc: "Production-grade e-commerce engine with Django REST backend, React reactive frontend, real-time inventory management, Stripe payment processing & admin dashboard.",
+    tags: ["Django REST", "React 19", "PostgreSQL", "Stripe", "Redis"],
+    stats: { Commits: 240, Users: 500, Uptime: "99.9%" },
+    statsDisplay: { Commits: "240+", Users: "500+", Uptime: "99.9%" },
+    github: "https://github.com/Muhamzy-ui",
+    live: "https://m-b-owebdev.vercel.app/",
+  },
+  {
+    id: 2,
+    category: "Backend / API",
+    title: "SaaS API & Operations",
+    tagline: "Real-Time Mining Operations Platform",
+    desc: "Custom industrial IoT platform for real-time equipment tracking, shift telemetry, WebSockets dispatch, and automated compliance reports with sub-50ms query latency.",
+    tags: ["Python", "Flask", "PostgreSQL", "WebSockets", "Chart.js"],
+    stats: { Sensors: 80, Reports: 1000, Speed: "50ms" },
+    statsDisplay: { Sensors: "80+", Reports: "1000+", Speed: "50ms" },
+    github: "https://github.com/Muhamzy-ui",
+    live: "https://m-b-owebdev.vercel.app/",
+  },
+  {
+    id: 3,
+    category: "System Design",
+    title: "Titanium Web Architecture",
+    tagline: "Ultra-Fast Liquid Glass Web System",
+    desc: "Modern Apple Titanium iOS 27 glass portfolio with calendar booking, client reviews engine, dynamic admin panel, and sub-second load times.",
+    tags: ["React 19", "Vite", "EmailJS", "Framer Motion", "CSS Glass"],
+    stats: { Score: 99, Load: "<0.8s", FPS: 60 },
+    statsDisplay: { Score: "99/100", Load: "<0.8s", FPS: "60fps" },
+    github: "https://github.com/Muhamzy-ui",
+    live: "https://m-b-owebdev.vercel.app/",
+  },
 ];
 
-// ─── INITIAL RATINGS DATA ─────────────────────────────────────────────────────
+const MARQUEE_TECH = [
+  "Python", "Django", "React 19", "PostgreSQL", "Redis", "Celery",
+  "WebSockets", "Paystack", "Stripe", "Render", "Railway", "Docker",
+  "TailwindCSS", "Git", "REST APIs", "TypeScript", "Linux", "Vite"
+];
+
+const WORK_PROCESS = [
+  {
+    step: "01",
+    title: "Discovery & Architecture",
+    desc: "Deconstructing core business requirements, modeling relational PostgreSQL schemas, and mapping robust, versioned REST API contracts before writing code.",
+    icon: "📐",
+    tag: "Planning & Scoping"
+  },
+  {
+    step: "02",
+    title: "Core Backend & Security",
+    desc: "Implementing scalable Django REST Framework viewsets, granular JWT authentication, atomic database transactions, and background task queues with Celery + Redis.",
+    icon: "⚡",
+    tag: "High-Performance API"
+  },
+  {
+    step: "03",
+    title: "Reactive Glass Frontend",
+    desc: "Crafting fluid, accessible React interfaces with liquid glassmorphism, hardware-accelerated Framer Motion animations, and seamless optimistic API interactions.",
+    icon: "💎",
+    tag: "Modern UI/UX"
+  },
+  {
+    step: "04",
+    title: "Deploy & Reliability",
+    desc: "Setting up CI/CD automation, production environment variables, database composite indexing, and deploying to cloud platforms (Render, Railway, Vercel) with 99.9% uptime.",
+    icon: "🚀",
+    tag: "Cloud & Monitoring"
+  },
+];
+
+const SKILL_CATEGORIES = [
+  {
+    name: "Backend Architecture",
+    icon: "⚙️",
+    items: [
+      { name: "Python", level: 94, note: "Async, Concurrency, OOP" },
+      { name: "Django & DRF", level: 92, note: "ViewSets, Serializers, JWT" },
+      { name: "REST APIs", level: 95, note: "Contract Design & Scalability" },
+      { name: "PostgreSQL", level: 90, note: "Composite Indexing & Tuning" },
+    ],
+  },
+  {
+    name: "Frontend Engineering",
+    icon: "🎨",
+    items: [
+      { name: "React 19", level: 90, note: "Hooks, State, Fiber" },
+      { name: "JavaScript (ES6+)", level: 92, note: "Async/Await, Modern Engine" },
+      { name: "Liquid Glass / CSS", level: 94, note: "Specular Shimmer & Physics" },
+      { name: "Tailwind & Bootstrap", level: 88, note: "Clean Responsive Layouts" },
+    ],
+  },
+  {
+    name: "DevOps & Cloud",
+    icon: "☁️",
+    items: [
+      { name: "Git & GitHub", level: 92, note: "Version Control & Automation" },
+      { name: "Render & Railway", level: 88, note: "Zero-Downtime Deployment" },
+      { name: "Redis & WebSockets", level: 85, note: "Pub/Sub & Real-Time Sync" },
+      { name: "React Native", level: 80, note: "iOS & Android Cross-Platform" },
+    ],
+  },
+];
+
 const INIT_RATINGS = [
-  {id:1,name:"James O.",role:"E-commerce Client",country:"🇬🇧 UK",stars:5,
-   text:"Mahmud delivered the entire e-commerce platform 3 days ahead of schedule. The Django backend is rock solid — zero downtime since launch. Genuinely one of the best developers I've worked with.",
-   project:"FullStack E-Commerce Platform",date:"Feb 2026"},
-  {id:2,name:"Sarah M.",role:"Startup Founder",country:"🇨🇦 Canada",stars:5,
-   text:"We needed a full-stack developer who could handle both the Django API and the React frontend. Mahmud handled both brilliantly. Communication was clear, code was clean, delivery was on time. 10/10.",
-   project:"Custom Dashboard App",date:"Jan 2026"},
-  {id:3,name:"Chukwuemeka A.",role:"Mining Operations Manager",country:"🇳🇬 Nigeria",stars:5,
-   text:"The mining operations platform Mahmud built for us saved our team 20+ hours per month on compliance reports alone. He understood our non-technical team's needs and built something intuitive. Outstanding work.",
-   project:"Mining Operations Platform",date:"Dec 2025"},
-  {id:4,name:"Lena K.",role:"Product Manager",country:"🇩🇪 Germany",stars:5,
-   text:"Hired Mahmud for a PostgreSQL performance fix. He identified the bottleneck in under an hour and brought our API from 3s response times down to 50ms. Exceptional technical depth.",
-   project:"Database Optimisation",date:"Nov 2025"},
-  {id:5,name:"David T.",role:"Freelance Client",country:"🇦🇺 Australia",stars:5,
-   text:"Clear communication, clean code, responsive across all timezones. Mahmud built our REST API with JWT auth and full test coverage. Will definitely hire again.",
-   project:"REST API Development",date:"Oct 2025"},
-  {id:6,name:"Fatima B.",role:"EdTech Founder",country:"🇳🇱 Netherlands",stars:4,
-   text:"Fantastic developer. Built our Django backend with full documentation. Minor revision needed on the frontend but resolved same day. Very professional attitude throughout.",
-   project:"EdTech Platform Backend",date:"Sep 2025"},
+  {
+    id: 1,
+    name: "James O.",
+    role: "E-Commerce Client",
+    country: "🇬🇧 UK",
+    stars: 5,
+    text: "Mahmud delivered our full-stack commerce platform 3 days ahead of deadline. The Django API is rock-solid with zero downtime since launch. One of the sharpest engineers I've worked with.",
+    project: "FullStack E-Commerce Platform",
+    date: "Feb 2026",
+  },
+  {
+    id: 2,
+    name: "Sarah M.",
+    role: "Startup Founder",
+    country: "🇨🇦 Canada",
+    stars: 5,
+    text: "We needed an engineer who could master both the Django backend and the React frontend seamlessly. Mahmud delivered both with clean code and incredible speed. 10/10.",
+    project: "Custom Dashboard App",
+    date: "Jan 2026",
+  },
+  {
+    id: 3,
+    name: "Chukwuemeka A.",
+    role: "Operations Manager",
+    country: "🇳🇬 Nigeria",
+    stars: 5,
+    text: "The mining operations platform saved our team 20+ hours monthly on compliance reports alone. Intuitive interface, responsive across all devices, and fast delivery.",
+    project: "Mining Operations Platform",
+    date: "Dec 2025",
+  },
+  {
+    id: 4,
+    name: "Lena K.",
+    role: "Product Lead",
+    country: "🇩🇪 Germany",
+    stars: 5,
+    text: "Hired Mahmud for database performance tuning. He diagnosed the bottleneck in under an hour and brought API response times from 3s down to 50ms. Exceptional technical depth.",
+    project: "PostgreSQL Optimization",
+    date: "Nov 2025",
+  },
+  {
+    id: 5,
+    name: "David T.",
+    role: "Technical Client",
+    country: "🇦🇺 Australia",
+    stars: 5,
+    text: "Clean modular architecture, JWT auth, and complete test coverage. Mahmud is responsive across all timezones and very easy to collaborate with.",
+    project: "REST API Development",
+    date: "Oct 2025",
+  },
+  {
+    id: 6,
+    name: "Fatima B.",
+    role: "EdTech Founder",
+    country: "🇳🇱 Netherlands",
+    stars: 5,
+    text: "Built our Django API with clean documentation and delivered the React frontend with pixel-perfect design. Highly recommended.",
+    project: "EdTech Platform Backend",
+    date: "Sep 2025",
+  },
 ];
 
 const BLOGS = [
-  {id:1,slug:"django-rest-apis",tag:"Django",date:"Mar 2026",icon:"🎸",rt:"8 min",
-   title:"Building REST APIs with Django REST Framework",
-   desc:"A deep dive into DRF viewsets, serializers, JWT auth and pagination — patterns I use on every project.",
-   body:`Django REST Framework is the gold standard for Python APIs. Here are the patterns that actually matter after 2+ years in production.nn## ViewSets vs APIViewsnnFor simple CRUD, ViewSets save massive amounts of code. For complex business logic, APIView gives full control. I default to APIView for anything beyond basic CRUD — the explicitness pays off.nn## Serializers Are Your ContractnnYour serializer IS your API contract. Validate everything at the serializer level. Use nested serializers sparingly — they cause N+1 queries that kill performance at scale.nn## JWT AuthenticationnnUse djangorestframework-simplejwt. Set access token expiry to 15 minutes, refresh to 7 days. Always blacklist tokens on logout.nn## PaginationnnAlways paginate list endpoints. Use PageNumberPagination with page_size=20. Your API users will thank you when the dataset hits 100k records.`},
-  {id:2,slug:"react-native-journey",tag:"React Native",date:"Feb 2026",icon:"📱",rt:"6 min",
-   title:"From Web Dev to Mobile: My React Native Journey",
-   desc:"How a Django/React developer learned to ship production mobile apps on iOS and Android.",
-   body:`Making the jump from web to mobile was the best skill investment I made.nn## The Mental ShiftnnThe biggest change isn't the code — it's constraints. No hover states. No right-click. Touch targets must be at least 44px. Think offline-first from day one.nn## Expo vs Bare React NativennStart with Expo. You can always eject later. Expo Go makes prototyping 10x faster.nn## State ManagementnnZustand is my pick for React Native. Lightweight, simple, works perfectly with async storage.nn## NavigationnnReact Navigation is the standard. Stack navigator for flows, tab navigator for main sections.`},
-  {id:3,slug:"postgresql-indexing",tag:"PostgreSQL",date:"Jan 2026",icon:"🐘",rt:"10 min",
-   title:"PostgreSQL Indexing Strategies That Actually Matter",
-   desc:"The mistakes I made and the patterns that took my query times from 3s to under 50ms on real data.",
-   body:`Database performance is where good apps become great ones.nn## The Query That Started It AllnnA mining dashboard query was taking 3.2 seconds on 50,000 rows. Adding a single B-tree index dropped it to 12ms — a 99.6% improvement.nn## When to IndexnnIndex columns in WHERE clauses, JOIN conditions, and ORDER BY. Don't index low-cardinality columns.nn## Composite IndexesnnColumn order is critical. Put the highest-cardinality column first.nn## EXPLAIN ANALYZEnnRun EXPLAIN ANALYZE before and after every optimization. Look for Sequential Scans on large tables.`},
-  {id:4,slug:"flutter-vs-rn",tag:"Flutter",date:"Dec 2025",icon:"💙",rt:"7 min",
-   title:"Flutter vs React Native: An Honest Full-Stack Take",
-   desc:"After shipping apps in both, here's my unfiltered comparison.",
-   body:`I've shipped production apps in both Flutter and React Native.nn## PerformancennFlutter wins. Dart compiles to native ARM code and renders with its own engine — consistent 60fps.nn## Developer ExperiencennIf you're a JS developer, React Native feels natural immediately. Flutter requires learning Dart, but Dart is genuinely pleasant.nn## My RecommendationnnChoose React Native if your team is JS-heavy. Choose Flutter for pixel-perfect UI across all platforms.`},
-  {id:5,slug:"async-django",tag:"Django",date:"Nov 2025",icon:"🚀",rt:"9 min",
-   title:"Async Django: Non-Blocking Views That Scale",
-   desc:"How I rewrote a slow synchronous Django API and cut response times 70% on I/O-heavy endpoints.",
-   body:`Django has had async support since 3.1 but most tutorials don't show effective usage.nn## Why Async MattersnnMost API endpoints are I/O-bound — waiting on databases or external APIs. Async views release the thread so Django handles other requests meanwhile.nn## Concurrent Requests with asyncio.gathernnThree sequential calls taking 300ms become three concurrent calls finishing in ~100ms — a 3x speedup.nn## When NOT to Use AsyncnnCPU-bound tasks don't benefit from async. Use Celery + Redis for those.`},
-  {id:6,slug:"deploy-railway",tag:"DevOps",date:"Oct 2025",icon:"🚂",rt:"5 min",
-   title:"Deploying Django + PostgreSQL to Railway in 15 Minutes",
-   desc:"The fastest way to get a production Django app live.",
-   body:`Railway is genuinely the fastest Django deployment I've found.nn## Why RailwaynnNo server management. Git-push-to-deploy. Built-in PostgreSQL. Automatic SSL. $5/month for hobby projects.nn## Stepsnn1. Add gunicorn to requirements.txtn2. Create Procfile: web: gunicorn yourapp.wsgin3. Add .railway.app to ALLOWED_HOSTSn4. Push to GitHub, connect in Railway dashboardn5. Click + New → Database → PostgreSQLnnDone in under 15 minutes every time.`},
+  {
+    id: 1,
+    slug: "django-rest-apis",
+    tag: "Django",
+    date: "Mar 2026",
+    rt: "8 min",
+    title: "Building High-Throughput REST APIs with Django & DRF",
+    desc: "Essential patterns for DRF viewsets, serializers, JWT token revocation, and pagination when scaling past 100k requests.",
+    body: `Django REST Framework is the gold standard for Python APIs. Here are the core architectural patterns that matter in production:
+
+## 1. ViewSets vs APIViews
+For standard CRUD operations, ViewSets save immense boilerplate. However, for custom business workflows with multi-step transactions, APIView provides surgical control. Defaulting to explicit APIViews for sensitive workflows prevents hidden ORM overhead.
+
+## 2. Serializers As Your Security Contract
+Your serializer is your public contract. Validate aggressively at the serializer level. Always use select_related and prefetch_related on QuerySets to avoid the dreaded N+1 database queries.
+
+## 3. JWT Strategy
+Use djangorestframework-simplejwt with short-lived access tokens (15 minutes) and 7-day refresh tokens. Always implement token blacklisting upon logout for security compliance.
+
+## 4. Pagination
+Never return unbounded lists. Standardize on PageNumberPagination with page_size=20 to ensure sub-50ms API response times even as tables scale.`,
+  },
+  {
+    id: 2,
+    slug: "react-architecture",
+    tag: "React",
+    date: "Feb 2026",
+    rt: "6 min",
+    title: "Clean React 19 State Architecture & Modern UI Patterns",
+    desc: "How to maintain high velocity and zero lag in large React frontends using modern hooks, clean component isolation, and glassmorphic styling.",
+    body: `Writing clean frontend code requires discipline around component boundaries and rendering budgets.
+
+## 1. Minimal State Footprint
+Derive values wherever possible instead of syncing state between components. Less state means fewer synchronization bugs and faster paint cycles.
+
+## 2. Liquid Glass & CSS Performance
+When building frosted glass and backdrop-blur interfaces, always use transform3d and will-change sparingly to ensure hardware acceleration without blowing GPU memory.
+
+## 3. Optimistic Updates
+Give users instant feedback by updating UI state before the network round-trip finishes, rolling back gracefully if the API fails.`,
+  },
+  {
+    id: 3,
+    slug: "postgresql-indexing",
+    tag: "Database",
+    date: "Jan 2026",
+    rt: "10 min",
+    title: "PostgreSQL Indexing Strategies That Cut Latency by 95%",
+    desc: "The real-world indexing mistakes and patterns that dropped production query times from 3.2s down to 12ms.",
+    body: `Database performance is where good apps become great apps.
+
+## 1. The Bottleneck Query
+A dashboard endpoint was taking 3.2s over 50,000 telemetry rows. Running EXPLAIN ANALYZE revealed a sequential table scan. Adding a single composite B-tree index brought query execution down to 12ms.
+
+## 2. Composite Index Column Ordering
+Put highest-cardinality equality columns first, followed by range or ORDER BY columns.
+
+## 3. Avoid Over-Indexing
+Every index slows down INSERT and UPDATE operations. Only index columns actively filtered or joined in production workloads.`,
+  },
 ];
 
-const SKILLS = [
-  {n:"Python",p:90,i:"🐍",c:"#22c55e"},{n:"Django",p:88,i:"🎸",c:"#16a34a"},
-  {n:"Bootstrap",p:85,i:"🅱️",c:"#4ade80"},{n:"React",p:80,i:"⚛️",c:"#86efac"},
-  {n:"HTML/CSS",p:88,i:"🌐",c:"#34d399"},{n:"PostgreSQL",p:85,i:"🐘",c:"#22c55e"},
-  {n:"JavaScript",p:80,i:"⚡",c:"#a3e635"},{n:"REST APIs",p:92,i:"🔗",c:"#4ade80"},
-  {n:"React Native",p:78,i:"📱",c:"#86efac"},
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const TIMES = [
+  "09:00 AM", "10:30 AM", "01:00 PM", "02:30 PM", "04:00 PM", "05:30 PM",
 ];
 
-const NAV = [
-  {id:"home",label:"Home",icon:"⌂",sub:"Start here"},
-  {id:"about",label:"About",icon:"◉",sub:"Who I am"},
-  {id:"skills",label:"Skills",icon:"⚡",sub:"Tech stack"},
-  {id:"projects",label:"Projects",icon:"◈",sub:"My work"},
-  {id:"ratings",label:"Ratings",icon:"★",sub:"Client reviews"},
-  {id:"blog",label:"Blog",icon:"✦",sub:"Articles"},
-  {id:"book-meeting",label:"Book Meeting",icon:"◷",sub:"Schedule a call"},
-  {id:"contact",label:"Contact",icon:"◎",sub:"Get in touch"},
-];
+// ─── STARDUST PARTICLES DATA ─────────────────────────────────────────────────
+const STARDUST = Array.from({ length: 28 }, (_, i) => ({
+  id: i,
+  top: `${(i * 17) % 96}%`,
+  left: `${(i * 29) % 96}%`,
+  size: (i % 3) + 1.5,
+  delay: `${(i * 0.4) % 4}s`,
+  duration: `${3.5 + ((i * 0.6) % 3)}s`,
+}));
 
-const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
-const DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-const TIMES=["09:00 AM","10:00 AM","11:00 AM","01:00 PM","02:00 PM","03:00 PM","04:00 PM","05:00 PM"];
-
-// ─── UTILITY COMPONENTS ───────────────────────────────────────────────────────
-const Logo=({size=40})=>(
-  <svg width={size} height={size} viewBox="0 0 40 40">
-    <rect width="40" height="40" rx="10" fill="#16a34a"/>
-    <text x="50%" y="56%" dominantBaseline="middle" textAnchor="middle"
-      fill="#fff" fontSize="14" fontWeight="900" fontFamily="monospace">MBO</text>
-  </svg>
-);
-
-const FadeUp=({children,delay=0,style:s={}})=>{
-  const ref=useRef();const[vis,setV]=useState(false);
-  useEffect(()=>{const o=new IntersectionObserver(([e])=>{if(e.isIntersecting)setV(true)},{threshold:.12});
-    if(ref.current)o.observe(ref.current);return()=>o.disconnect();},[]);
-  return <div ref={ref} style={{opacity:vis?1:0,transform:vis?"none":"translateY(22px)",
-    transition:`opacity .6s ${delay}s ease,transform .6s ${delay}s ease`,...s}}>{children}</div>;
-};
-
-const Typewriter=({texts,speed=75})=>{
-  const[idx,setI]=useState(0);const[ch,setCh]=useState(0);const[del,setDel]=useState(false);
-  useEffect(()=>{
-    const t=setTimeout(()=>{
-      if(!del){if(ch<texts[idx].length)setCh(c=>c+1);else setTimeout(()=>setDel(true),1400);}
-      else{if(ch>0)setCh(c=>c-1);else{setDel(false);setI(i=>(i+1)%texts.length);}}
-    },del?38:speed);
-    return()=>clearTimeout(t);
-  },[ch,del,idx,texts,speed]);
-  return <span>{texts[idx].slice(0,ch)}<span style={{animation:"blink 1s step-end infinite",color:"#22c55e"}}>|</span></span>;
-};
-
-const CountUp=({end,sfx=""})=>{
-  const[v,setV]=useState(0);const ref=useRef();
-  useEffect(()=>{const o=new IntersectionObserver(([e])=>{
-    if(e.isIntersecting){let s=0;const i=setInterval(()=>{s+=Math.ceil(end/40);if(s>=end){setV(end);clearInterval(i);}else setV(s);},35);o.disconnect();}
-  },{threshold:.5});if(ref.current)o.observe(ref.current);return()=>o.disconnect();},[end]);
-  return <span ref={ref}>{v}{sfx}</span>;
-};
-
-const Stars=({count=5,size=18,animated=false})=>(
-  <span style={{display:"inline-flex",gap:2}}>
-    {Array(5).fill(0).map((_,i)=>(
-      <span key={i} style={{
-        fontSize:size,color:i<count?"#f59e0b":"rgba(245,158,11,0.2)",
-        animation:animated?`starPop .35s cubic-bezier(.34,1.56,.64,1) ${i*0.07}s both`:"none",
-        display:"inline-block",
-      }}>★</span>
-    ))}
-  </span>
-);
-
-// ─── SIDEBAR ──────────────────────────────────────────────────────────────────
-const Sidebar=({open,onClose,active,go,t,dark,setDark})=>{
-  const[hov,setHov]=useState(null);
-  useEffect(()=>{const h=(e)=>{if(open&&e.key==="Escape")onClose();};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);},[open,onClose]);
-  return(
-    <>
-      {open&&<div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",backdropFilter:"blur(4px)",zIndex:998,transition:"opacity .3s"}}/>}
-      <nav style={{position:"fixed",top:0,left:0,height:"100vh",width:290,zIndex:999,
-        background:"linear-gradient(180deg,#020b02 0%,#040f04 100%)",
-        borderRight:`1px solid rgba(34,197,94,0.18)`,
-        transform:open?"translateX(0)":"translateX(-100%)",
-        transition:"transform .42s cubic-bezier(.32,.72,0,1)",
-        display:"flex",flexDirection:"column",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${t.accent},transparent)`,animation:"scanLine 3.5s linear infinite",opacity:.7}}/>
-        <div style={{position:"absolute",top:-60,left:-60,width:200,height:200,borderRadius:"50%",background:"radial-gradient(circle,rgba(34,197,94,0.07) 0%,transparent 70%)",pointerEvents:"none"}}/>
-        <div style={{padding:"28px 22px 18px",borderBottom:"1px solid rgba(34,197,94,0.1)"}}>
-          <div style={{display:"flex",alignItems:"center",gap:11,marginBottom:4}}><Logo size={36}/>
-            <div><div style={{fontFamily:"'Orbitron',monospace",fontSize:15,fontWeight:900,color:"#f0fdf4"}}>M.B.O</div>
-              <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:9,color:t.accent,fontWeight:700,letterSpacing:3}}>WEBDEV</div></div>
-            <button onClick={onClose} style={{marginLeft:"auto",background:"none",border:"none",color:"rgba(34,197,94,.5)",fontSize:20,cursor:"pointer",lineHeight:1,transition:"color .2s"}} onMouseEnter={e=>e.target.style.color="#22c55e"} onMouseLeave={e=>e.target.style.color="rgba(34,197,94,.5)"}>✕</button>
-          </div>
-        </div>
-        <div style={{flex:1,overflowY:"auto",padding:"12px 0"}}>
-          {NAV.map((item,idx)=>{
-            const isActive=active===item.id;
-            return(
-              <button key={item.id} onClick={()=>{go(item.id);onClose();}}
-                onMouseEnter={()=>setHov(item.id)} onMouseLeave={()=>setHov(null)}
-                style={{display:"flex",alignItems:"center",gap:13,width:"100%",padding:"12px 22px",
-                  background:isActive?"rgba(34,197,94,0.1)":hov===item.id?"rgba(34,197,94,0.05)":"transparent",
-                  border:"none",borderLeft:`3px solid ${isActive?t.accent:"transparent"}`,
-                  cursor:"pointer",animation:`sbIn .3s ease ${idx*.05}s both`,
-                  transition:"all .18s",position:"relative"}}>
-                <span style={{fontSize:16,opacity:.8,color:isActive?t.accent:"#9ca3af",transition:"color .2s"}}>{item.icon}</span>
-                <div style={{textAlign:"left"}}>
-                  <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:14,fontWeight:700,color:isActive?t.accent:"#d1fae5",transition:"color .2s"}}>{item.label}</div>
-                  <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:10,color:"rgba(156,163,175,.6)",marginTop:1}}>{item.sub}</div>
-                </div>
-                {isActive&&<div style={{marginLeft:"auto",width:6,height:6,borderRadius:"50%",background:t.accent,animation:"pulseDot 2s ease infinite"}}/>}
-              </button>
-            );
-          })}
-        </div>
-        <div style={{padding:"14px 22px",borderTop:"1px solid rgba(34,197,94,0.1)"}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-            <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:"rgba(156,163,175,.7)",fontWeight:700,letterSpacing:1}}>THEME</span>
-            <button onClick={()=>setDark(d=>!d)} style={{background:"rgba(34,197,94,0.1)",border:"1px solid rgba(34,197,94,0.2)",borderRadius:20,padding:"4px 12px",cursor:"pointer",color:t.accent,fontFamily:"'Rajdhani',sans-serif",fontSize:11,fontWeight:700}}>{dark?"☀️ Light":"🌙 Dark"}</button>
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:7}}>
-            <div style={{width:7,height:7,borderRadius:"50%",background:"#22c55e",animation:"pulseDot 2s ease infinite"}}/>
-            <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:"rgba(34,197,94,.8)",fontWeight:600}}>Available for Projects</span>
-          </div>
-        </div>
-      </nav>
-    </>
-  );
-};
-
-// ─── NAVBAR ───────────────────────────────────────────────────────────────────
-const Navbar=({active,go,t,dark,setDark,sb,setSb})=>{
-  const[scroll,setScroll]=useState(false);
-  useEffect(()=>{const h=()=>setScroll(window.scrollY>40);window.addEventListener("scroll",h);return()=>window.removeEventListener("scroll",h);},[]);
-  return(
-    <header style={{position:"fixed",top:0,left:0,right:0,zIndex:997,
-      background:scroll?t.navBg:"transparent",
-      borderBottom:scroll?`1px solid ${t.border}`:"none",
-      backdropFilter:scroll?"blur(14px)":"none",
-      transition:"all .3s",padding:"0 clamp(16px,4vw,52px)"}}>
-      <div style={{maxWidth:1280,margin:"0 auto",height:64,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-        <button onClick={()=>go("home")} style={{display:"flex",alignItems:"center",gap:10,background:"none",border:"none",cursor:"pointer"}}>
-          <Logo size={32}/>
-          <div style={{fontFamily:"'Orbitron',monospace",fontSize:14,fontWeight:900,color:t.text}}>M.B.O<span style={{color:t.accent}}>.dev</span></div>
-        </button>
-        <nav className="desk-nav" style={{display:"flex",gap:4,alignItems:"center"}}>
-          {NAV.filter(n=>!["book-meeting"].includes(n.id)).map(item=>(
-            <button key={item.id} onClick={()=>go(item.id)}
-              style={{fontFamily:"'Rajdhani',sans-serif",fontSize:13,fontWeight:700,
-                background:"none",border:"none",cursor:"pointer",padding:"6px 10px",borderRadius:7,
-                color:active===item.id?t.accent:t.textSub,
-                borderBottom:active===item.id?`2px solid ${t.accent}`:"2px solid transparent",
-                transition:"all .2s"}}
-              onMouseEnter={e=>e.currentTarget.style.color=t.accent}
-              onMouseLeave={e=>e.currentTarget.style.color=active===item.id?t.accent:t.textSub}>{item.label}</button>
-          ))}
-          <button className="btn btn-primary btn-sm" style={{marginLeft:6}} onClick={()=>go("book-meeting")}>📅 Book</button>
-          <button onClick={()=>setDark(d=>!d)} style={{background:t.accentDim,border:`1px solid ${t.border}`,borderRadius:8,padding:"7px 10px",cursor:"pointer",fontSize:14,marginLeft:4}}>{dark?"☀️":"🌙"}</button>
-        </nav>
-        <button className="mob-btn btn btn-ghost btn-sm" onClick={()=>setSb(true)}>☰ Menu</button>
-      </div>
-    </header>
-  );
-};
-
-// ─── HERO ─────────────────────────────────────────────────────────────────────
-const Hero=({go,t})=>(
-  <section style={{minHeight:"100vh",display:"flex",alignItems:"center",
-    padding:"100px clamp(16px,5vw,68px) 60px",position:"relative",overflow:"hidden"}}>
-    <div style={{position:"absolute",inset:0,backgroundImage:`linear-gradient(${t.grid} 1px,transparent 1px),linear-gradient(90deg,${t.grid} 1px,transparent 1px)`,backgroundSize:"50px 50px",pointerEvents:"none"}}/>
-    <div style={{position:"absolute",top:"10%",right:"3%",width:"min(520px,55vw)",height:"min(520px,55vw)",borderRadius:"50%",background:`radial-gradient(circle,${t.orb} 0%,transparent 70%)`,pointerEvents:"none"}}/>
-    <div style={{position:"absolute",left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,rgba(34,197,94,.28),transparent)`,animation:"scanLine 7s linear infinite",pointerEvents:"none"}}/>
-    <div className="hero-grid" style={{maxWidth:1280,margin:"0 auto",width:"100%",display:"grid",gridTemplateColumns:"1fr 1fr",gap:"clamp(24px,5vw,72px)",alignItems:"center"}}>
-      <div style={{animation:"fadeUp .7s ease both"}}>
-        <div style={{marginBottom:18}}>
-          <span style={{background:t.accentDim,border:`1px solid ${t.border}`,color:t.accent,
-            padding:"5px 14px",borderRadius:20,fontFamily:"'Rajdhani',sans-serif",
-            fontSize:13,fontWeight:700,letterSpacing:1,animation:"pulseDot 2.5s ease infinite"}}>
-            🟢 &nbsp;Available for Projects
-          </span>
-        </div>
-        <h1 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(26px,4vw,52px)",fontWeight:900,lineHeight:1.1,marginBottom:10,color:t.text}}>
-          MAHMUD<br/>
-          <span style={{background:"linear-gradient(135deg,#22c55e,#4ade80,#86efac)",backgroundSize:"200% 200%",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",animation:"gradShift 4s ease infinite,neonPulse 3s ease infinite"}}>BASHIR</span>
-          <br/><span style={{fontSize:"clamp(15px,2vw,28px)",color:t.textMuted,fontFamily:"'Rajdhani',sans-serif",fontWeight:600}}>OLASUNKANMI</span>
-        </h1>
-        <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:"clamp(14px,1.6vw,19px)",color:t.textSub,marginBottom:22,fontWeight:600}}>
-          <Typewriter texts={["Full Stack Developer","Django Backend Expert","React Engineer","Bootstrap Specialist","API Architect","HTML/CSS Developer"]}/>
-        </div>
-        <p style={{color:t.textSub,lineHeight:1.9,fontSize:"clamp(13px,1.1vw,15px)",maxWidth:500,marginBottom:28,fontFamily:"'Rajdhani',sans-serif"}}>
-          Turning ideas into fast, elegant web solutions. I build production-grade apps with Python, Django, React & Bootstrap — from API design to pixel-perfect UI.
-        </p>
-        <div className="hero-btns" style={{display:"flex",gap:11,flexWrap:"wrap",marginBottom:16}}>
-          <button className="btn btn-primary btn-lg" onClick={()=>go("projects")}>View My Work ↗</button>
-          <button className="btn btn-outline btn-lg" onClick={()=>go("book-meeting")}>📅 Book Meeting</button>
-          <a className="btn btn-ghost btn-lg"
-            href="/Mahmud_Bashir_Resume_v2.docx"
-            download="Mahmud_Bashir_Olasunkanmi_Resume.docx"
-            style={{textDecoration:"none"}}>
-            📄 Download CV
-          </a>
-        </div>
-        <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
-          {[["GitHub","https://github.com/Muhamzy-ui"],["LinkedIn","https://linkedin.com/in/mahmud-olasunkanmi"],["Upwork","#"],["WhatsApp","#"]].map(([s,href])=>(
-            <a key={s} href={href} target="_blank" rel="noreferrer"
-              style={{color:t.textMuted,fontSize:11,fontFamily:"'Rajdhani',sans-serif",textDecoration:"none",fontWeight:700,borderBottom:`1px solid ${t.border}`,paddingBottom:2,transition:"color .2s,border-color .2s",letterSpacing:.4}}
-              onMouseEnter={e=>{e.target.style.color=t.accent;e.target.style.borderColor=t.accent}}
-              onMouseLeave={e=>{e.target.style.color=t.textMuted;e.target.style.borderColor=t.border}}>{s}</a>
-          ))}
-        </div>
-      </div>
-      <div className="hero-right" style={{display:"flex",justifyContent:"center",animation:"slideR .85s ease both"}}>
-        <div style={{position:"relative",width:"clamp(230px,28vw,310px)"}}>
-          <div style={{position:"absolute",top:"50%",left:"50%",width:210,height:210,marginLeft:-105,marginTop:-105,borderRadius:"50%",border:`1px solid ${t.border}`,pointerEvents:"none"}}>
-            <div style={{position:"absolute",width:8,height:8,background:t.accent,borderRadius:"50%",boxShadow:`0 0 12px ${t.accent}`,animation:"orbit 4s linear infinite",top:"50%",left:"50%",marginLeft:-4,marginTop:-4}}/>
-          </div>
-          <div style={{background:t.card,border:`1px solid ${t.borderHov}`,borderRadius:20,padding:22,boxShadow:`0 20px 65px ${t.shadow},0 0 32px ${t.accentGlow}`,animation:"floatY 5s ease-in-out infinite"}}>
-            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:18}}><Logo size={42}/>
-              <div><div style={{fontFamily:"'Orbitron',monospace",fontSize:17,fontWeight:900,color:t.text}}>M.B.O</div>
-                <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:9,color:t.accent,fontWeight:700,letterSpacing:3}}>WEBDEV</div></div></div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7,marginBottom:14}}>
-              {[{v:"2+",l:"Yrs Exp"},{v:"3+",l:"Projects"},{v:"100%",l:"Satisfaction"},{v:"500+",l:"Commits"}].map(s=>(
-                <div key={s.l} style={{background:t.accentDim,border:`1px solid ${t.border}`,borderRadius:8,padding:"9px 10px"}}>
-                  <div style={{fontFamily:"'Orbitron',monospace",fontSize:14,fontWeight:900,color:t.accent}}>{s.v}</div>
-                  <div style={{fontSize:10,color:t.textMuted,fontFamily:"'Rajdhani',sans-serif",marginTop:2,fontWeight:600}}>{s.l}</div>
-                </div>
-              ))}
-            </div>
-            <div style={{borderTop:`1px solid ${t.border}`,paddingTop:11}}>
-              <div style={{fontSize:9,color:t.textMuted,fontFamily:"'Rajdhani',sans-serif",marginBottom:6,fontWeight:700,letterSpacing:2}}>TECH STACK</div>
-              <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                {["🐍 Python","🎸 Django","⚛️ React","🌐 HTML/CSS"].map(tag=>(
-                  <span key={tag} style={{background:t.tagBg,border:`1px solid ${t.border}`,color:t.tagColor,padding:"2px 7px",borderRadius:20,fontSize:10,fontFamily:"'Rajdhani',sans-serif",fontWeight:700}}>{tag}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-);
-
-// ─── ABOUT ────────────────────────────────────────────────────────────────────
-const About=({t})=>{
-  const[flip,setFlip]=useState(false);
-  return(
-    <section style={{padding:"100px clamp(16px,5vw,68px)",background:t.bg2}}>
-      <div style={{maxWidth:1280,margin:"0 auto"}}>
-        <FadeUp><div style={{textAlign:"center",marginBottom:50}}>
-          <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// ABOUT_ME</div>
-          <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Who I Am</h2>
-        </div></FadeUp>
-        <div className="about-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"clamp(24px,5vw,60px)",alignItems:"start"}}>
-          <FadeUp>
-            <div style={{background:t.codeBg,border:`1px solid ${t.border}`,borderRadius:14,padding:"clamp(16px,3vw,28px)",fontFamily:"monospace",fontSize:"clamp(11px,1.2vw,13px)",lineHeight:2,marginBottom:20}}>
-              <div style={{color:"#4b5563",marginBottom:10,fontSize:11}}>// mahmud_olasunkanmi.py</div>
-              {[["name","Mahmud Bashir Olasunkanmi"],["role","Full Stack Developer"],["location","Abuja, Nigeria 🇳🇬"],["experience","2.5+ years"],["stack",["Python","Django","React","Bootstrap","PostgreSQL"]],["available",true]].map(([k,v])=>(
-                <div key={k} style={{marginBottom:4}}>
-                  <span style={{color:"#86efac"}}>{k}</span>
-                  <span style={{color:"#9ca3af"}}> = </span>
-                  {Array.isArray(v)
-                    ?<span style={{color:"#fcd34d"}}>{"["}{v.map((i,idx)=><span key={i}><span style={{color:"#f9a8d4"}}>"{i}"</span>{idx<v.length-1?", ":""}</span>)}{"]"}</span>
-                    :typeof v==="boolean"?<span style={{color:"#f87171"}}>{String(v)}</span>
-                    :<span style={{color:"#fcd34d"}}>"{v}"</span>}
-                </div>
-              ))}
-            </div>
-            <div className="stats3" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
-              {[["Projects","3+","🚀"],["Commits","500+","💻"],["Satisfaction","100%","⭐"]].map(([l,v,ic])=>(
-                <div key={l} style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:12,padding:"16px 10px",textAlign:"center"}}>
-                  <div style={{fontSize:20,marginBottom:4}}>{ic}</div>
-                  <div style={{fontFamily:"'Orbitron',monospace",fontSize:20,fontWeight:900,color:t.accent}}><CountUp end={parseInt(v)||0} sfx={v.replace(/\d/g,"")}/></div>
-                  <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,marginTop:3,fontWeight:700}}>{l}</div>
-                </div>
-              ))}
-            </div>
-          </FadeUp>
-          <FadeUp delay={.15}>
-            <p style={{color:t.textSub,lineHeight:1.95,fontSize:"clamp(13px,1.2vw,15px)",marginBottom:22,fontFamily:"'Rajdhani',sans-serif"}}>
-              I'm a full stack developer based in Abuja, Nigeria. I turn ideas into production-ready applications — with clean architecture, fast performance, and code that actually ships.
-            </p>
-            <p style={{color:t.textSub,lineHeight:1.95,fontSize:"clamp(13px,1.2vw,15px)",marginBottom:26,fontFamily:"'Rajdhani',sans-serif"}}>
-              From building Django REST APIs that handle thousands of requests, to crafting pixel-perfect React + Bootstrap frontends and mobile apps — I handle the full stack end to end.
-            </p>
-            <div style={{display:"flex",flexWrap:"wrap",gap:7,marginBottom:26}}>
-              {["Python","Django","React","Bootstrap","HTML/CSS","PostgreSQL","REST APIs","JavaScript","Git"].map(tag=>(
-                <span key={tag} style={{background:t.tagBg,border:`1px solid ${t.border}`,color:t.tagColor,padding:"4px 11px",borderRadius:20,fontSize:12,fontFamily:"'Rajdhani',sans-serif",fontWeight:700}}>{tag}</span>
-              ))}
-            </div>
-            {/* Business Card */}
-            <div onClick={()=>setFlip(f=>!f)} style={{cursor:"pointer",perspective:800,height:170}}>
-              <div style={{position:"relative",width:"100%",height:"100%",transition:"transform .6s",transformStyle:"preserve-3d",transform:flip?"rotateY(180deg)":"none"}}>
-                <div style={{position:"absolute",inset:0,background:`linear-gradient(135deg,${t.card},${t.surface})`,border:`1px solid ${t.borderHov}`,borderRadius:16,padding:20,backfaceVisibility:"hidden",display:"flex",flexDirection:"column",justifyContent:"space-between"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:10}}><Logo size={36}/><div><div style={{fontFamily:"'Orbitron',monospace",fontWeight:900,fontSize:15,color:t.text}}>M.B.O WebDev</div><div style={{fontSize:11,color:t.accent,fontFamily:"'Rajdhani',sans-serif",fontWeight:700}}>Full Stack Developer</div></div></div>
-                  <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,textAlign:"center"}}>Click to flip →</div>
-                  <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>{["Python","Django","React","Bootstrap"].map(s=><span key={s} style={{fontSize:11,color:t.tagColor,fontFamily:"'Rajdhani',sans-serif",fontWeight:700}}>{s}</span>)}</div>
-                </div>
-                <div style={{position:"absolute",inset:0,background:`linear-gradient(135deg,#052e16,#0d1c0d)`,border:`1px solid ${t.borderHov}`,borderRadius:16,padding:20,backfaceVisibility:"hidden",transform:"rotateY(180deg)",display:"flex",flexDirection:"column",justifyContent:"center",gap:8}}>
-                  {[["📧","mahmudolasunkami895@gmail.com"],["📍","Abuja, Nigeria"],["📞","08072410373"],["🐙","github.com/Muhamzy-ui"]].map(([ic,v])=>(
-                    <div key={v} style={{display:"flex",gap:9,alignItems:"center"}}><span style={{fontSize:13}}>{ic}</span><span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:12,color:"#86efac",fontWeight:600}}>{v}</span></div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </FadeUp>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// ─── SKILLS ───────────────────────────────────────────────────────────────────
-const SkillBar=({s,delay,t})=>{
-  const[w,setW]=useState(0);const ref=useRef();
-  useEffect(()=>{const o=new IntersectionObserver(([e])=>{if(e.isIntersecting)setTimeout(()=>setW(s.p),100)},{threshold:.3});if(ref.current)o.observe(ref.current);return()=>o.disconnect();},[s.p]);
-  return(
-    <div ref={ref} style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:12,padding:"16px 18px",transition:"transform .2s,box-shadow .2s",cursor:"default"}}
-      onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow=`0 8px 24px ${t.accentGlow}`;}}
-      onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:9}}>
-        <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:18}}>{s.i}</span><span style={{fontFamily:"'Rajdhani',sans-serif",fontWeight:700,fontSize:14,color:t.text}}>{s.n}</span></div>
-        <span style={{fontFamily:"'Orbitron',monospace",fontSize:12,fontWeight:700,color:t.accent}}>{s.p}%</span>
-      </div>
-      <div style={{height:5,background:t.border,borderRadius:3,overflow:"hidden"}}>
-        <div style={{height:"100%",width:`${w}%`,background:`linear-gradient(90deg,${s.c},#4ade80)`,borderRadius:3,transition:"width 1.1s cubic-bezier(.4,0,.2,1)",boxShadow:`0 0 8px ${s.c}66`}}/>
-      </div>
-    </div>
-  );
-};
-
-const Skills=({t})=>(
-  <section style={{padding:"100px clamp(16px,5vw,68px)"}}>
-    <div style={{maxWidth:1280,margin:"0 auto"}}>
-      <FadeUp><div style={{textAlign:"center",marginBottom:50}}>
-        <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// SKILLS.map()</div>
-        <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Tech Stack</h2>
-      </div></FadeUp>
-      <div className="skills-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
-        {SKILLS.map((s,i)=><FadeUp key={s.n} delay={i*.07}><SkillBar s={s} delay={i*.1} t={t}/></FadeUp>)}
-      </div>
-    </div>
-  </section>
-);
-
-// ─── PROJECTS ─────────────────────────────────────────────────────────────────
-const ProjCard=({p,t,isAdmin,onDelete})=>(
-  <div style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:18,padding:"clamp(18px,3vw,26px)",display:"flex",flexDirection:"column",transition:"transform .22s,box-shadow .22s",position:"relative"}}
-    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-5px)";e.currentTarget.style.boxShadow=`0 18px 50px ${t.shadow}`;e.currentTarget.style.borderColor=t.borderHov;}}
-    onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";e.currentTarget.style.borderColor=t.border;}}>
-    {isAdmin&&(
-      <button className="btn btn-danger btn-sm" style={{position:"absolute",top:12,right:12,padding:"4px 10px",fontSize:11}} onClick={()=>onDelete(p.id)}>✕ Remove</button>
-    )}
-    <div style={{fontSize:"clamp(28px,4vw,38px)",marginBottom:14}}>{p.icon}</div>
-    <h3 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(13px,1.5vw,16px)",color:t.text,marginBottom:10,lineHeight:1.3}}>{p.title}</h3>
-    <p style={{color:t.textSub,fontFamily:"'Rajdhani',sans-serif",fontSize:"clamp(12px,1vw,14px)",lineHeight:1.75,marginBottom:14,flex:1}}>{p.desc}</p>
-    <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:14}}>
-      {p.tags.map(tag=><span key={tag} style={{background:t.tagBg,border:`1px solid ${t.border}`,color:t.tagColor,padding:"3px 9px",borderRadius:20,fontSize:11,fontFamily:"'Rajdhani',sans-serif",fontWeight:700}}>{tag}</span>)}
-    </div>
-    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:14}}>
-      {Object.entries(p.stats).map(([k,v])=>(
-        <div key={k} style={{textAlign:"center",background:t.accentDim,borderRadius:8,padding:"8px 4px"}}>
-          <div style={{fontFamily:"'Orbitron',monospace",fontSize:13,fontWeight:900,color:t.accent}}>{v}</div>
-          <div style={{fontSize:9,color:t.textMuted,fontFamily:"'Rajdhani',sans-serif",fontWeight:700,marginTop:2}}>{k}</div>
-        </div>
-      ))}
-    </div>
-    <div style={{display:"flex",gap:8}}>
-      <a href={p.github||"#"} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{flex:1,textDecoration:"none"}}>🐙 GitHub</a>
-      <a href={p.live||"#"} target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{flex:1,textDecoration:"none"}}>🚀 Live Demo</a>
-    </div>
+// ─── TITANIUM LOGO ───────────────────────────────────────────────────────────
+const TitaniumLogo = ({ size = 38 }) => (
+  <div
+    style={{
+      width: size,
+      height: size,
+      borderRadius: size * 0.28,
+      background: "linear-gradient(145deg, #2a2c38 0%, #0d0f18 100%)",
+      border: "1px solid rgba(255, 255, 255, 0.35)",
+      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 0 14px rgba(99, 102, 241, 0.25)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative",
+      overflow: "hidden",
+    }}
+  >
+    <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "45%",
+        background: "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%)",
+      }}
+    />
+    <span
+      style={{
+        fontFamily: "'Space Grotesk', sans-serif",
+        fontWeight: 800,
+        fontSize: size * 0.38,
+        letterSpacing: "-0.5px",
+        background: "linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%)",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
+      }}
+    >
+      MBO
+    </span>
   </div>
 );
 
-const Projects=({t,projects,setProjects})=>{
-  const[isAdmin,setIsAdmin]=useState(false);
-  const[showLogin,setShowLogin]=useState(false);
-  const[pw,setPw]=useState("");const[pwErr,setPwErr]=useState(false);
-  const[showAdd,setShowAdd]=useState(false);
-  const[newP,setNewP]=useState({icon:"🚀",title:"",desc:"",tags:"",github:"",live:"",stat1k:"",stat1v:"",stat2k:"",stat2v:"",stat3k:"",stat3v:""});
+// ─── ANIMATED COUNT UP COMPONENT ─────────────────────────────────────────────
+const CountUp = ({ target, suffix = "" }) => {
+  const [val, setVal] = useState(0);
+  const ref = useRef(null);
+  const hasRun = useRef(false);
 
-  const inp={background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:8,padding:"9px 12px",color:t.text,fontFamily:"'Rajdhani',sans-serif",fontSize:13,outline:"none",width:"100%",boxSizing:"border-box"};
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasRun.current) {
+          hasRun.current = true;
+          const num = typeof target === "number" ? target : parseInt(target, 10);
+          if (isNaN(num)) {
+            setVal(target);
+            return;
+          }
+          let start = 0;
+          const step = Math.max(1, Math.floor(num / 30));
+          const timer = setInterval(() => {
+            start += step;
+            if (start >= num) {
+              setVal(num);
+              clearInterval(timer);
+            } else {
+              setVal(start);
+            }
+          }, 35);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [target]);
 
-  const handleLogin=()=>{
-    if(pw===ADMIN_PASSWORD){setIsAdmin(true);setShowLogin(false);setPw("");}
-    else{setPwErr(true);setTimeout(()=>setPwErr(false),2000);}
+  return (
+    <span ref={ref}>
+      {val}
+      {suffix}
+    </span>
+  );
+};
+
+// ─── HIGH PERFORMANCE TITANIUM CARD (ZERO MOUSE RE-RENDER LAG) ─────────────
+const SpotlightCard = ({ children, style = {}, className = "", ...props }) => {
+  return (
+    <div
+      className={`border-beam-card ${className}`}
+      style={{
+        ...style,
+      }}
+      {...props}
+    >
+      <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column" }}>
+        {children}
+      </div>
+    </div>
+  );
+};
+
+// ─── STARS RATING ────────────────────────────────────────────────────────────
+const Stars = ({ count = 5, size = 15 }) => (
+  <div style={{ display: "inline-flex", gap: 3 }}>
+    {Array(5)
+      .fill(0)
+      .map((_, i) => (
+        <span
+          key={i}
+          style={{
+            fontSize: size,
+            color: i < count ? "#ffffff" : "rgba(255,255,255,0.18)",
+            filter: i < count ? "drop-shadow(0 0 8px rgba(255,255,255,0.75))" : "none",
+            display: "inline-block",
+            transition: "all 0.2s",
+          }}
+        >
+          ★
+        </span>
+      ))}
+  </div>
+);
+
+// ─── TYPEWRITER COMPONENT ────────────────────────────────────────────────────
+const Typewriter = ({ phrases, speed = 80 }) => {
+  const [index, setIndex] = useState(0);
+  const [subIndex, setSubIndex] = useState(0);
+  const [reverse, setReverse] = useState(false);
+
+  useEffect(() => {
+    if (subIndex === phrases[index].length + 1 && !reverse) {
+      const timeout = setTimeout(() => setReverse(true), 1600);
+      return () => clearTimeout(timeout);
+    }
+    if (subIndex === 0 && reverse) {
+      setReverse(false);
+      setIndex((prev) => (prev + 1) % phrases.length);
+      return;
+    }
+    const timeout = setTimeout(() => {
+      setSubIndex((prev) => prev + (reverse ? -1 : 1));
+    }, reverse ? 35 : speed);
+    return () => clearTimeout(timeout);
+  }, [subIndex, index, reverse, phrases, speed]);
+
+  return (
+    <span>
+      {phrases[index].substring(0, subIndex)}
+      <span style={{ borderRight: "2px solid #ffffff", marginLeft: 2, animation: "sparkleTwinkle 0.8s infinite" }} />
+    </span>
+  );
+};
+
+// ─── MAIN APP COMPONENT ──────────────────────────────────────────────────────
+export default function App() {
+  const [activeTab, setActiveTab] = useState("code"); // 'code' | 'projects' | 'info'
+  const [activeSection, setActiveSection] = useState("hero");
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [projects, setProjects] = useState(INIT_PROJECTS);
+  const [ratings, setRatings] = useState(INIT_RATINGS);
+  const [selectedBlog, setSelectedBlog] = useState(null);
+  const [projectFilter, setProjectFilter] = useState("All");
+
+  // Admin state
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [adminPasswordInput, setAdminPasswordInput] = useState("");
+  const [adminError, setAdminError] = useState(false);
+  const [showAddProject, setShowAddProject] = useState(false);
+  const [newProject, setNewProject] = useState({
+    title: "",
+    tagline: "",
+    desc: "",
+    category: "Full Stack",
+    tags: "",
+    github: "",
+    live: "",
+    stat1k: "Uptime",
+    stat1v: "99.9%",
+    stat2k: "Users",
+    stat2v: "500+",
+  });
+
+  // Booking State
+  const [bookingStep, setBookingStep] = useState(1);
+  const [bookDate, setBookDate] = useState("");
+  const [bookTime, setBookTime] = useState("");
+  const [bookInfo, setBookInfo] = useState({ name: "", email: "", project: "", company: "" });
+  const [bookingStatus, setBookingStatus] = useState({ submitting: false, msg: "", err: "" });
+
+  // Contact State
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
+  const [contactStatus, setContactStatus] = useState({ state: "idle", msg: "" });
+
+  // New Review State
+  const [newReview, setNewReview] = useState({ name: "", role: "", country: "", stars: 5, text: "", project: "" });
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+
+  // Mobile menu & Nav Scroll State
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [navScrolled, setNavScrolled] = useState(false);
+
+  // Framer Motion Scroll Progress & Reduced Motion
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+  const shouldReduceMotion = useReducedMotion();
+
+
+  // Scroll spy & Nav blur trigger
+  useEffect(() => {
+    const handleScroll = () => {
+      setNavScrolled(window.scrollY > 40);
+      const sections = ["hero", "about", "projects", "skills", "process", "reviews", "blog", "booking", "contact"];
+      const scrollPos = window.scrollY + 200;
+      for (const id of sections) {
+        const el = document.getElementById(id);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            setActiveSection(id);
+            break;
+          }
+        }
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollTo = (id) => {
+    setSelectedBlog(null);
+    setMobileMenuOpen(false);
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
-  const handleAdd=()=>{
-    if(!newP.title||!newP.desc)return;
-    const p={
-      id:Date.now(),icon:newP.icon||"🚀",title:newP.title,desc:newP.desc,
-      tags:newP.tags.split(",").map(t=>t.trim()).filter(Boolean),
-      github:newP.github||"#",live:newP.live||"#",
-      stats:{
-        [newP.stat1k||"Stat1"]:newP.stat1v||"—",
-        [newP.stat2k||"Stat2"]:newP.stat2v||"—",
-        [newP.stat3k||"Stat3"]:newP.stat3v||"—",
+  const copyCodeProfile = () => {
+    const codeSnippet = `# Mahmud Bashir Olasunkanmi
+ROLE = "Full Stack Developer & Systems Engineer"
+LOCATION = "Abuja, Nigeria"
+STACK = ["Python", "Django", "React", "PostgreSQL", "REST APIs"]
+AVAILABILITY = "Ready for Contract & Full-time"
+CONTACT = "mahmudolasunkami895@gmail.com"`;
+    navigator.clipboard.writeText(codeSnippet);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2200);
+  };
+
+  // Booking handler
+  const handleBookingSubmit = (e) => {
+    e.preventDefault();
+    setBookingStatus({ submitting: true, msg: "", err: "" });
+
+    const templateParams = {
+      to_name: "Mahmud",
+      from_name: bookInfo.name,
+      from_email: bookInfo.email,
+      meeting_date: bookDate,
+      meeting_time: bookTime,
+      project_details: bookInfo.project,
+      company: bookInfo.company || "N/A",
+    };
+
+    emailjs
+      .send(
+        EMAILJS_CONFIG.bookingServiceId,
+        EMAILJS_CONFIG.bookingTemplate,
+        templateParams,
+        EMAILJS_CONFIG.publicKey
+      )
+      .then(() => {
+        setBookingStatus({
+          submitting: false,
+          msg: "Discovery call scheduled! Confirmation email dispatched.",
+          err: "",
+        });
+        setTimeout(() => {
+          setBookingStep(1);
+          setBookDate("");
+          setBookTime("");
+          setBookInfo({ name: "", email: "", project: "", company: "" });
+          setBookingStatus({ submitting: false, msg: "", err: "" });
+        }, 4500);
+      })
+      .catch((err) => {
+        console.error("Booking error:", err);
+        setBookingStatus({
+          submitting: false,
+          msg: "",
+          err: "Please email Mahmud directly at mahmudolasunkami895@gmail.com",
+        });
+      });
+  };
+
+  // Contact handler
+  const handleContactSubmit = (e) => {
+    e.preventDefault();
+    setContactStatus({ state: "submitting", msg: "" });
+
+    const templateParams = {
+      from_name: contactForm.name,
+      from_email: contactForm.email,
+      message: contactForm.message,
+      to_name: "Mahmud",
+    };
+
+    emailjs
+      .send(
+        EMAILJS_CONFIG.contactServiceId,
+        EMAILJS_CONFIG.contactTemplate,
+        templateParams,
+        EMAILJS_CONFIG.publicKey
+      )
+      .then(() => {
+        setContactStatus({ state: "success", msg: "Message delivered directly. Expect a reply within 24h." });
+        setContactForm({ name: "", email: "", message: "" });
+        setTimeout(() => setContactStatus({ state: "idle", msg: "" }), 5000);
+      })
+      .catch((err) => {
+        console.error("Contact error:", err);
+        setContactStatus({
+          state: "error",
+          msg: "Failed to dispatch. Please connect on WhatsApp (+234 807 241 0373) or email directly.",
+        });
+      });
+  };
+
+  // Admin login
+  const handleAdminLogin = () => {
+    if (adminPasswordInput === ADMIN_PASSWORD) {
+      setIsAdmin(true);
+      setShowAdminModal(false);
+      setAdminPasswordInput("");
+    } else {
+      setAdminError(true);
+      setTimeout(() => setAdminError(false), 2000);
+    }
+  };
+
+  // Add Project
+  const handleAddProject = () => {
+    if (!newProject.title || !newProject.desc) return;
+    const p = {
+      id: Date.now(),
+      category: newProject.category,
+      title: newProject.title,
+      tagline: newProject.tagline || "Custom Software Architecture",
+      desc: newProject.desc,
+      tags: newProject.tags.split(",").map((t) => t.trim()).filter(Boolean),
+      github: newProject.github || "https://github.com/Muhamzy-ui",
+      live: newProject.live || "#",
+      stats: {
+        [newProject.stat1k || "Metric"]: newProject.stat1v || "Active",
+        [newProject.stat2k || "Speed"]: newProject.stat2v || "Fast",
+      },
+      statsDisplay: {
+        [newProject.stat1k || "Metric"]: newProject.stat1v || "Active",
+        [newProject.stat2k || "Speed"]: newProject.stat2v || "Fast",
       },
     };
-    setProjects(prev=>[...prev,p]);
-    setShowAdd(false);
-    setNewP({icon:"🚀",title:"",desc:"",tags:"",github:"",live:"",stat1k:"",stat1v:"",stat2k:"",stat2v:"",stat3k:"",stat3v:""});
+    setProjects((prev) => [p, ...prev]);
+    setShowAddProject(false);
+    setNewProject({
+      title: "",
+      tagline: "",
+      desc: "",
+      category: "Full Stack",
+      tags: "",
+      github: "",
+      live: "",
+      stat1k: "Uptime",
+      stat1v: "99.9%",
+      stat2k: "Users",
+      stat2v: "500+",
+    });
   };
 
-  const handleDelete=(id)=>setProjects(prev=>prev.filter(p=>p.id!==id));
+  const handleDeleteProject = (id) => {
+    setProjects((prev) => prev.filter((p) => p.id !== id));
+  };
 
-  return(
-    <section style={{padding:"100px clamp(16px,5vw,68px)"}}>
-      <div style={{maxWidth:1280,margin:"0 auto"}}>
-        <FadeUp><div style={{textAlign:"center",marginBottom:50}}>
-          <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// PROJECTS.filter(live===true)</div>
-          <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Featured Projects</h2>
-          <div style={{display:"flex",justifyContent:"center",gap:10,marginTop:18,flexWrap:"wrap"}}>
-            {!isAdmin
-              ?<button className="btn btn-ghost btn-sm" onClick={()=>setShowLogin(true)}>🔐 Admin</button>
-              :<>
-                <button className="btn btn-primary btn-sm" onClick={()=>setShowAdd(s=>!s)}>＋ Add Project</button>
-                <button className="btn btn-ghost btn-sm" onClick={()=>setIsAdmin(false)}>🔒 Lock</button>
-              </>
-            }
-          </div>
-        </div></FadeUp>
+  // Review submission
+  const handleAddReview = (e) => {
+    e.preventDefault();
+    if (!newReview.name || !newReview.text) return;
+    setRatings((prev) => [
+      {
+        id: Date.now(),
+        ...newReview,
+        date: "Just now",
+      },
+      ...prev,
+    ]);
+    setReviewSubmitted(true);
+    setNewReview({ name: "", role: "", country: "", stars: 5, text: "", project: "" });
+    setTimeout(() => setReviewSubmitted(false), 4000);
+  };
 
-        {/* Admin Login Modal */}
-        {showLogin&&(
-          <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",backdropFilter:"blur(6px)",zIndex:1200,display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <div style={{background:t.card,border:`1px solid ${t.borderHov}`,borderRadius:18,padding:32,width:"min(380px,90vw)"}}>
-              <h3 style={{fontFamily:"'Orbitron',monospace",fontSize:16,color:t.text,marginBottom:6}}>Admin Access</h3>
-              <p style={{fontFamily:"'Rajdhani',sans-serif",fontSize:13,color:t.textMuted,marginBottom:18}}>Enter your password to manage projects</p>
-              <input type="password" value={pw} onChange={e=>setPw(e.target.value)}
-                onKeyDown={e=>e.key==="Enter"&&handleLogin()}
-                placeholder="Password" style={{...inp,marginBottom:10,border:`1px solid ${pwErr?"#ef4444":t.border}`}}/>
-              {pwErr&&<p style={{color:"#ef4444",fontFamily:"'Rajdhani',sans-serif",fontSize:12,marginBottom:8}}>❌ Wrong password</p>}
-              <div style={{display:"flex",gap:8}}>
-                <button className="btn btn-primary" style={{flex:1}} onClick={handleLogin}>Unlock</button>
-                <button className="btn btn-ghost" onClick={()=>{setShowLogin(false);setPw("");}}>Cancel</button>
-              </div>
+  const filteredProjects =
+    projectFilter === "All"
+      ? projects
+      : projects.filter((p) => p.category.toLowerCase().includes(projectFilter.toLowerCase()));
+
+  // ─── BLOG POST MODAL VIEW ──────────────────────────────────────────────────
+  if (selectedBlog) {
+    return (
+      <div style={{ background: "#05060a", minHeight: "100vh", color: "#ffffff", padding: "40px 20px" }}>
+        <div style={{ maxWidth: 840, margin: "0 auto" }}>
+          <button
+            onClick={() => setSelectedBlog(null)}
+            className="btn-shining-glass"
+            style={{ marginBottom: 30 }}
+          >
+            ← Back to Overview
+          </button>
+          <div className="border-beam-card" style={{ padding: "clamp(24px, 5vw, 56px)" }}>
+            <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 20 }}>
+              <span
+                style={{
+                  background: "rgba(255,255,255,0.1)",
+                  border: "1px solid rgba(255,255,255,0.25)",
+                  padding: "4px 14px",
+                  borderRadius: 9999,
+                  fontSize: 12,
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontWeight: 700,
+                }}
+              >
+                {selectedBlog.tag}
+              </span>
+              <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
+                {selectedBlog.date} • {selectedBlog.rt} read
+              </span>
+            </div>
+            <h1
+              className="text-shining-titanium"
+              style={{
+                fontSize: "clamp(28px, 4vw, 44px)",
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: 800,
+                lineHeight: 1.15,
+                marginBottom: 20,
+              }}
+            >
+              {selectedBlog.title}
+            </h1>
+            <p
+              style={{
+                fontSize: "18px",
+                color: "#a1a1aa",
+                lineHeight: 1.6,
+                marginBottom: 36,
+                borderBottom: "1px solid rgba(255,255,255,0.12)",
+                paddingBottom: 24,
+              }}
+            >
+              {selectedBlog.desc}
+            </p>
+            <div
+              style={{
+                fontSize: "16px",
+                lineHeight: 1.9,
+                color: "#e4e4e7",
+                whiteSpace: "pre-wrap",
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+              }}
+            >
+              {selectedBlog.body}
             </div>
           </div>
-        )}
-
-        {/* Add Project Panel */}
-        {isAdmin&&showAdd&&(
-          <FadeUp>
-            <div style={{background:t.card,border:`1px solid ${t.borderHov}`,borderRadius:18,padding:"clamp(18px,4vw,30px)",marginBottom:34}}>
-              <h3 style={{fontFamily:"'Orbitron',monospace",fontSize:15,color:t.accent,marginBottom:18}}>＋ New Project</h3>
-              <div className="c2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
-                <div><label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:5}}>ICON (emoji)</label><input value={newP.icon} onChange={e=>setNewP(p=>({...p,icon:e.target.value}))} style={inp}/></div>
-                <div><label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:5}}>TITLE *</label><input value={newP.title} onChange={e=>setNewP(p=>({...p,title:e.target.value}))} placeholder="Project name" style={inp}/></div>
-              </div>
-              <div style={{marginBottom:10}}><label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:5}}>DESCRIPTION *</label><textarea value={newP.desc} onChange={e=>setNewP(p=>({...p,desc:e.target.value}))} rows={2} placeholder="What this project does..." style={{...inp,resize:"vertical"}}/></div>
-              <div className="c2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
-                <div><label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:5}}>TAGS (comma separated)</label><input value={newP.tags} onChange={e=>setNewP(p=>({...p,tags:e.target.value}))} placeholder="React, Django, PostgreSQL" style={inp}/></div>
-                <div><label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:5}}>GITHUB URL</label><input value={newP.github} onChange={e=>setNewP(p=>({...p,github:e.target.value}))} placeholder="https://github.com/..." style={inp}/></div>
-              </div>
-              <div className="c2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
-                <div><label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:5}}>LIVE URL</label><input value={newP.live} onChange={e=>setNewP(p=>({...p,live:e.target.value}))} placeholder="https://your-app.com" style={inp}/></div>
-              </div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
-                {[[1],[2],[3]].map(([n])=>(
-                  <div key={n}>
-                    <label style={{fontFamily:"'Rajdhani',sans-serif",fontSize:10,color:t.textMuted,fontWeight:700,display:"block",marginBottom:4}}>STAT {n} LABEL</label>
-                    <input value={newP[`stat${n}k`]} onChange={e=>setNewP(p=>({...p,[`stat${n}k`]:e.target.value}))} placeholder="e.g. Users" style={{...inp,marginBottom:5}}/>
-                    <input value={newP[`stat${n}v`]} onChange={e=>setNewP(p=>({...p,[`stat${n}v`]:e.target.value}))} placeholder="e.g. 500+" style={inp}/>
-                  </div>
-                ))}
-              </div>
-              <div style={{display:"flex",gap:8}}>
-                <button className="btn btn-primary" onClick={handleAdd} disabled={!newP.title||!newP.desc}>✅ Add Project</button>
-                <button className="btn btn-ghost" onClick={()=>setShowAdd(false)}>Cancel</button>
-              </div>
-            </div>
-          </FadeUp>
-        )}
-
-        <div className="proj-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
-          {projects.map((p,i)=>(
-            <FadeUp key={p.id} delay={i*.1}><ProjCard p={p} t={t} isAdmin={isAdmin} onDelete={handleDelete}/></FadeUp>
-          ))}
         </div>
       </div>
-    </section>
-  );
-};
+    );
+  }
 
-// ─── REVIEW FORM ──────────────────────────────────────────────────────────────
-const ReviewForm=({t,onAdd})=>{
-  const[rv,setRv]=useState({name:"",role:"",country:"",stars:5,text:"",project:""});
-  const[hov,setHov]=useState(0);const[done,setDone]=useState(false);
-  const inp2={background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:9,padding:"11px 14px",color:t.text,fontFamily:"'Rajdhani',sans-serif",fontSize:14,outline:"none",width:"100%",boxSizing:"border-box"};
-  const lbl2={fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:6,marginTop:14};
-  const sub=(e)=>{e.preventDefault();if(!rv.name||!rv.text)return;onAdd({...rv});setDone(true);setRv({name:"",role:"",country:"",stars:5,text:"",project:""});setTimeout(()=>setDone(false),3500);};
-  if(done)return <div style={{background:t.tagBg,border:`1px solid ${t.border}`,padding:24,borderRadius:14,textAlign:"center",color:t.tagColor,fontFamily:"'Rajdhani',sans-serif",fontSize:16,fontWeight:700}}>❤️ Thank you! Your review has been added.</div>;
-  return(
-    <form onSubmit={sub}>
-      <div style={{marginBottom:14}}>
-        <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,marginRight:10}}>YOUR RATING</span>
-        {[1,2,3,4,5].map(s=>(
-          <span key={s} onClick={()=>setRv(r=>({...r,stars:s}))} onMouseEnter={()=>setHov(s)} onMouseLeave={()=>setHov(0)}
-            style={{fontSize:28,cursor:"pointer",color:(hov||rv.stars)>=s?"#f59e0b":"rgba(245,158,11,0.18)",transition:"color .15s",display:"inline-block"}}>★</span>
-        ))}
-      </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-        <div><label style={lbl2}>YOUR NAME *</label><input required value={rv.name} onChange={e=>setRv(r=>({...r,name:e.target.value}))} placeholder="John D." style={inp2}/></div>
-        <div><label style={lbl2}>ROLE / TITLE</label><input value={rv.role} onChange={e=>setRv(r=>({...r,role:e.target.value}))} placeholder="Startup Founder" style={inp2}/></div>
-      </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-        <div><label style={lbl2}>COUNTRY</label><input value={rv.country} onChange={e=>setRv(r=>({...r,country:e.target.value}))} placeholder="🇺🇸 USA" style={inp2}/></div>
-        <div><label style={lbl2}>PROJECT / SERVICE</label><input value={rv.project} onChange={e=>setRv(r=>({...r,project:e.target.value}))} placeholder="React App" style={inp2}/></div>
-      </div>
-      <label style={lbl2}>YOUR REVIEW *</label>
-      <textarea required rows={3} value={rv.text} onChange={e=>setRv(r=>({...r,text:e.target.value}))} placeholder="Share your honest experience..." style={{...inp2,resize:"vertical",marginBottom:18}}/>
-      <button type="submit" className="btn btn-primary btn-block" style={{fontSize:15}}>Submit Review ★</button>
-    </form>
-  );
-};
+  return (
+    <div style={{ background: "#000000", minHeight: "100vh", color: "#ffffff", overflowX: "hidden", position: "relative" }}>
+      {/* ─── SCROLL PROGRESS BAR ─── */}
+      <motion.div className="scroll-progress-bar" style={{ scaleX }} />
 
-// ─── RATINGS (CLIENT TESTIMONIALS) ────────────────────────────────────────────
-const Ratings=({t,ratings:initRatings})=>{
-  const[ratings,setRatings]=useState(initRatings);
-  const[avg,setAvg]=useState(0);
-  const[showAll,setShowAll]=useState(false);
-  const[isMobile,setIsMobile]=useState(window.innerWidth<=768);
-  useEffect(()=>{
-    const h=()=>setIsMobile(window.innerWidth<=768);
-    window.addEventListener("resize",h);
-    return()=>window.removeEventListener("resize",h);
-  },[]);
-  useEffect(()=>{if(ratings.length)setAvg((ratings.reduce((a,r)=>a+r.stars,0)/ratings.length).toFixed(1))},[ratings]);
-  const visible=isMobile&&!showAll?ratings.slice(0,3):ratings;
-  return(
-    <section style={{padding:"100px clamp(16px,5vw,68px)",background:t.bg2}}>
-      <div style={{maxWidth:1280,margin:"0 auto"}}>
-        <FadeUp><div style={{textAlign:"center",marginBottom:50}}>
-          <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// CLIENT_FEEDBACK</div>
-          <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Testimonials</h2>
-        </div></FadeUp>
-        <div className="ratings-grid" style={{display:"grid",gridTemplateColumns:"320px 1fr",gap:"clamp(24px,4vw,40px)",alignItems:"start"}}>
-          <FadeUp>
-            <div style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:20,padding:32,textAlign:"center",position:"sticky",top:100}}>
-              <div style={{fontSize:48,fontFamily:"'Orbitron',monospace",fontWeight:900,color:t.text,lineHeight:1}}>{avg}</div>
-              <div style={{margin:"12px 0 8px"}}><Stars count={Math.round(avg)} size={22} animated/></div>
-              <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:14,color:t.textSub,fontWeight:600}}>{ratings.length} Client Reviews</div>
-              <div style={{width:"100%",height:1,background:t.border,margin:"24px 0"}}/>
-              <div style={{display:"flex",flexDirection:"column",gap:12}}>
-                {[5,4,3,2,1].map(star=>{
-                  const count=ratings.filter(r=>Math.round(r.stars)===star).length;
-                  const pct=ratings.length?(count/ratings.length)*100:0;
-                  return(
-                    <div key={star} style={{display:"flex",alignItems:"center",gap:10,fontSize:13,fontFamily:"'Rajdhani',sans-serif",fontWeight:600,color:t.textSub}}>
-                      <span style={{width:12}}>{star}</span>
-                      <span style={{color:"#f59e0b"}}>★</span>
-                      <div style={{flex:1,height:6,background:t.accentDim,borderRadius:3,overflow:"hidden"}}>
-                        <div style={{height:"100%",width:`${pct}%`,background:t.accent,borderRadius:3}}/>
-                      </div>
-                      <span style={{width:24,textAlign:"right",fontSize:11}}>{count}</span>
-                    </div>
+      {/* ─── CLEAN SUBTLE PERSPECTIVE GRID ON SOLID BLACK ─── */}
+      <div className="animated-grid-overlay" />
+
+      {/* ─── FLOATING TOP NAVIGATION (iOS 27 Glass Dock) ─── */}
+      <header
+        style={{
+          position: "fixed",
+          top: 18,
+          left: 0,
+          right: 0,
+          zIndex: 990,
+          display: "flex",
+          justifyContent: "center",
+          padding: "0 16px",
+          pointerEvents: "none",
+        }}
+      >
+        <motion.nav
+          initial={{ y: -30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            pointerEvents: "auto",
+            display: "flex",
+            alignItems: "center",
+            gap: "clamp(8px, 1.6vw, 24px)",
+            padding: "8px 16px",
+            maxWidth: 980,
+            width: "100%",
+            justifyContent: "space-between",
+            background: navScrolled ? "rgba(10, 12, 20, 0.9)" : "rgba(14, 16, 26, 0.72)",
+            backdropFilter: "blur(28px) saturate(200%)",
+            WebkitBackdropFilter: "blur(28px) saturate(200%)",
+            border: "1px solid rgba(255, 255, 255, 0.18)",
+            borderRadius: 9999,
+            boxShadow: navScrolled
+              ? "0 20px 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 255, 255, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.4)"
+              : "0 14px 40px rgba(0, 0, 0, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.3)",
+            transition: "background 0.3s, box-shadow 0.3s",
+          }}
+        >
+          {/* Logo Monogram */}
+          <div
+            onClick={() => scrollTo("hero")}
+            style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}
+          >
+            <TitaniumLogo size={32} />
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span
+                style={{
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: 13,
+                  fontWeight: 800,
+                  letterSpacing: "0.2px",
+                }}
+              >
+                MAHMUD BASHIR
+              </span>
+              <span style={{ fontSize: 9, color: "#a1a1aa", letterSpacing: "1.2px", fontWeight: 700 }}>
+                FULL-STACK DEV
+              </span>
+            </div>
+          </div>
+
+          {/* Desktop Center Links with Sliding Pill Indicator */}
+          <div
+            className="desk-nav"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              position: "relative",
+            }}
+          >
+            {[
+              { id: "hero", label: "Overview" },
+              { id: "about", label: "About" },
+              { id: "projects", label: "Projects" },
+              { id: "skills", label: "Stack" },
+              { id: "process", label: "Process" },
+              { id: "reviews", label: "Reviews" },
+              { id: "contact", label: "Contact" },
+            ].map((item) => {
+              const isActive = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => scrollTo(item.id)}
+                  style={{
+                    position: "relative",
+                    background: "transparent",
+                    border: "none",
+                    color: isActive ? "#ffffff" : "#a1a1aa",
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    padding: "7px 14px",
+                    borderRadius: 9999,
+                    cursor: "pointer",
+                    transition: "color 0.2s ease",
+                    zIndex: 2,
+                    minHeight: 44,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.currentTarget.style.color = "#ffffff";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.currentTarget.style.color = "#a1a1aa";
+                  }}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeNavPill"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        borderRadius: 9999,
+                        background: "rgba(255, 255, 255, 0.18)",
+                        border: "1px solid rgba(255, 255, 255, 0.35)",
+                        boxShadow: "0 2px 12px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.45)",
+                        zIndex: -1,
+                      }}
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Action CTA */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => scrollTo("booking")}
+              className="btn-shining-primary"
+              style={{ padding: "8px 18px", fontSize: 13 }}
+            >
+              📅 Book Call
+            </motion.button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="mob-menu-btn"
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.25)",
+                color: "#ffffff",
+                padding: "8px 14px",
+                borderRadius: 9999,
+                fontSize: 16,
+                cursor: "pointer",
+                minHeight: 44,
+                minWidth: 44,
+                display: "none",
+              }}
+            >
+              {mobileMenuOpen ? "✕" : "☰"}
+            </button>
+          </div>
+        </motion.nav>
+      </header>
+
+      {/* Mobile Drawer (Animated Glass) */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.96 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            style={{
+              position: "fixed",
+              top: 80,
+              left: 16,
+              right: 16,
+              zIndex: 999,
+              background: "rgba(10, 12, 20, 0.96)",
+              backdropFilter: "blur(36px)",
+              WebkitBackdropFilter: "blur(36px)",
+              border: "1px solid rgba(255, 255, 255, 0.25)",
+              borderRadius: 24,
+              padding: "24px 18px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              boxShadow: "0 25px 70px rgba(0,0,0,0.95), 0 0 30px rgba(99,102,241,0.2)",
+            }}
+          >
+            {[
+              { id: "hero", label: "Overview" },
+              { id: "about", label: "About & Stack" },
+              { id: "projects", label: "Projects" },
+              { id: "skills", label: "Capabilities" },
+              { id: "process", label: "Engineering Process" },
+              { id: "reviews", label: "Client Reviews" },
+              { id: "blog", label: "Technical Articles" },
+              { id: "booking", label: "Book Discovery Call" },
+              { id: "contact", label: "Get in Touch" },
+            ].map((n) => (
+              <button
+                key={n.id}
+                onClick={() => scrollTo(n.id)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  textAlign: "left",
+                  color: "#ffffff",
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: 16,
+                  fontWeight: 700,
+                  padding: "12px 16px",
+                  borderRadius: 12,
+                  cursor: "pointer",
+                  minHeight: 44,
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                {n.label}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── HERO SECTION ─── */}
+      <section
+        id="hero"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          padding: "clamp(90px, 11vw, 115px) clamp(16px, 3.5vw, 36px) 36px",
+          maxWidth: 1040,
+          margin: "0 auto",
+        }}
+      >
+        {/* Floating Ambient Chips */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 14,
+            flexWrap: "wrap",
+            gap: 10,
+          }}
+        >
+          <div className="floating-chip">
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
+            <span>⚡ Sub-50ms API Latency</span>
+          </div>
+
+          <div className="floating-chip">
+            <span>★ 5.0 Star Verified Rating</span>
+          </div>
+        </div>
+
+        {/* ─── HERO WINDOW CARD (COMPACT & SLEEK) ─── */}
+        <div
+          className="border-beam-card"
+          style={{
+            padding: "clamp(20px, 3.2vw, 36px)",
+            marginBottom: 28,
+            position: "relative",
+            overflow: "hidden",
+            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.25)",
+          }}
+        >
+          {/* Window Traffic Lights Header */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+              paddingBottom: 10,
+              marginBottom: 20,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444", opacity: 0.85 }} />
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#eab308", opacity: 0.85 }} />
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e", opacity: 0.85 }} />
+            </div>
+
+            <div
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: 11,
+                letterSpacing: "1.5px",
+                color: "rgba(255, 255, 255, 0.75)",
+                fontWeight: 800,
+                textTransform: "uppercase",
+              }}
+            >
+              M.B.O WEBDEV // SOFTWARE ARCHITECT
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: "#22c55e",
+                  boxShadow: "0 0 8px #22c55e",
+                }}
+              />
+              <span style={{ fontSize: 11, color: "#d4d4d8", fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700 }}>
+                ONLINE
+              </span>
+            </div>
+          </div>
+
+          {/* Main Hero Headline */}
+          <div style={{ textAlign: "center", maxWidth: 780, margin: "0 auto" }}>
+            <h1
+              className="text-shining-titanium"
+              style={{
+                fontFamily: "'Space Grotesk', -apple-system, sans-serif",
+                fontSize: "clamp(30px, 5vw, 56px)",
+                fontWeight: 900,
+                lineHeight: 1.12,
+                letterSpacing: "-1.2px",
+                marginBottom: 6,
+              }}
+            >
+              Mahmud Bashir Olasunkanmi
+            </h1>
+
+            <div
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: "clamp(15px, 2.2vw, 21px)",
+                fontWeight: 700,
+                color: "#e2e8f0",
+                letterSpacing: "-0.2px",
+                marginBottom: 12,
+              }}
+            >
+              Full-Stack Developer & Systems Architect
+            </div>
+
+            {/* Dynamic Typewriter Subheader */}
+            <div
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: "clamp(13px, 1.5vw, 15px)",
+                color: "#94a3b8",
+                fontWeight: 600,
+                marginBottom: 14,
+                minHeight: 24,
+              }}
+            >
+              <span style={{ color: "#ffffff", fontWeight: 700 }}>Expertise: </span>
+              <Typewriter
+                phrases={[
+                  "High-Throughput Django REST Framework APIs",
+                  "Modern Reactive React 19 Architectures",
+                  "PostgreSQL Index Optimization & Sub-50ms Latency",
+                  "Production-Grade Cloud Deployments & Security",
+                ]}
+              />
+            </div>
+
+            <p
+              style={{
+                fontSize: "clamp(13px, 1.3vw, 15px)",
+                color: "#a1a1aa",
+                lineHeight: 1.65,
+                maxWidth: 600,
+                margin: "0 auto 18px",
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+              }}
+            >
+              Transforming complex product roadmaps into lightning-fast, production-grade applications. Clean Python backends, fluid React frontends, and zero-compromise security.
+            </p>
+
+            {/* Specular Direction Indicator Line */}
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 12,
+                color: "rgba(255, 255, 255, 0.4)",
+                marginBottom: 18,
+              }}
+            >
+              <span style={{ width: 36, height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.6))" }} />
+              <span style={{ fontFamily: "'Space Grotesk', monospace", fontSize: 11, letterSpacing: 2, color: "#ffffff", fontWeight: 700 }}>
+                ABUJA, NIGERIA 🇳🇬
+              </span>
+              <span style={{ width: 36, height: 1, background: "linear-gradient(90deg, rgba(255,255,255,0.6), transparent)" }} />
+            </div>
+
+            {/* ─── INTERACTIVE PILL DOCK (Code | Projects | Info) ─── */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: 20,
+              }}
+            >
+              <div
+                style={{
+                  display: "inline-flex",
+                  padding: 4,
+                  gap: 4,
+                  background: "rgba(18, 18, 24, 0.9)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  borderRadius: 9999,
+                  boxShadow: "0 6px 20px rgba(0,0,0,0.8)",
+                }}
+              >
+                {[
+                  { key: "code", label: "Code" },
+                  { key: "projects", label: "Projects" },
+                  { key: "info", label: "Info" },
+                ].map((tab) => {
+                  const isActive = activeTab === tab.key;
+                  return (
+                    <button
+                      key={tab.key}
+                      onClick={() => {
+                        setActiveTab(tab.key);
+                        if (tab.key === "projects") scrollTo("projects");
+                        if (tab.key === "info") scrollTo("about");
+                      }}
+                      style={{
+                        position: "relative",
+                        padding: "7px 20px",
+                        borderRadius: 9999,
+                        border: "none",
+                        cursor: "pointer",
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontWeight: 700,
+                        fontSize: 13,
+                        background: "transparent",
+                        color: isActive ? "#000000" : "#a1a1aa",
+                        transition: "color 0.15s ease",
+                        minHeight: 38,
+                      }}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="heroTabPill"
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            borderRadius: 9999,
+                            background: "#ffffff",
+                            boxShadow: "0 2px 10px rgba(255, 255, 255, 0.5)",
+                            zIndex: -1,
+                          }}
+                          transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                        />
+                      )}
+                      {tab.label}
+                    </button>
                   );
                 })}
               </div>
             </div>
-          </FadeUp>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:20}}>
-            {visible.map((r,i)=>(
-              <FadeUp key={r.id} delay={i*.05}>
-                <div style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:18,padding:24,height:"100%",display:"flex",flexDirection:"column",transition:"transform .2s",cursor:"default"}}
-                  onMouseEnter={e=>e.currentTarget.style.transform="translateY(-4px)"}
-                  onMouseLeave={e=>e.currentTarget.style.transform="none"}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
-                    <div style={{display:"flex",gap:12,alignItems:"center"}}>
-                      <div style={{width:42,height:42,borderRadius:"50%",background:t.accentDim,border:`1px solid ${t.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontFamily:"'Orbitron',monospace",fontWeight:900,color:t.accent}}>
-                        {r.name.charAt(0)}
-                      </div>
-                      <div>
-                        <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:15,fontWeight:700,color:t.text}}>{r.name}</div>
-                        <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:600}}>{r.role} • {r.country}</div>
-                      </div>
-                    </div>
-                    <Stars count={r.stars} size={14}/>
-                  </div>
-                  <p style={{fontFamily:"'Rajdhani',sans-serif",fontSize:14,color:t.textSub,lineHeight:1.7,flex:1,margin:"0 0 16px"}}>"{r.text}"</p>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",borderTop:`1px solid ${t.border}`,paddingTop:12,marginTop:"auto"}}>
-                    <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.accent,fontWeight:700,background:t.tagBg,padding:"2px 8px",borderRadius:12}}>✓ {r.project}</span>
-                    <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:600}}>{r.date}</span>
-                  </div>
-                </div>
-              </FadeUp>
-            ))}
-          </div>
-          {isMobile && ratings.length > 3 && (
-            <div style={{textAlign:"center",marginTop:20}}>
-              <button className="btn btn-outline" onClick={()=>setShowAll(s=>!s)}>
-                {showAll ? "Show Less ↑" : `View All ${ratings.length} Reviews ↓`}
+
+            {/* Quick Action CTAs */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: 10,
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                onClick={() => scrollTo("projects")}
+                className="btn-shining-primary"
+              >
+                ⚡ Explore Work ↗
               </button>
+              <button
+                onClick={() => scrollTo("booking")}
+                className="btn-shining-glass"
+              >
+                📅 Schedule Call
+              </button>
+              <a
+                href="/Mahmud_Bashir_Resume_v2.docx"
+                download="Mahmud_Bashir_Olasunkanmi_Resume.docx"
+                className="btn-shining-glass"
+              >
+                📄 Resume
+              </a>
             </div>
-          )}
+          </div>
         </div>
-      </div>
 
-      {/* ─ Leave a Review ─ */}
-      <FadeUp>
-        <div style={{maxWidth:680,margin:"60px auto 0",background:t.card,border:`1px solid ${t.borderHov}`,borderRadius:20,padding:"clamp(20px,4vw,36px)"}}>
-          <h3 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(15px,2vw,20px)",color:t.text,marginBottom:6}}>Leave a Review</h3>
-          <p style={{fontFamily:"'Rajdhani',sans-serif",fontSize:13,color:t.textMuted,marginBottom:24,fontWeight:600}}>Worked with me? Share your honest experience — it helps others find the right developer.</p>
-          <ReviewForm t={t} onAdd={(rev)=>{
-            setRatings(prev=>[{...rev,id:Date.now(),date:new Date().toLocaleString("en-US",{month:"short",year:"numeric"})},...prev]);
-          }}/>
-        </div>
-      </FadeUp>
-    </section>
-  );
-};
-
-
-// ─── BLOG ─────────────────────────────────────────────────────────────────────
-const Blog=({t,go,setBlog})=>{
-  const open=(b)=>{setBlog(b);window.scrollTo(0,0);};
-  const [showAll, setShowAll] = useState(false);
-  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth <= 768);
-  useEffect(() => {
-    const handle = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener("resize", handle);
-    return () => window.removeEventListener("resize", handle);
-  }, []);
-  const visible = isMobile && !showAll ? BLOGS.slice(0, 2) : BLOGS;
-  return(
-    <section style={{padding:"100px clamp(16px,5vw,68px)"}}>
-      <div style={{maxWidth:1280,margin:"0 auto"}}>
-         <FadeUp><div style={{textAlign:"center",marginBottom:50}}>
-          <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// TECH_BLOG</div>
-          <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Latest Articles</h2>
-        </div></FadeUp>
-        <div className="blog-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:24}}>
-          {visible.map((b,i)=>(
-            <FadeUp key={b.id} delay={i*.1}>
-              <div onClick={()=>open(b)} style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:18,padding:24,cursor:"pointer",transition:"all .2s",height:"100%",display:"flex",flexDirection:"column"}}
-                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.borderColor=t.accent;}}
-                onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.borderColor=t.border;}}>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:14,alignItems:"center"}}>
-                  <span style={{background:t.tagBg,color:t.tagColor,padding:"4px 10px",borderRadius:20,fontSize:11,fontFamily:"'Rajdhani',sans-serif",fontWeight:700}}>{b.icon} {b.tag}</span>
-                  <span style={{fontSize:11,color:t.textMuted,fontFamily:"'Rajdhani',sans-serif",fontWeight:600}}>{b.date} • {b.rt} read</span>
-                </div>
-                <h3 style={{fontFamily:"'Orbitron',monospace",fontSize:16,color:t.text,marginBottom:10,lineHeight:1.3}}>{b.title}</h3>
-                <p style={{fontFamily:"'Rajdhani',sans-serif",fontSize:13,color:t.textSub,lineHeight:1.6,flex:1}}>{b.desc}</p>
-                <div style={{marginTop:16,fontFamily:"'Rajdhani',sans-serif",fontSize:13,color:t.accent,fontWeight:700}}>Read Article →</div>
+        {/* ─── DYNAMIC CODE TERMINAL WITH SYNTAX HIGHLIGHTING & STRAIGHT QUOTES ─── */}
+        {activeTab === "code" && (
+          <SpotlightCard
+            style={{
+              padding: "clamp(22px, 3.5vw, 36px)",
+              fontFamily: "'JetBrains Mono', 'Space Grotesk', monospace",
+              fontSize: "clamp(12px, 1.4vw, 14px)",
+              lineHeight: 1.9,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderBottom: "1px solid rgba(255, 255, 255, 0.12)",
+                paddingBottom: 14,
+                marginBottom: 18,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10, color: "#a1a1aa", fontSize: 13 }}>
+                <span style={{ fontSize: 16 }}>⚡</span>
+                <span style={{ color: "#ffffff", fontWeight: 800 }}>mahmud_architecture.py</span>
+                <span style={{ opacity: 0.5 }}>— Python 3.12 / Async FastEngine</span>
               </div>
-            </FadeUp>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={copyCodeProfile}
+                className="btn-shining-glass"
+                style={{ padding: "5px 16px", fontSize: 12 }}
+              >
+                {copiedCode ? "✓ Copied!" : "Copy Snippet"}
+              </motion.button>
+            </div>
+
+            {/* Horizontal Scrollable Code Container with Straight Quotes */}
+            <div className="code-scroll-pane" style={{ paddingBottom: 4 }}>
+              <pre style={{ margin: 0, whiteSpace: "pre", fontFamily: "inherit" }}>
+                <code>
+                  <span style={{ color: "#71717a" }}># Production Systems & Architectural Blueprint</span>{"\n"}
+                  <span style={{ color: "#818cf8", fontWeight: 700 }}>class</span> <span style={{ color: "#ffffff", fontWeight: 800 }}>FullStackEngineer</span>:{"\n"}
+                  {"    "}developer = <span style={{ color: "#38bdf8" }}>"Mahmud Bashir Olasunkanmi"</span>{"\n"}
+                  {"    "}headquarters = <span style={{ color: "#38bdf8" }}>"Abuja, Nigeria"</span>{"\n"}
+                  {"    "}core_stack = [
+                  {"\n        "}<span style={{ color: "#38bdf8" }}>"Python"</span>, <span style={{ color: "#38bdf8" }}>"Django REST Framework"</span>, <span style={{ color: "#38bdf8" }}>"React 19"</span>, <span style={{ color: "#38bdf8" }}>"PostgreSQL"</span>, <span style={{ color: "#38bdf8" }}>"Stripe"</span>
+                  {"\n    "}]
+                  {"\n    "}metrics = &#123; <span style={{ color: "#e4e4e7" }}>"latency"</span>: <span style={{ color: "#34d399", fontWeight: 700 }}>"&lt;50ms"</span>, <span style={{ color: "#e4e4e7" }}>"uptime"</span>: <span style={{ color: "#34d399", fontWeight: 700 }}>"99.9%"</span>, <span style={{ color: "#e4e4e7" }}>"satisfaction"</span>: <span style={{ color: "#34d399", fontWeight: 700 }}>"100%"</span> &#125;
+                  {"\n    "}status = <span style={{ color: "#38bdf8", fontWeight: 700 }}>"Available for High-Impact Projects"</span>
+                </code>
+              </pre>
+            </div>
+          </SpotlightCard>
+        )}
+      </section>
+
+      {/* ─── STATS STRIP ─── */}
+      <section
+        style={{
+          position: "relative",
+          zIndex: 1,
+          padding: "20px clamp(16px, 4vw, 40px) 60px",
+          maxWidth: 1100,
+          margin: "0 auto",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
+            gap: 16,
+          }}
+        >
+          {[
+            { label: "Production Experience", num: 2, suffix: ".5+ Years", note: "Python & React Architectures" },
+            { label: "Deployed Deliveries", num: 15, suffix: "+ Live Apps", note: "From SaaS to E-Commerce" },
+            { label: "On-Time Completion", num: 100, suffix: "% Rate", note: "Zero Missed Deadlines" },
+            { label: "Engineering Commits", num: 500, suffix: "+ Updates", note: "Clean Modular Repositories" },
+          ].map((item, i) => (
+            <motion.div
+              key={item.label}
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.6 }}
+              className="border-beam-card"
+              style={{
+                padding: "22px 20px",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: "clamp(26px, 3.5vw, 36px)",
+                  fontWeight: 900,
+                  color: "#ffffff",
+                  letterSpacing: "-1px",
+                  marginBottom: 4,
+                  filter: "drop-shadow(0 0 16px rgba(255,255,255,0.4))",
+                }}
+              >
+                <CountUp target={item.num} suffix={item.suffix} />
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>
+                {item.label}
+              </div>
+              <div style={{ fontSize: 11, color: "#a1a1aa" }}>{item.note}</div>
+            </motion.div>
           ))}
         </div>
-        {isMobile&&BLOGS.length>2&&(
-          <div style={{textAlign:"center",marginTop:20}}>
-            <button className="btn btn-outline" onClick={()=>setShowAll(s=>!s)}>
-              {showAll?"Show Less ↑":`View All ${BLOGS.length} Articles ↓`}
-            </button>
+      </section>
+
+      {/* ─── BENTO-GRID ABOUT & TECH MARQUEE ─── */}
+      <section
+        id="about"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          padding: "60px clamp(16px, 4vw, 40px)",
+          maxWidth: 1100,
+          margin: "0 auto",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 12,
+              letterSpacing: 2,
+              color: "#a1a1aa",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}
+          >
+            // ARCHITECT PROFILE
           </div>
-        )}
-      </div>
-    </section>
-  );
-};
+          <h2
+            className="text-shining-titanium"
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "clamp(28px, 4vw, 46px)",
+              fontWeight: 800,
+              letterSpacing: "-1px",
+            }}
+          >
+            Engineering Foundation
+          </h2>
+        </div>
 
-// ─── BOOK MEETING ─────────────────────────────────────────────────────────────
-const BookMeeting=({t})=>{
-  const[step,setStep]=useState(1);
-  const[d,setD]=useState("");const[tm,setTm]=useState("");
-  const[info,setInfo]=useState({n:"",e:"",p:"",co:""});
-  const[msg,setMsg]=useState("");const[sub,setSub]=useState(false);
-  const[err,setErr]=useState("");
-
-  const handleSubmit=(e)=>{
-    e.preventDefault();setSub(true);setMsg("");setErr("");
-    
-    // Using EmailJS for Meetings
-    const templateParams = {
-      to_name: "Mahmud",
-      from_name: info.n,
-      from_email: info.e,
-      meeting_date: d,
-      meeting_time: tm,
-      project_details: info.p,
-      company: info.co || "N/A"
-    };
-
-    emailjs.send(
-      EMAILJS_CONFIG.bookingServiceId,
-      EMAILJS_CONFIG.bookingTemplate,
-      templateParams,
-      EMAILJS_CONFIG.publicKey
-    )
-    .then((response) => {
-      setMsg("Meeting requested successfully! I will email you to confirm.");
-      setSub(false);
-      setTimeout(()=>{
-        setStep(1);setD("");setTm("");setInfo({n:"",e:"",p:"",co:""});setMsg("");
-      },4000);
-    })
-    .catch((error) => {
-      console.error("EmailJS Error:", error);
-      setErr("Failed to send booking request. Please check your config or try emailing directly.");
-      setSub(false);
-    });
-  };
-
-  const inp={background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:10,padding:"12px 16px",color:t.text,fontFamily:"'Rajdhani',sans-serif",fontSize:14,outline:"none",width:"100%",boxSizing:"border-box",transition:"border-color .2s"};
-  const lbl={fontFamily:"'Rajdhani',sans-serif",fontSize:11,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:6,marginTop:16};
-
-  return(
-    <section style={{padding:"100px clamp(16px,5vw,68px)"}}>
-      <div style={{maxWidth:700,margin:"0 auto"}}>
-        <FadeUp><div style={{textAlign:"center",marginBottom:40}}>
-          <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// CALENDAR</div>
-          <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Book a Discovery Call</h2>
-        </div></FadeUp>
-        <FadeUp>
-          <div style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:24,padding:"clamp(20px,5vw,40px)",position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${t.accent},transparent)`}}/>
-            
-            <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:30}}>
-              {[1,2].map(s=>(
-                <React.Fragment key={s}>
-                  <div style={{width:32,height:32,borderRadius:"50%",background:step>=s?t.accent:t.accentDim,color:step>=s?"#fff":t.textMuted,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Orbitron',monospace",fontSize:14,fontWeight:900,transition:"all .3s"}}>{s}</div>
-                  {s===1&&<div style={{flex:1,height:2,background:step===2?t.accent:t.border,transition:"all .3s"}}/>}
-                </React.Fragment>
-              ))}
+        {/* Bento Grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: 20,
+            marginBottom: 24,
+          }}
+        >
+          {/* Bento Card 1: Core Bio */}
+          <SpotlightCard style={{ padding: "clamp(24px, 4vw, 36px)", gridColumn: "span 1" }}>
+            <div style={{ fontSize: 24, marginBottom: 12 }}>🚀</div>
+            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 800, marginBottom: 12, color: "#ffffff" }}>
+              Full-Stack Discipline
+            </h3>
+            <p style={{ color: "#a1a1aa", lineHeight: 1.75, fontSize: 14, marginBottom: 16 }}>
+              Based in Abuja, Nigeria, I engineer end-to-end applications designed for stability under load. From crafting complex Django ORM queries and async viewsets to building fluid React frontends with glassmorphism, I bridge the gap between heavy backend logic and elegant user experiences.
+            </p>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: "auto" }}>
+              <span className="floating-chip" style={{ fontSize: 11, padding: "5px 12px" }}>⚡ Django REST Expert</span>
+              <span className="floating-chip" style={{ fontSize: 11, padding: "5px 12px" }}>⚛️ React 19 Architect</span>
             </div>
+          </SpotlightCard>
 
-            {msg?<div style={{background:t.tagBg,border:`1px solid ${t.border}`,color:t.tagColor,padding:20,borderRadius:12,textAlign:"center",fontFamily:"'Rajdhani',sans-serif",fontSize:16,fontWeight:700}}>{msg}</div>:
-             err?<div style={{background:"rgba(239,68,68,0.1)",border:"1px solid #ef4444",color:"#ef4444",padding:20,borderRadius:12,textAlign:"center",fontFamily:"'Rajdhani',sans-serif",fontSize:15,fontWeight:600}}>{err}</div>:
-            step===1?(
-              <div style={{animation:"sbIn .3s ease"}}>
-                <h3 style={{fontFamily:"'Rajdhani',sans-serif",fontSize:22,color:t.text,marginBottom:6,fontWeight:700}}>Select Date & Time</h3>
-                <p style={{fontFamily:"'Rajdhani',sans-serif",fontSize:14,color:t.textSub,marginBottom:24}}>30-min discovery call to discuss your project.</p>
-                
-                <label style={lbl}>DATE (Next 14 Days)</label>
-                <div className="times-grid" style={{display:"grid",gap:10,marginBottom:20}}>
-                  {Array(8).fill(0).map((_,i)=>{
-                    const dt=new Date();dt.setDate(dt.getDate()+1+i);
-                    const ds=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
-                    const lbl=`${DAYS[dt.getDay()]} ${dt.getDate()} ${MONTHS[dt.getMonth()].slice(0,3)}`;
-                    return <button key={ds} onClick={()=>setD(ds)} style={{padding:"12px 10px",background:d===ds?t.accentDim:t.codeBg,border:`1px solid ${d===ds?t.accent:t.border}`,borderRadius:10,color:d===ds?t.accent:t.textSub,cursor:"pointer",fontFamily:"'Rajdhani',sans-serif",fontSize:13,fontWeight:600,transition:"all .2s"}}>{lbl}</button>;
-                  })}
-                </div>
-                {d&&(
-                  <FadeUp>
-                    <label style={lbl}>TIME (GMT+1)</label>
-                    <div className="times-grid" style={{display:"grid",gap:10,marginBottom:30}}>
-                      {TIMES.map(tStr=>(
-                        <button key={tStr} onClick={()=>setTm(tStr)} style={{padding:"10px",background:tm===tStr?t.accentDim:t.codeBg,border:`1px solid ${tm===tStr?t.accent:t.border}`,borderRadius:10,color:tm===tStr?t.accent:t.textSub,cursor:"pointer",fontFamily:"'Orbitron',monospace",fontSize:12,fontWeight:700,transition:"all .2s"}}>{tStr}</button>
-                      ))}
-                    </div>
-                  </FadeUp>
-                )}
-                <div style={{display:"flex",justifyContent:"flex-end"}}><button className="btn btn-primary" onClick={()=>setStep(2)} disabled={!d||!tm}>Continue →</button></div>
+          {/* Bento Card 2: Systems & Telemetry */}
+          <SpotlightCard style={{ padding: "clamp(24px, 4vw, 36px)", gridColumn: "span 1" }}>
+            <div style={{ fontSize: 24, marginBottom: 12 }}>🛡️</div>
+            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 800, marginBottom: 12, color: "#ffffff" }}>
+              High-Concurrency Focus
+            </h3>
+            <p style={{ color: "#a1a1aa", lineHeight: 1.75, fontSize: 14, marginBottom: 16 }}>
+              Writing code is easy; building architectures that survive high traffic without crashing takes engineering precision. I prioritize query profiling with <code style={{ color: "#fff", background: "rgba(255,255,255,0.1)", padding: "2px 6px", borderRadius: 4 }}>EXPLAIN ANALYZE</code>, JWT security lifecycle compliance, and non-blocking I/O.
+            </p>
+            <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "12px 16px", marginTop: "auto" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
+                <span style={{ color: "#a1a1aa" }}>Database Query Overhead</span>
+                <span style={{ color: "#ffffff", fontWeight: 700 }}>&lt; 50ms</span>
               </div>
-            ):(
-              <form onSubmit={handleSubmit} style={{animation:"slideR .3s ease"}}>
-                <h3 style={{fontFamily:"'Rajdhani',sans-serif",fontSize:22,color:t.text,marginBottom:6,fontWeight:700}}>Your Details</h3>
-                <div style={{background:t.accentDim,border:`1px solid ${t.border}`,padding:"10px 16px",borderRadius:8,marginBottom:24,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:14,color:t.textSub,fontWeight:600}}>🗓 {d} at {tm}</span>
-                  <button type="button" onClick={()=>setStep(1)} style={{background:"none",border:"none",color:t.accent,fontFamily:"'Rajdhani',sans-serif",fontSize:13,cursor:"pointer",fontWeight:700,textDecoration:"underline"}}>Edit</button>
-                </div>
-                <div className="c2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-                  <div><label style={lbl}>NAME *</label><input required value={info.n} onChange={e=>setInfo(i=>({...i,n:e.target.value}))} style={inp}/></div>
-                  <div><label style={lbl}>EMAIL *</label><input required type="email" value={info.e} onChange={e=>setInfo(i=>({...i,e:e.target.value}))} style={inp}/></div>
-                </div>
-                <label style={lbl}>COMPANY / URL (Optional)</label><input value={info.co} onChange={e=>setInfo(i=>({...i,co:e.target.value}))} style={inp}/>
-                <label style={lbl}>PROJECT DETAILS *</label><textarea required rows={4} value={info.p} onChange={e=>setInfo(i=>({...i,p:e.target.value}))} placeholder="What are we building?" style={{...inp,resize:"vertical",marginBottom:30}}/>
-                <div style={{display:"flex",gap:12}}>
-                  <button type="button" className="btn btn-ghost" onClick={()=>setStep(1)}>← Back</button>
-                  <button type="submit" className="btn btn-primary" style={{flex:1}} disabled={sub}>{sub?"Confirming...":"Confirm Booking ✅"}</button>
-                </div>
-              </form>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                <span style={{ color: "#a1a1aa" }}>API Contract Testing</span>
+                <span style={{ color: "#ffffff", fontWeight: 700 }}>100% Validated</span>
+              </div>
+            </div>
+          </SpotlightCard>
+        </div>
+
+        {/* ─── ANIMATED TECH STACK MARQUEE ─── */}
+        <div
+          className="border-beam-card"
+          style={{
+            padding: "20px 0",
+            overflow: "hidden",
+            position: "relative",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              left: 0,
+              width: 80,
+              background: "linear-gradient(90deg, #05060a 0%, transparent 100%)",
+              zIndex: 3,
+              pointerEvents: "none",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              right: 0,
+              width: 80,
+              background: "linear-gradient(270deg, #05060a 0%, transparent 100%)",
+              zIndex: 3,
+              pointerEvents: "none",
+            }}
+          />
+
+          <div className="marquee-track">
+            {[...MARQUEE_TECH, ...MARQUEE_TECH].map((tech, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 22px",
+                  margin: "0 8px",
+                  borderRadius: 9999,
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "#ffffff",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#6366f1" }} />
+                {tech}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FEATURED PROJECTS (CARDS WITH FILTER LAYOUT ANIMATION) ─── */}
+      <section
+        id="projects"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          padding: "70px clamp(16px, 4vw, 40px)",
+          maxWidth: 1100,
+          margin: "0 auto",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 12,
+              letterSpacing: 2,
+              color: "#a1a1aa",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}
+          >
+            // CURATED REPOSITORY
+          </div>
+          <h2
+            className="text-shining-titanium"
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "clamp(28px, 4vw, 46px)",
+              fontWeight: 800,
+              letterSpacing: "-1px",
+              marginBottom: 16,
+            }}
+          >
+            Selected Works
+          </h2>
+
+          {/* Category Filter Tabs with Sliding Active Pill */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 8,
+              flexWrap: "nowrap",
+              overflowX: "auto",
+              padding: "6px 4px",
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+              marginTop: 20,
+            }}
+          >
+            {["All", "Full Stack", "Backend / API", "System Design"].map((cat) => {
+              const isSelected = projectFilter === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setProjectFilter(cat)}
+                  style={{
+                    position: "relative",
+                    padding: "8px 22px",
+                    borderRadius: 9999,
+                    border: "none",
+                    background: "transparent",
+                    color: isSelected ? "#05060a" : "#a1a1aa",
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    transition: "color 0.2s",
+                    whiteSpace: "nowrap",
+                    minHeight: 44,
+                  }}
+                >
+                  {isSelected && (
+                    <motion.div
+                      layoutId="activeFilterPill"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        borderRadius: 9999,
+                        background: "#ffffff",
+                        boxShadow: "0 4px 20px rgba(255, 255, 255, 0.45), inset 0 1px 0 #ffffff",
+                        zIndex: -1,
+                      }}
+                      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    />
+                  )}
+                  {cat}
+                </button>
+              );
+            })}
+
+            {!isAdmin ? (
+              <button
+                onClick={() => setShowAdminModal(true)}
+                className="btn-shining-glass"
+                style={{ padding: "8px 16px", fontSize: 12, minHeight: 44 }}
+              >
+                🔐 Admin
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => setShowAddProject(!showAddProject)}
+                  className="btn-shining-primary"
+                  style={{ padding: "8px 16px", fontSize: 12, minHeight: 44 }}
+                >
+                  ＋ Add Work
+                </button>
+                <button
+                  onClick={() => setIsAdmin(false)}
+                  className="btn-shining-glass"
+                  style={{ padding: "8px 16px", fontSize: 12, minHeight: 44 }}
+                >
+                  🔒 Lock
+                </button>
+              </>
             )}
           </div>
-        </FadeUp>
-      </div>
-    </section>
-  );
-};
+        </div>
 
-// ─── CONTACT ────────────────────────────────────────────────────────────────
-const Contact=({t})=>{
-  const[f,setF]=useState({n:"",e:"",m:""});
-  const[st,setSt]=useState("idle");const[msg,setMsg]=useState("");
-
-  const handleSub=(e)=>{
-    e.preventDefault();setSt("sub");setMsg("");
-    
-    // Using EmailJS for Contact
-    const templateParams = {
-      from_name: f.n,
-      from_email: f.e,
-      message: f.m,
-      to_name: "Mahmud"
-    };
-
-    emailjs.send(
-      EMAILJS_CONFIG.contactServiceId,
-      EMAILJS_CONFIG.contactTemplate,
-      templateParams,
-      EMAILJS_CONFIG.publicKey
-    )
-    .then((response) => {
-      setSt("success");setMsg("Message sent! I'll reply soon.");setF({n:"",e:"",m:""});
-      setTimeout(()=>setSt("idle"),4000);
-    })
-    .catch((error) => {
-      console.error("EmailJS Error:", error);
-      setSt("error");setMsg("Failed to send message. Please try emailing directly.");
-      setTimeout(()=>setSt("idle"),4000);
-    });
-  };
-
-  const inp={background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:10,padding:"14px 18px",color:t.text,fontFamily:"'Rajdhani',sans-serif",fontSize:15,outline:"none",width:"100%",boxSizing:"border-box",transition:"all .2s"};
-  const lbl={fontFamily:"'Rajdhani',sans-serif",fontSize:12,color:t.textMuted,fontWeight:700,letterSpacing:1,display:"block",marginBottom:8,marginTop:18};
-
-  return(
-    <section style={{padding:"100px clamp(16px,5vw,68px)",background:t.bg2}}>
-      <div style={{maxWidth:1280,margin:"0 auto"}}>
-        <FadeUp><div style={{textAlign:"center",marginBottom:50}}>
-          <div style={{fontFamily:"'Rajdhani',sans-serif",color:t.accent,fontSize:11,letterSpacing:3,fontWeight:700,marginBottom:8}}>// CONTACT</div>
-          <h2 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(22px,4vw,40px)",color:t.text}}>Let's Talk</h2>
-        </div></FadeUp>
-        <div className="contact-grid" style={{display:"grid",gridTemplateColumns:"minmax(280px,1fr) minmax(280px,1.5fr)",gap:"clamp(28px,6vw,80px)",alignItems:"start"}}>
-          <FadeUp>
-            <h3 style={{fontFamily:"'Rajdhani',sans-serif",fontSize:26,color:t.text,marginBottom:16,fontWeight:700}}>Have a project in mind?</h3>
-            <p style={{fontFamily:"'Rajdhani',sans-serif",fontSize:15,color:t.textSub,lineHeight:1.8,marginBottom:32}}>
-              I'm currently available for freelance projects and full-time opportunities.
-              Whether you need a complex Django API, a responsive React frontend, or a full-stack e-commerce platform — I can help.
-            </p>
-            <div style={{display:"flex",flexDirection:"column",gap:20,marginBottom:32}}>
-              {[["📧","Email","mahmudolasunkami895@gmail.com","mailto:mahmudolasunkami895@gmail.com"],
-                ["📱","WhatsApp","+234 807 241 0373","https://wa.me/2348072410373"],
-                ["🐙","GitHub","github.com/Muhamzy-ui","https://github.com/Muhamzy-ui"],
-                ["📍","Location","Abuja, Nigeria","#"]].map(([ic,l,v,href])=>(
-                <a key={l} href={href} target={href.startsWith("http")?"_blank":"_self"} rel="noreferrer" style={{display:"flex",alignItems:"center",gap:16,textDecoration:"none",background:t.card,border:`1px solid ${t.border}`,padding:"16px",borderRadius:14,transition:"transform .2s",cursor:href==="#"?"default":"pointer"}}
-                  onMouseEnter={e=>href!=="#"&&(e.currentTarget.style.transform="translateX(6px)")}
-                  onMouseLeave={e=>href!=="#"&&(e.currentTarget.style.transform="none")}>
-                  <div style={{width:44,height:44,borderRadius:"50%",background:t.accentDim,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,border:`1px solid ${t.border}`}}>{ic}</div>
-                  <div>
-                    <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:12,color:t.textMuted,fontWeight:700,letterSpacing:1,marginBottom:4}}>{l.toUpperCase()}</div>
-                    <div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:15,color:t.text,fontWeight:600}}>{v}</div>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </FadeUp>
-          <FadeUp delay={.2}>
-            <form onSubmit={handleSub} style={{background:t.card,border:`1px solid ${t.border}`,borderRadius:24,padding:"clamp(24px,4vw,40px)"}}>
-              <div className="c2" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-                <div><label style={lbl}>NAME</label><input required value={f.n} onChange={e=>setF({...f,n:e.target.value})} style={inp}/></div>
-                <div><label style={lbl}>EMAIL</label><input required type="email" value={f.e} onChange={e=>setF({...f,e:e.target.value})} style={inp}/></div>
+        {/* Admin Login Modal */}
+        {showAdminModal && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.88)",
+              backdropFilter: "blur(16px)",
+              zIndex: 1200,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 20,
+            }}
+          >
+            <div className="border-beam-card" style={{ padding: 32, width: "min(380px, 95vw)" }}>
+              <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, marginBottom: 8 }}>
+                Admin Authentication
+              </h3>
+              <p style={{ color: "#a1a1aa", fontSize: 13, marginBottom: 18 }}>
+                Enter your administrative key to manage live projects.
+              </p>
+              <input
+                type="password"
+                placeholder="Password"
+                value={adminPasswordInput}
+                onChange={(e) => setAdminPasswordInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAdminLogin()}
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  background: "rgba(255,255,255,0.06)",
+                  border: `1px solid ${adminError ? "#ef4444" : "rgba(255,255,255,0.25)"}`,
+                  borderRadius: 12,
+                  color: "#ffffff",
+                  fontSize: 14,
+                  outline: "none",
+                  marginBottom: 12,
+                  minHeight: 44,
+                }}
+              />
+              {adminError && <div style={{ color: "#ef4444", fontSize: 12, marginBottom: 10 }}>Incorrect passcode</div>}
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={handleAdminLogin} className="btn-shining-primary" style={{ flex: 1 }}>
+                  Unlock
+                </button>
+                <button onClick={() => setShowAdminModal(false)} className="btn-shining-glass">
+                  Cancel
+                </button>
               </div>
-              <div><label style={lbl}>MESSAGE</label><textarea required rows={5} value={f.m} onChange={e=>setF({...f,m:e.target.value})} style={{...inp,resize:"vertical",marginBottom:30}} placeholder="How can I help you?"/></div>
-              <button type="submit" className="btn btn-primary btn-block" disabled={st==="sub"} style={{height:54,fontSize:16}}>
-                {st==="sub"?"Sending...":st==="success"?"✓ Message Sent":st==="error"?"❌ Error":"Send Message ↗"}
+            </div>
+          </div>
+        )}
+
+        {/* Add Project Form (Admin) */}
+        {isAdmin && showAddProject && (
+          <div className="border-beam-card" style={{ padding: 28, marginBottom: 30 }}>
+            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, marginBottom: 16 }}>
+              Publish New Project
+            </h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+              <input
+                placeholder="Project Title"
+                value={newProject.title}
+                onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
+                style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", minHeight: 44 }}
+              />
+              <input
+                placeholder="Tagline / Short Subtitle"
+                value={newProject.tagline}
+                onChange={(e) => setNewProject({ ...newProject, tagline: e.target.value })}
+                style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", minHeight: 44 }}
+              />
+            </div>
+            <textarea
+              rows={3}
+              placeholder="Detailed description of architecture and results..."
+              value={newProject.desc}
+              onChange={(e) => setNewProject({ ...newProject, desc: e.target.value })}
+              style={{ width: "100%", padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", marginBottom: 12 }}
+            />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+              <input
+                placeholder="Tech Tags (comma separated)"
+                value={newProject.tags}
+                onChange={(e) => setNewProject({ ...newProject, tags: e.target.value })}
+                style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", minHeight: 44 }}
+              />
+              <input
+                placeholder="Live URL"
+                value={newProject.live}
+                onChange={(e) => setNewProject({ ...newProject, live: e.target.value })}
+                style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", minHeight: 44 }}
+              />
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={handleAddProject} className="btn-shining-primary">
+                Save & Deploy Project
               </button>
-              {msg&&<div style={{marginTop:16,textAlign:"center",fontFamily:"'Rajdhani',sans-serif",fontSize:14,fontWeight:600,color:st==="success"?"#10b981":"#ef4444"}}>{msg}</div>}
+              <button onClick={() => setShowAddProject(false)} className="btn-shining-glass">
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── PROJECT CARDS GRID WITH ANIMATEPRESENCE ─── */}
+        <motion.div
+          layout
+          className="projects-grid"
+        >
+          <AnimatePresence mode="popLayout">
+            {filteredProjects.map((proj) => (
+              <motion.div
+                key={proj.id}
+                layout
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.92 }}
+                transition={{ duration: 0.4 }}
+                style={{ height: "100%" }}
+              >
+                <SpotlightCard
+                  style={{
+                    padding: "clamp(22px, 3vw, 32px)",
+                    height: "100%",
+                  }}
+                >
+                  {isAdmin && (
+                    <button
+                      onClick={() => handleDeleteProject(proj.id)}
+                      style={{
+                        position: "absolute",
+                        top: 16,
+                        right: 16,
+                        background: "rgba(239,68,68,0.2)",
+                        border: "1px solid #ef4444",
+                        color: "#ef4444",
+                        borderRadius: 9999,
+                        padding: "4px 10px",
+                        fontSize: 11,
+                        cursor: "pointer",
+                        zIndex: 10,
+                      }}
+                    >
+                      ✕ Remove
+                    </button>
+                  )}
+
+                  {/* Top macOS/iOS Mini Window Bar */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+                      paddingBottom: 12,
+                      marginBottom: 18,
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: "rgba(255,255,255,0.4)" }} />
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: "rgba(255,255,255,0.25)" }} />
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: "rgba(255,255,255,0.25)" }} />
+                    </div>
+                    <span
+                      style={{
+                        fontFamily: "'Space Grotesk', sans-serif",
+                        fontSize: 11,
+                        color: "rgba(255,255,255,0.6)",
+                        letterSpacing: 1.2,
+                        textTransform: "uppercase",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {proj.category}
+                    </span>
+                  </div>
+
+                  {/* Title & Tagline */}
+                  <h3
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontSize: 22,
+                      fontWeight: 800,
+                      color: "#ffffff",
+                      marginBottom: 6,
+                      letterSpacing: "-0.5px",
+                    }}
+                  >
+                    {proj.title}
+                  </h3>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      color: "#a1a1aa",
+                      fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      marginBottom: 16,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {proj.tagline}
+                  </div>
+
+                  <p
+                    style={{
+                      fontSize: 14,
+                      color: "rgba(255, 255, 255, 0.75)",
+                      lineHeight: 1.7,
+                      marginBottom: 20,
+                      flex: 1,
+                    }}
+                  >
+                    {proj.desc}
+                  </p>
+
+                  {/* Tech Tags */}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 20 }}>
+                    {proj.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        style={{
+                          background: "rgba(255, 255, 255, 0.08)",
+                          border: "1px solid rgba(255, 255, 255, 0.16)",
+                          borderRadius: 9999,
+                          padding: "4px 12px",
+                          fontSize: 11,
+                          fontFamily: "'Space Grotesk', sans-serif",
+                          fontWeight: 700,
+                          color: "#ffffff",
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Animated Stats Bar */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: `repeat(${Object.keys(proj.stats).length}, 1fr)`,
+                      gap: 8,
+                      marginBottom: 20,
+                      background: "rgba(255, 255, 255, 0.04)",
+                      border: "1px solid rgba(255, 255, 255, 0.12)",
+                      borderRadius: 14,
+                      padding: "12px 8px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {Object.entries(proj.stats).map(([k, v]) => (
+                      <div key={k}>
+                        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                          {typeof v === "number" ? <CountUp target={v} suffix="+" /> : v}
+                        </div>
+                        <div style={{ fontSize: 10, color: "#a1a1aa", textTransform: "uppercase", letterSpacing: 0.8, marginTop: 2 }}>
+                          {k}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <a
+                      href={proj.github}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn-shining-glass"
+                      style={{ flex: 1, textDecoration: "none", fontSize: 13, padding: "9px 14px" }}
+                    >
+                      🐙 GitHub
+                    </a>
+                    <a
+                      href={proj.live}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn-shining-primary"
+                      style={{ flex: 1, textDecoration: "none", fontSize: 13, padding: "9px 14px" }}
+                    >
+                      Live Demo ↗
+                    </a>
+                  </div>
+                </SpotlightCard>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+      </section>
+
+      {/* ─── ENGINEERING PROCESS & HOW I WORK ─── */}
+      <section
+        id="process"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          padding: "70px clamp(16px, 4vw, 40px)",
+          maxWidth: 1100,
+          margin: "0 auto",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 12,
+              letterSpacing: 2,
+              color: "#a1a1aa",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}
+          >
+            // METHODOLOGY
+          </div>
+          <h2
+            className="text-shining-titanium"
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "clamp(28px, 4vw, 46px)",
+              fontWeight: 800,
+              letterSpacing: "-1px",
+            }}
+          >
+            How I Build & Ship
+          </h2>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: 20,
+          }}
+        >
+          {WORK_PROCESS.map((proc, i) => (
+            <motion.div
+              key={proc.step}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.12, duration: 0.6 }}
+              style={{ height: "100%" }}
+            >
+              <SpotlightCard style={{ padding: "26px 22px", height: "100%" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                  <span style={{ fontSize: 26 }}>{proc.icon}</span>
+                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 900, color: "rgba(255,255,255,0.25)" }}>
+                    {proc.step}
+                  </span>
+                </div>
+                <div style={{ fontSize: 11, fontFamily: "'Space Grotesk', sans-serif", color: "#6366f1", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>
+                  {proc.tag}
+                </div>
+                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 17, fontWeight: 800, color: "#ffffff", marginBottom: 10 }}>
+                  {proc.title}
+                </h3>
+                <p style={{ fontSize: 13, color: "#a1a1aa", lineHeight: 1.7, margin: 0 }}>
+                  {proc.desc}
+                </p>
+              </SpotlightCard>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── TECHNICAL SKILLS MATRIX ─── */}
+      <section
+        id="skills"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          padding: "70px clamp(16px, 4vw, 40px)",
+          maxWidth: 1100,
+          margin: "0 auto",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 12,
+              letterSpacing: 2,
+              color: "#a1a1aa",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}
+          >
+            // TECHNICAL DEPTH
+          </div>
+          <h2
+            className="text-shining-titanium"
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "clamp(28px, 4vw, 46px)",
+              fontWeight: 800,
+              letterSpacing: "-1px",
+            }}
+          >
+            Engineered Capabilities
+          </h2>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gap: 24,
+          }}
+        >
+          {SKILL_CATEGORIES.map((category) => (
+            <SpotlightCard
+              key={category.name}
+              style={{ padding: "clamp(22px, 3.5vw, 32px)" }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 22, borderBottom: "1px solid rgba(255,255,255,0.12)", paddingBottom: 12 }}>
+                <span style={{ fontSize: 18 }}>{category.icon}</span>
+                <h3
+                  style={{
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: 17,
+                    fontWeight: 800,
+                    color: "#ffffff",
+                    margin: 0,
+                  }}
+                >
+                  {category.name}
+                </h3>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                {category.items.map((skill) => (
+                  <div key={skill.name}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                      <span style={{ fontWeight: 700, fontSize: 14 }}>{skill.name}</span>
+                      <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "#ffffff", fontWeight: 800 }}>
+                        {skill.level}%
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        height: 5,
+                        background: "rgba(255,255,255,0.08)",
+                        borderRadius: 9999,
+                        overflow: "hidden",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                      }}
+                    >
+                      <motion.div
+                        initial={{ width: 0 }}
+                        whileInView={{ width: `${skill.level}%` }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.1, ease: "easeOut" }}
+                        style={{
+                          height: "100%",
+                          background: "linear-gradient(90deg, rgba(99, 102, 241, 0.6), #ffffff)",
+                          boxShadow: "0 0 12px rgba(255,255,255,0.9)",
+                          borderRadius: 9999,
+                        }}
+                      />
+                    </div>
+                    <div style={{ fontSize: 11, color: "#a1a1aa", marginTop: 4 }}>{skill.note}</div>
+                  </div>
+                ))}
+              </div>
+            </SpotlightCard>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── CLIENT REVIEWS & TESTIMONIALS ─── */}
+      <section
+        id="reviews"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          padding: "70px clamp(16px, 4vw, 40px)",
+          maxWidth: 1100,
+          margin: "0 auto",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 12,
+              letterSpacing: 2,
+              color: "#a1a1aa",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}
+          >
+            // VERIFIED REPUTATION
+          </div>
+          <h2
+            className="text-shining-titanium"
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "clamp(28px, 4vw, 46px)",
+              fontWeight: 800,
+              letterSpacing: "-1px",
+              marginBottom: 10,
+            }}
+          >
+            Client Reviews
+          </h2>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginTop: 8 }}>
+            <Stars count={5} size={18} />
+            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 16 }}>
+              5.0 / 5.0 Rating (6+ Global Deliveries)
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))",
+            gap: 22,
+            marginBottom: 40,
+          }}
+        >
+          {ratings.map((rev) => (
+            <SpotlightCard
+              key={rev.id}
+              style={{
+                padding: "24px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 15 }}>{rev.name}</div>
+                    <div style={{ fontSize: 12, color: "#a1a1aa" }}>{rev.role} • {rev.country}</div>
+                  </div>
+                  <Stars count={rev.stars} size={14} />
+                </div>
+                <p style={{ fontSize: 14, color: "#e4e4e7", lineHeight: 1.75, marginBottom: 16 }}>
+                  "{rev.text}"
+                </p>
+              </div>
+              <div
+                style={{
+                  borderTop: "1px solid rgba(255,255,255,0.1)",
+                  paddingTop: 10,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: 11,
+                  color: "#a1a1aa",
+                }}
+              >
+                <span>✓ {rev.project}</span>
+                <span>{rev.date}</span>
+              </div>
+            </SpotlightCard>
+          ))}
+        </div>
+
+        {/* Leave a Review Form */}
+        <div className="border-beam-card" style={{ maxWidth: 640, margin: "0 auto", padding: "clamp(24px, 4vw, 36px)" }}>
+          <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, marginBottom: 6 }}>
+            Leave a Client Review
+          </h3>
+          <p style={{ color: "#a1a1aa", fontSize: 13, marginBottom: 20 }}>
+            Have we partnered on a project? Share your feedback for the public registry.
+          </p>
+          {reviewSubmitted ? (
+            <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid #ffffff", padding: 18, borderRadius: 14, textAlign: "center", fontWeight: 700 }}>
+              ✓ Thank you! Your review has been recorded.
+            </div>
+          ) : (
+            <form onSubmit={handleAddReview}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                <input
+                  required
+                  placeholder="Your Name *"
+                  value={newReview.name}
+                  onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
+                  style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", fontSize: 13, minHeight: 44 }}
+                />
+                <input
+                  placeholder="Role / Title"
+                  value={newReview.role}
+                  onChange={(e) => setNewReview({ ...newReview, role: e.target.value })}
+                  style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", fontSize: 13, minHeight: 44 }}
+                />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                <input
+                  placeholder="Country (e.g. 🇳🇬 Nigeria, 🇬🇧 UK)"
+                  value={newReview.country}
+                  onChange={(e) => setNewReview({ ...newReview, country: e.target.value })}
+                  style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", fontSize: 13, minHeight: 44 }}
+                />
+                <input
+                  placeholder="Service / Project Delivered"
+                  value={newReview.project}
+                  onChange={(e) => setNewReview({ ...newReview, project: e.target.value })}
+                  style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", fontSize: 13, minHeight: 44 }}
+                />
+              </div>
+              <textarea
+                required
+                rows={3}
+                placeholder="Share your experience working with Mahmud..."
+                value={newReview.text}
+                onChange={(e) => setNewReview({ ...newReview, text: e.target.value })}
+                style={{ width: "100%", padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", fontSize: 13, marginBottom: 16 }}
+              />
+              <button type="submit" className="btn-shining-primary" style={{ width: "100%" }}>
+                Submit Public Review ★
+              </button>
             </form>
-          </FadeUp>
+          )}
         </div>
-      </div>
-    </section>
-  );
-};
+      </section>
 
-// ─── FOOTER ───────────────────────────────────────────────────────────────────
-const Footer=({t,go})=>(
-  <footer style={{borderTop:`1px solid ${t.border}`,padding:"60px clamp(16px,5vw,68px) 30px",background:t.navBg}}>
-    <div className="foot-grid" style={{maxWidth:1280,margin:"0 auto",display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:40,marginBottom:60}}>
-      <div>
-        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}><Logo size={32}/>
-          <div><div style={{fontFamily:"'Orbitron',monospace",fontSize:14,fontWeight:900,color:t.text}}>M.B.O</div><div style={{fontFamily:"'Rajdhani',sans-serif",fontSize:10,color:t.accent,fontWeight:700,letterSpacing:2}}>WEBDEV</div></div>
+      {/* ─── TECH BLOG & THOUGHTS ─── */}
+      <section
+        id="blog"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          padding: "70px clamp(16px, 4vw, 40px)",
+          maxWidth: 1100,
+          margin: "0 auto",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 12,
+              letterSpacing: 2,
+              color: "#a1a1aa",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}
+          >
+            // ENGINEERING LOGS
+          </div>
+          <h2
+            className="text-shining-titanium"
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "clamp(28px, 4vw, 46px)",
+              fontWeight: 800,
+              letterSpacing: "-1px",
+            }}
+          >
+            Technical Articles
+          </h2>
         </div>
-        <p style={{color:t.textSub,fontFamily:"'Rajdhani',sans-serif",fontSize:14,lineHeight:1.8,marginBottom:20,maxWidth:300,fontWeight:600}}>
-          Building fast, scalable, and modern applications with Python and React.
-        </p>
-        <a href="mailto:mahmudolasunkami895@gmail.com" style={{display:"inline-flex",alignItems:"center",gap:8,color:t.text,textDecoration:"none",fontFamily:"'Rajdhani',sans-serif",fontSize:15,fontWeight:700}} onMouseEnter={e=>e.currentTarget.style.color=t.accent} onMouseLeave={e=>e.currentTarget.style.color=t.text}>
-          ✉️ mahmudolasunkami895@gmail.com
-        </a>
-      </div>
-      <div>
-        <h4 style={{fontFamily:"'Orbitron',monospace",fontSize:13,color:t.text,marginBottom:20}}>Navigation</h4>
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          {NAV.slice(0,4).map(n=><button key={n.id} onClick={()=>go(n.id)} className="footlink">{n.label}</button>)}
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))",
+            gap: 24,
+          }}
+        >
+          {BLOGS.map((article) => (
+            <SpotlightCard
+              key={article.id}
+              onClick={() => setSelectedBlog(article)}
+              style={{
+                padding: "24px",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 14 }}>
+                  <span
+                    style={{
+                      background: "rgba(255,255,255,0.1)",
+                      border: "1px solid rgba(255,255,255,0.22)",
+                      borderRadius: 9999,
+                      padding: "4px 12px",
+                      fontSize: 11,
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {article.tag}
+                  </span>
+                  <span style={{ fontSize: 12, color: "#a1a1aa" }}>
+                    {article.date} • {article.rt}
+                  </span>
+                </div>
+                <h3
+                  style={{
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: 18,
+                    fontWeight: 800,
+                    lineHeight: 1.3,
+                    marginBottom: 10,
+                    color: "#ffffff",
+                  }}
+                >
+                  {article.title}
+                </h3>
+                <p style={{ fontSize: 14, color: "#a1a1aa", lineHeight: 1.65, marginBottom: 18 }}>
+                  {article.desc}
+                </p>
+              </div>
+              <div
+                style={{
+                  color: "#ffffff",
+                  fontSize: 13,
+                  fontWeight: 800,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                Read Specification ↗
+              </div>
+            </SpotlightCard>
+          ))}
         </div>
-      </div>
-      <div>
-        <h4 style={{fontFamily:"'Orbitron',monospace",fontSize:13,color:t.text,marginBottom:20}}>Services</h4>
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          {["Django APIs","React Frontends","Full Stack Dev","Database Design"].map(s=><span key={s} style={{color:t.textSub,fontFamily:"'Rajdhani',sans-serif",fontSize:14,fontWeight:600}}>{s}</span>)}
+      </section>
+
+      {/* ─── MEETING BOOKING SECTION ─── */}
+      <section
+        id="booking"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          padding: "70px clamp(16px, 4vw, 40px)",
+          maxWidth: 820,
+          margin: "0 auto",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <div
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 12,
+              letterSpacing: 2,
+              color: "#a1a1aa",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}
+          >
+            // DIRECT COLLABORATION
+          </div>
+          <h2
+            className="text-shining-titanium"
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "clamp(28px, 4vw, 46px)",
+              fontWeight: 800,
+              letterSpacing: "-1px",
+              marginBottom: 10,
+            }}
+          >
+            Schedule a Discovery Call
+          </h2>
+          <p style={{ color: "#a1a1aa", fontSize: 15, maxWidth: 480, margin: "0 auto" }}>
+            Book a 30-minute direct session to review architecture, project scope, or technical advisory.
+          </p>
         </div>
-      </div>
-      <div>
-        <h4 style={{fontFamily:"'Orbitron',monospace",fontSize:13,color:t.text,marginBottom:20}}>Connect</h4>
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          <a href="https://github.com/Muhamzy-ui" target="_blank" rel="noreferrer" className="footlink">GitHub</a>
-          <a href="https://linkedin.com/in/mahmud-olasunkanmi" target="_blank" rel="noreferrer" className="footlink">LinkedIn</a>
-          <a href="#" className="footlink">Twitter</a>
-          <a href="https://wa.me/2348072410373" target="_blank" rel="noreferrer" className="footlink">WhatsApp ↗</a>
+
+        <SpotlightCard style={{ padding: "clamp(24px, 5vw, 44px)" }}>
+          {/* Step Indicator */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
+            <div
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: "50%",
+                background: bookingStep >= 1 ? "#ffffff" : "rgba(255,255,255,0.1)",
+                color: bookingStep >= 1 ? "#05060a" : "#ffffff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 800,
+                fontSize: 12,
+                boxShadow: bookingStep >= 1 ? "0 0 15px rgba(255,255,255,0.6)" : "none",
+              }}
+            >
+              1
+            </div>
+            <div style={{ flex: 1, height: 1, background: bookingStep === 2 ? "#ffffff" : "rgba(255,255,255,0.18)" }} />
+            <div
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: "50%",
+                background: bookingStep >= 2 ? "#ffffff" : "rgba(255,255,255,0.1)",
+                color: bookingStep >= 2 ? "#05060a" : "#ffffff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 800,
+                fontSize: 12,
+                boxShadow: bookingStep >= 2 ? "0 0 15px rgba(255,255,255,0.6)" : "none",
+              }}
+            >
+              2
+            </div>
+          </div>
+
+          {bookingStatus.msg ? (
+            <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid #ffffff", padding: 24, borderRadius: 16, textAlign: "center", fontWeight: 700 }}>
+              {bookingStatus.msg}
+            </div>
+          ) : bookingStatus.err ? (
+            <div style={{ background: "rgba(239,68,68,0.15)", border: "1px solid #ef4444", color: "#fca5a5", padding: 20, borderRadius: 16, textAlign: "center" }}>
+              {bookingStatus.err}
+            </div>
+          ) : bookingStep === 1 ? (
+            <div>
+              <div style={{ fontSize: 13, color: "#a1a1aa", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 14 }}>
+                1. Select Available Date
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
+                  gap: 10,
+                  marginBottom: 26,
+                }}
+              >
+                {Array(8)
+                  .fill(0)
+                  .map((_, i) => {
+                    const dt = new Date();
+                    dt.setDate(dt.getDate() + 1 + i);
+                    const ds = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+                    const label = `${DAYS[dt.getDay()]} ${dt.getDate()} ${MONTHS[dt.getMonth()].slice(0, 3)}`;
+                    const isSelected = bookDate === ds;
+                    return (
+                      <button
+                        key={ds}
+                        onClick={() => setBookDate(ds)}
+                        style={{
+                          padding: "13px 6px",
+                          borderRadius: 14,
+                          border: isSelected ? "1px solid #ffffff" : "1px solid rgba(255,255,255,0.18)",
+                          background: isSelected ? "#ffffff" : "rgba(255,255,255,0.05)",
+                          color: isSelected ? "#05060a" : "#ffffff",
+                          fontFamily: "'Space Grotesk', sans-serif",
+                          fontWeight: 800,
+                          fontSize: 12,
+                          cursor: "pointer",
+                          transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                          boxShadow: isSelected ? "0 4px 18px rgba(255,255,255,0.5)" : "none",
+                          minHeight: 44,
+                        }}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+              </div>
+
+              {bookDate && (
+                <div>
+                  <div style={{ fontSize: 13, color: "#a1a1aa", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 14 }}>
+                    2. Select Time (GMT+1 / West Africa Time)
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
+                      gap: 10,
+                      marginBottom: 28,
+                    }}
+                  >
+                    {TIMES.map((time) => {
+                      const isSelected = bookTime === time;
+                      return (
+                        <button
+                          key={time}
+                          onClick={() => setBookTime(time)}
+                          style={{
+                            padding: "11px",
+                            borderRadius: 12,
+                            border: isSelected ? "1px solid #ffffff" : "1px solid rgba(255,255,255,0.18)",
+                            background: isSelected ? "#ffffff" : "rgba(255,255,255,0.05)",
+                            color: isSelected ? "#05060a" : "#ffffff",
+                            fontFamily: "'Space Grotesk', sans-serif",
+                            fontWeight: 800,
+                            fontSize: 12,
+                            cursor: "pointer",
+                            transition: "all 0.2s",
+                            boxShadow: isSelected ? "0 4px 18px rgba(255,255,255,0.5)" : "none",
+                            minHeight: 44,
+                          }}
+                        >
+                          {time}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <button
+                  onClick={() => setBookingStep(2)}
+                  disabled={!bookDate || !bookTime}
+                  className="btn-shining-primary"
+                  style={{ opacity: !bookDate || !bookTime ? 0.35 : 1 }}
+                >
+                  Continue to Confirmation →
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleBookingSubmit}>
+              <div
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.22)",
+                  borderRadius: 14,
+                  padding: "14px 20px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 22,
+                }}
+              >
+                <span style={{ fontSize: 14, fontWeight: 700 }}>
+                  🗓 {bookDate} at {bookTime} (GMT+1)
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setBookingStep(1)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#ffffff",
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    minHeight: 44,
+                  }}
+                >
+                  Change
+                </button>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+                <input
+                  required
+                  placeholder="Your Full Name *"
+                  value={bookInfo.name}
+                  onChange={(e) => setBookInfo({ ...bookInfo, name: e.target.value })}
+                  style={{ padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, minHeight: 44 }}
+                />
+                <input
+                  required
+                  type="email"
+                  placeholder="Your Work Email *"
+                  value={bookInfo.email}
+                  onChange={(e) => setBookInfo({ ...bookInfo, email: e.target.value })}
+                  style={{ padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, minHeight: 44 }}
+                />
+              </div>
+
+              <input
+                placeholder="Company / Organization (Optional)"
+                value={bookInfo.company}
+                onChange={(e) => setBookInfo({ ...bookInfo, company: e.target.value })}
+                style={{ width: "100%", padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, marginBottom: 14, minHeight: 44 }}
+              />
+
+              <textarea
+                required
+                rows={4}
+                placeholder="Briefly describe what you'd like to build or solve..."
+                value={bookInfo.project}
+                onChange={(e) => setBookInfo({ ...bookInfo, project: e.target.value })}
+                style={{ width: "100%", padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, marginBottom: 20 }}
+              />
+
+              <div style={{ display: "flex", gap: 12 }}>
+                <button type="button" onClick={() => setBookingStep(1)} className="btn-shining-glass">
+                  ← Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={bookingStatus.submitting}
+                  className="btn-shining-primary"
+                  style={{ flex: 1 }}
+                >
+                  {bookingStatus.submitting ? "Booking..." : "Confirm Discovery Session ✅"}
+                </button>
+              </div>
+            </form>
+          )}
+        </SpotlightCard>
+      </section>
+
+      {/* ─── CONTACT SECTION ─── */}
+      <section
+        id="contact"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          padding: "70px clamp(16px, 4vw, 40px) 100px",
+          maxWidth: 1100,
+          margin: "0 auto",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 12,
+              letterSpacing: 2,
+              color: "#a1a1aa",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}
+          >
+            // DIRECT CONTACT
+          </div>
+          <h2
+            className="text-shining-titanium"
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "clamp(28px, 4vw, 46px)",
+              fontWeight: 800,
+              letterSpacing: "-1px",
+            }}
+          >
+            Let's Build Something Exceptional
+          </h2>
         </div>
-      </div>
-    </div>
-    <div style={{maxWidth:1280,margin:"0 auto",borderTop:`1px solid ${t.border}`,paddingTop:24,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:14}}>
-      <div style={{color:t.textMuted,fontFamily:"'Rajdhani',sans-serif",fontSize:14,fontWeight:600}}>© {new Date().getFullYear()} Mahmud Bashir Olasunkanmi. All rights reserved.</div>
-      <div style={{display:"flex",gap:6}}>
-        <span style={{width:8,height:8,borderRadius:"50%",background:"#22c55e",animation:"pulseDot 2s infinite"}}/>
-        <span style={{fontFamily:"'Rajdhani',sans-serif",fontSize:12,color:t.textSub,fontWeight:600}}>System Status: 100% Operational</span>
-      </div>
-    </div>
-  </footer>
-);
 
-// ─── MAIN APP ─────────────────────────────────────────────────────────────────
-export default function App(){
-  const[active,setActive]=useState("home");const[dark,setDark]=useState(true);
-  const[sb,setSb]=useState(false);const[blog,setBlog]=useState(null);
-  const t=dark?DARK:LIGHT;
-  const[projects,setProjects]=useState(INIT_PROJECTS);
-  const[ratings,setRatings]=useState(INIT_RATINGS);
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))",
+            gap: 32,
+            alignItems: "start",
+          }}
+        >
+          {/* Left Cards */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {[
+              {
+                icon: "✉️",
+                label: "Email",
+                val: "mahmudolasunkami895@gmail.com",
+                href: "mailto:mahmudolasunkami895@gmail.com",
+              },
+              {
+                icon: "💬",
+                label: "WhatsApp",
+                val: "+234 807 241 0373",
+                href: "https://wa.me/2348072410373",
+              },
+              {
+                icon: "🐙",
+                label: "GitHub",
+                val: "github.com/Muhamzy-ui",
+                href: "https://github.com/Muhamzy-ui",
+              },
+              {
+                icon: "💼",
+                label: "LinkedIn",
+                val: "linkedin.com/in/mahmud-olasunkanmi",
+                href: "https://linkedin.com/in/mahmud-olasunkanmi",
+              },
+            ].map((c) => (
+              <a
+                key={c.label}
+                href={c.href}
+                target="_blank"
+                rel="noreferrer"
+                className="border-beam-card"
+                style={{
+                  padding: "20px 24px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 18,
+                  textDecoration: "none",
+                  color: "#ffffff",
+                  minHeight: 44,
+                }}
+              >
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 14,
+                    background: "rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.25)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 20,
+                  }}
+                >
+                  {c.icon}
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: "#a1a1aa", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 800 }}>
+                    {c.label}
+                  </div>
+                  <div style={{ fontSize: 15, fontWeight: 700 }}>{c.val}</div>
+                </div>
+              </a>
+            ))}
+          </div>
 
-  useEffect(()=>{
-    document.head.insertAdjacentHTML("beforeend",`<style id="mbo-css">${makeCSS(t)}</style>`);
-    return()=>document.getElementById("mbo-css")?.remove();
-  },[t]);
+          {/* Right Form */}
+          <SpotlightCard style={{ padding: "clamp(24px, 4vw, 36px)" }}>
+            <form onSubmit={handleContactSubmit}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+                <input
+                  required
+                  placeholder="Your Name *"
+                  value={contactForm.name}
+                  onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                  style={{ padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, minHeight: 44 }}
+                />
+                <input
+                  required
+                  type="email"
+                  placeholder="Your Email *"
+                  value={contactForm.email}
+                  onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                  style={{ padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, minHeight: 44 }}
+                />
+              </div>
 
-  const go=(id)=>{
-    setActive(id);setBlog(null);
-    const el=document.getElementById(id);if(el){el.scrollIntoView({behavior:"smooth"});}
-  };
+              <textarea
+                required
+                rows={5}
+                placeholder="Tell me about your project, timeline, and goals..."
+                value={contactForm.message}
+                onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                style={{ width: "100%", padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, marginBottom: 20 }}
+              />
 
-  useEffect(()=>{
-    const observer=new IntersectionObserver((entries)=>{
-      entries.forEach(entry=>{if(entry.isIntersecting)setActive(entry.target.id);});
-    },{threshold:0.3});
-    NAV.forEach(nav=>{
-      const el=document.getElementById(nav.id);
-      if(el)observer.observe(el);
-    });
-    return()=>observer.disconnect();
-  },[]);
+              <button
+                type="submit"
+                disabled={contactStatus.state === "submitting"}
+                className="btn-shining-primary"
+                style={{ width: "100%", height: 52, fontSize: 15 }}
+              >
+                {contactStatus.state === "submitting" ? "Transmitting..." : "Send Message ↗"}
+              </button>
 
-  if(blog)return(
-    <div style={{background:t.bg,minHeight:"100vh",color:t.text,transition:"background .3s",fontFamily:"'Rajdhani',sans-serif"}}>
-      <Navbar active="blog" go={go} t={t} dark={dark} setDark={setDark} sb={sb} setSb={setSb}/>
-      <Sidebar open={sb} onClose={()=>setSb(false)} active="blog" go={go} t={t} dark={dark} setDark={setDark}/>
-      <main style={{padding:"120px clamp(16px,5vw,68px) 100px",maxWidth:800,margin:"0 auto",animation:"pageIn .5s ease"}}>
-        <button className="btn btn-ghost btn-sm" onClick={()=>setBlog(null)} style={{marginBottom:32}}>← Back to Articles</button>
-        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
-          <span style={{background:t.tagBg,color:t.tagColor,padding:"4px 12px",borderRadius:20,fontSize:13,fontWeight:700}}>{blog.icon} {blog.tag}</span>
-          <span style={{color:t.textMuted,fontSize:13,fontWeight:600}}>{blog.date} • {blog.rt} read</span>
+              {contactStatus.msg && (
+                <div
+                  style={{
+                    marginTop: 14,
+                    textAlign: "center",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: contactStatus.state === "success" ? "#4ade80" : "#f87171",
+                  }}
+                >
+                  {contactStatus.msg}
+                </div>
+              )}
+            </form>
+          </SpotlightCard>
         </div>
-        <h1 style={{fontFamily:"'Orbitron',monospace",fontSize:"clamp(28px,5vw,48px)",color:t.text,marginBottom:24,lineHeight:1.2}}>{blog.title}</h1>
-        <p style={{fontSize:"clamp(16px,2vw,18px)",color:t.textSub,lineHeight:1.8,marginBottom:40,fontWeight:600}}>{blog.desc}</p>
-        <div style={{height:1,background:t.border,marginBottom:40}}/>
-        <div style={{fontSize:16,color:t.text,lineHeight:1.9,whiteSpace:"pre-wrap"}}>{blog.body}</div>
-      </main>
-      <Footer t={t} go={go}/>
-    </div>
-  );
+      </section>
 
-  return(
-    <div style={{background:t.bg,minHeight:"100vh",color:t.text,transition:"background .3s"}}>
-      <Navbar active={active} go={go} t={t} dark={dark} setDark={setDark} sb={sb} setSb={setSb}/>
-      <Sidebar open={sb} onClose={()=>setSb(false)} active={active} go={go} t={t} dark={dark} setDark={setDark}/>
-      <main>
-        <div id="home"><Hero go={go} t={t}/></div>
-        <div id="about"><About t={t}/></div>
-        <div id="skills"><Skills t={t}/></div>
-        <div id="projects"><Projects t={t} projects={projects} setProjects={setProjects}/></div>
-        <div id="ratings"><Ratings t={t} ratings={ratings}/></div>
-        <div id="blog"><Blog t={t} go={go} setBlog={setBlog}/></div>
-        <div id="book-meeting"><BookMeeting t={t}/></div>
-        <div id="contact"><Contact t={t}/></div>
-      </main>
-      <Footer t={t} go={go}/>
+      {/* ─── FOOTER WITH BACK-TO-TOP BUTTON ─── */}
+      <footer
+        style={{
+          borderTop: "1px solid rgba(255, 255, 255, 0.15)",
+          padding: "44px clamp(16px, 4vw, 40px)",
+          background: "rgba(8, 10, 16, 0.92)",
+          backdropFilter: "blur(24px)",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1100,
+            margin: "0 auto",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 20,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <TitaniumLogo size={28} />
+            <span style={{ fontSize: 13, color: "#a1a1aa" }}>
+              © {new Date().getFullYear()} Mahmud Bashir Olasunkanmi. All rights reserved.
+            </span>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: "#22c55e",
+                  boxShadow: "0 0 10px #22c55e",
+                  animation: "pulseGlowRing 2s infinite",
+                }}
+              />
+              <span style={{ fontSize: 12, color: "#a1a1aa", fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700 }}>
+                Engine Status: 100% Operational
+              </span>
+            </div>
+
+            {/* Back to Top Button */}
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.94 }}
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="btn-shining-glass"
+              style={{ padding: "6px 14px", fontSize: 12, minHeight: 38 }}
+            >
+              ↑ Top
+            </motion.button>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
-
