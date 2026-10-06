@@ -795,13 +795,14 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               : "0 14px 40px rgba(0, 0, 0, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.3)",
             transition: "background 0.3s, box-shadow 0.3s",
           }}
+          className="nav-header-dock"
         >
           {/* Logo Monogram */}
           <div
             onClick={() => scrollTo("hero")}
             style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}
           >
-            <TitaniumLogo size={32} />
+            <TitaniumLogo size={30} />
             <div style={{ display: "flex", flexDirection: "column" }}>
               <span
                 style={{
@@ -813,7 +814,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               >
                 MAHMUD BASHIR
               </span>
-              <span style={{ fontSize: 9, color: "#a1a1aa", letterSpacing: "1.2px", fontWeight: 700 }}>
+              <span className="nav-sub-role" style={{ fontSize: 9, color: "#a1a1aa", letterSpacing: "1.2px", fontWeight: 700 }}>
                 FULL-STACK DEV
               </span>
             </div>
@@ -887,15 +888,14 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
           </div>
 
           {/* Action CTA */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <motion.button
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => scrollTo("booking")}
-              className="btn-shining-primary"
-              style={{ padding: "8px 18px", fontSize: 13 }}
+              className="btn-shining-primary nav-book-btn"
             >
-              📅 Book Call
+              📅 <span className="nav-book-text">Book Call</span>
             </motion.button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -908,8 +908,8 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
                 borderRadius: 9999,
                 fontSize: 16,
                 cursor: "pointer",
-                minHeight: 44,
-                minWidth: 44,
+                minHeight: 40,
+                minWidth: 40,
                 display: "none",
               }}
             >
@@ -922,63 +922,81 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
       {/* Mobile Drawer (Animated Glass) */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.96 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            style={{
-              position: "fixed",
-              top: 80,
-              left: 16,
-              right: 16,
-              zIndex: 999,
-              background: "rgba(10, 12, 20, 0.96)",
-              backdropFilter: "blur(36px)",
-              WebkitBackdropFilter: "blur(36px)",
-              border: "1px solid rgba(255, 255, 255, 0.25)",
-              borderRadius: 24,
-              padding: "24px 18px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              boxShadow: "0 25px 70px rgba(0,0,0,0.95), 0 0 30px rgba(99,102,241,0.2)",
-            }}
-          >
-            {[
-              { id: "hero", label: "Overview" },
-              { id: "about", label: "About & Stack" },
-              { id: "projects", label: "Projects" },
-              { id: "skills", label: "Capabilities" },
-              { id: "process", label: "Engineering Process" },
-              { id: "reviews", label: "Client Reviews" },
-              { id: "blog", label: "Technical Articles" },
-              { id: "booking", label: "Book Discovery Call" },
-              { id: "contact", label: "Get in Touch" },
-            ].map((n) => (
-              <button
-                key={n.id}
-                onClick={() => scrollTo(n.id)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  textAlign: "left",
-                  color: "#ffffff",
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  fontSize: 16,
-                  fontWeight: 700,
-                  padding: "12px 16px",
-                  borderRadius: 12,
-                  cursor: "pointer",
-                  minHeight: 44,
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                {n.label}
-              </button>
-            ))}
-          </motion.div>
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0,0,0,0.7)",
+                backdropFilter: "blur(6px)",
+                WebkitBackdropFilter: "blur(6px)",
+                zIndex: 995,
+              }}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.96 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              style={{
+                position: "fixed",
+                top: 75,
+                left: 14,
+                right: 14,
+                maxHeight: "calc(100vh - 95px)",
+                overflowY: "auto",
+                zIndex: 999,
+                background: "rgba(10, 12, 20, 0.97)",
+                backdropFilter: "blur(36px)",
+                WebkitBackdropFilter: "blur(36px)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                borderRadius: 20,
+                padding: "16px 12px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+                boxShadow: "0 25px 70px rgba(0,0,0,0.98), 0 0 30px rgba(99,102,241,0.2)",
+              }}
+            >
+              {[
+                { id: "hero", label: "Overview" },
+                { id: "about", label: "About & Stack" },
+                { id: "projects", label: "Projects" },
+                { id: "skills", label: "Capabilities" },
+                { id: "process", label: "Engineering Process" },
+                { id: "reviews", label: "Client Reviews" },
+                { id: "blog", label: "Technical Articles" },
+                { id: "booking", label: "Book Discovery Call" },
+                { id: "contact", label: "Get in Touch" },
+              ].map((n) => (
+                <button
+                  key={n.id}
+                  onClick={() => scrollTo(n.id)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    textAlign: "left",
+                    color: "#ffffff",
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: 15,
+                    fontWeight: 700,
+                    padding: "10px 14px",
+                    borderRadius: 10,
+                    cursor: "pointer",
+                    minHeight: 44,
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  {n.label}
+                </button>
+              ))}
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
@@ -994,16 +1012,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
         }}
       >
         {/* Floating Ambient Chips */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 14,
-            flexWrap: "wrap",
-            gap: 10,
-          }}
-        >
+        <div className="hero-chips-bar">
           <div className="floating-chip">
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
             <span>⚡ Sub-50ms API Latency</span>
@@ -1042,16 +1051,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e", opacity: 0.85 }} />
             </div>
 
-            <div
-              style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: 11,
-                letterSpacing: "1.5px",
-                color: "rgba(255, 255, 255, 0.75)",
-                fontWeight: 800,
-                textTransform: "uppercase",
-              }}
-            >
+            <div className="hero-window-header-title">
               M.B.O WEBDEV // SOFTWARE ARCHITECT
             </div>
 
@@ -1073,17 +1073,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
 
           {/* Main Hero Headline */}
           <div style={{ textAlign: "center", maxWidth: 780, margin: "0 auto" }}>
-            <h1
-              className="text-shining-titanium"
-              style={{
-                fontFamily: "'Space Grotesk', -apple-system, sans-serif",
-                fontSize: "clamp(30px, 5vw, 56px)",
-                fontWeight: 900,
-                lineHeight: 1.12,
-                letterSpacing: "-1.2px",
-                marginBottom: 6,
-              }}
-            >
+            <h1 className="text-shining-titanium hero-main-title">
               Mahmud Bashir Olasunkanmi
             </h1>
 
@@ -1222,30 +1212,23 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
             </div>
 
             {/* Quick Action CTAs */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: 10,
-                flexWrap: "wrap",
-              }}
-            >
+            <div className="hero-cta-group">
               <button
                 onClick={() => scrollTo("projects")}
-                className="btn-shining-primary"
+                className="btn-shining-primary hero-btn-main"
               >
                 ⚡ Explore Work ↗
               </button>
               <button
                 onClick={() => scrollTo("booking")}
-                className="btn-shining-glass"
+                className="btn-shining-glass hero-btn-sub"
               >
                 📅 Schedule Call
               </button>
               <a
                 href="/Mahmud_Bashir_Resume_v2.docx"
                 download="Mahmud_Bashir_Olasunkanmi_Resume.docx"
-                className="btn-shining-glass"
+                className="btn-shining-glass hero-btn-sub"
               >
                 📄 Resume
               </a>
@@ -1263,20 +1246,11 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               lineHeight: 1.9,
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                borderBottom: "1px solid rgba(255, 255, 255, 0.12)",
-                paddingBottom: 14,
-                marginBottom: 18,
-              }}
-            >
+            <div className="code-terminal-header">
               <div style={{ display: "flex", alignItems: "center", gap: 10, color: "#a1a1aa", fontSize: 13 }}>
                 <span style={{ fontSize: 16 }}>⚡</span>
                 <span style={{ color: "#ffffff", fontWeight: 800 }}>mahmud_architecture.py</span>
-                <span style={{ opacity: 0.5 }}>— Python 3.12 / Async FastEngine</span>
+                <span className="code-sub-badge" style={{ opacity: 0.5 }}>— Python 3.12 / Async FastEngine</span>
               </div>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -1319,13 +1293,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
           margin: "0 auto",
         }}
       >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
-            gap: 16,
-          }}
-        >
+        <div className="stats-grid">
           {[
             { label: "Production Experience", num: 2, suffix: ".5+ Years", note: "Python & React Architectures" },
             { label: "Deployed Deliveries", num: 15, suffix: "+ Live Apps", note: "From SaaS to E-Commerce" },
@@ -1349,6 +1317,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               }}
             >
               <div
+                className="stats-num"
                 style={{
                   fontFamily: "'Space Grotesk', sans-serif",
                   fontSize: "clamp(26px, 3.5vw, 36px)",
@@ -1361,7 +1330,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               >
                 <CountUp target={item.num} suffix={item.suffix} />
               </div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>
+              <div className="stats-label" style={{ fontSize: 13, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>
                 {item.label}
               </div>
               <div style={{ fontSize: 11, color: "#a1a1aa" }}>{item.note}</div>
@@ -1409,14 +1378,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
         </div>
 
         {/* Bento Grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-            gap: 20,
-            marginBottom: 24,
-          }}
-        >
+        <div className="bento-grid">
           {/* Bento Card 1: Core Bio */}
           <SpotlightCard style={{ padding: "clamp(24px, 4vw, 36px)", gridColumn: "span 1" }}>
             <div style={{ fontSize: 24, marginBottom: 12 }}>🚀</div>
@@ -1464,27 +1426,17 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
           }}
         >
           <div
+            className="marquee-edge-gradient"
             style={{
-              position: "absolute",
-              top: 0,
-              bottom: 0,
               left: 0,
-              width: 80,
-              background: "linear-gradient(90deg, #05060a 0%, transparent 100%)",
-              zIndex: 3,
-              pointerEvents: "none",
+              background: "linear-gradient(90deg, #000000 0%, transparent 100%)",
             }}
           />
           <div
+            className="marquee-edge-gradient"
             style={{
-              position: "absolute",
-              top: 0,
-              bottom: 0,
               right: 0,
-              width: 80,
-              background: "linear-gradient(270deg, #05060a 0%, transparent 100%)",
-              zIndex: 3,
-              pointerEvents: "none",
+              background: "linear-gradient(270deg, #000000 0%, transparent 100%)",
             }}
           />
 
@@ -1555,19 +1507,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
           </h2>
 
           {/* Category Filter Tabs with Sliding Active Pill */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: 8,
-              flexWrap: "nowrap",
-              overflowX: "auto",
-              padding: "6px 4px",
-              WebkitOverflowScrolling: "touch",
-              scrollbarWidth: "none",
-              marginTop: 20,
-            }}
-          >
+          <div className="filter-tabs-wrapper">
             {["All", "Full Stack", "Backend / API", "System Design"].map((cat) => {
               const isSelected = projectFilter === cat;
               return (
@@ -1698,7 +1638,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
             <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, marginBottom: 16 }}>
               Publish New Project
             </h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+            <div className="form-two-col">
               <input
                 placeholder="Project Title"
                 value={newProject.title}
@@ -1719,7 +1659,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               onChange={(e) => setNewProject({ ...newProject, desc: e.target.value })}
               style={{ width: "100%", padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", marginBottom: 12 }}
             />
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+            <div className="form-two-col">
               <input
                 placeholder="Tech Tags (comma separated)"
                 value={newProject.tags}
@@ -1967,13 +1907,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
           </h2>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: 20,
-          }}
-        >
+        <div className="process-grid">
           {WORK_PROCESS.map((proc, i) => (
             <motion.div
               key={proc.step}
@@ -2043,13 +1977,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
           </h2>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-            gap: 24,
-          }}
-        >
+        <div className="skills-grid">
           {SKILL_CATEGORIES.map((category) => (
             <SpotlightCard
               key={category.name}
@@ -2154,14 +2082,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
           </div>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))",
-            gap: 22,
-            marginBottom: 40,
-          }}
-        >
+        <div className="reviews-grid">
           {ratings.map((rev) => (
             <SpotlightCard
               key={rev.id}
@@ -2215,7 +2136,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
             </div>
           ) : (
             <form onSubmit={handleAddReview}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+              <div className="form-two-col">
                 <input
                   required
                   placeholder="Your Name *"
@@ -2230,7 +2151,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
                   style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", fontSize: 13, minHeight: 44 }}
                 />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+              <div className="form-two-col">
                 <input
                   placeholder="Country (e.g. 🇳🇬 Nigeria, 🇬🇧 UK)"
                   value={newReview.country}
@@ -2464,14 +2385,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               <div style={{ fontSize: 13, color: "#a1a1aa", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 14 }}>
                 1. Select Available Date
               </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
-                  gap: 10,
-                  marginBottom: 26,
-                }}
-              >
+              <div className="calendar-dates-grid">
                 {Array(8)
                   .fill(0)
                   .map((_, i) => {
@@ -2510,14 +2424,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
                   <div style={{ fontSize: 13, color: "#a1a1aa", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 14 }}>
                     2. Select Time (GMT+1 / West Africa Time)
                   </div>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
-                      gap: 10,
-                      marginBottom: 28,
-                    }}
-                  >
+                  <div className="calendar-times-grid">
                     {TIMES.map((time) => {
                       const isSelected = bookTime === time;
                       return (
@@ -2593,7 +2500,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
                 </button>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+              <div className="form-two-col">
                 <input
                   required
                   placeholder="Your Full Name *"
@@ -2683,14 +2590,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
           </h2>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))",
-            gap: 32,
-            alignItems: "start",
-          }}
-        >
+        <div className="contact-layout-grid">
           {/* Left Cards */}
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {[
@@ -2763,7 +2663,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
           {/* Right Form */}
           <SpotlightCard style={{ padding: "clamp(24px, 4vw, 36px)" }}>
             <form onSubmit={handleContactSubmit}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+              <div className="form-two-col">
                 <input
                   required
                   placeholder="Your Name *"
@@ -2829,6 +2729,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
         }}
       >
         <div
+          className="footer-container"
           style={{
             maxWidth: 1100,
             margin: "0 auto",
