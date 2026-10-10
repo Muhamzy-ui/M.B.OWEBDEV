@@ -18,30 +18,71 @@ const ADMIN_PASSWORD = "Mahmud12$$";
 const INIT_PROJECTS = [
   {
     id: 1,
-    category: "Full Stack",
-    title: "E-Commerce UI & API",
-    tagline: "End-to-End Enterprise Commerce Engine",
-    desc: "Production-grade e-commerce engine with Django REST backend, React reactive frontend, real-time inventory management, Stripe payment processing & admin dashboard.",
-    tags: ["Django REST", "React 19", "PostgreSQL", "Stripe", "Redis"],
-    stats: { Commits: 240, Users: 500, Uptime: "99.9%" },
-    statsDisplay: { Commits: "240+", Users: "500+", Uptime: "99.9%" },
+    category: "Fintech / Web3",
+    title: "SwiftSats",
+    tagline: "Crypto Purchase & Naira Settlement Platform",
+    desc: "Designed and built an end-to-end platform where customers pick a supported cryptocurrency and volume, receive an automated dynamic payment account, and pay in Naira before crypto release. Built the full stack: responsive frontend, backend logic, APIs, data handling, validation, and production deployment.",
+    tags: ["React.js", "Django REST", "PostgreSQL", "Payment APIs", "Celery", "Redis"],
+    stats: { Latency: "Sub-50ms", Settlement: "Automated", Uptime: "99.9%" },
+    statsDisplay: { Latency: "<50ms", Settlement: "Auto", Uptime: "99.9%" },
     github: "https://github.com/Muhamzy-ui",
-    live: "https://m-b-owebdev.vercel.app/",
+    live: "https://swiftsat.app",
+    liveLabel: "swiftsat.app ↗",
   },
   {
     id: 2,
-    category: "Backend / API",
-    title: "SaaS API & Operations",
-    tagline: "Real-Time Mining Operations Platform",
-    desc: "Custom industrial IoT platform for real-time equipment tracking, shift telemetry, WebSockets dispatch, and automated compliance reports with sub-50ms query latency.",
-    tags: ["Python", "Flask", "PostgreSQL", "WebSockets", "Chart.js"],
-    stats: { Sensors: 80, Reports: 1000, Speed: "50ms" },
-    statsDisplay: { Sensors: "80+", Reports: "1000+", Speed: "50ms" },
+    category: "Fintech / Web3",
+    title: "Axiom Wallets",
+    tagline: "Hybrid Trading & Digital Wallet Engine",
+    desc: "Built and deployed a full-stack trading application combining capabilities of decentralized trading protocols and centralized exchanges. Engineered trading interface, authentication, wallet functionality, API integrations, live market-data visualizations, deposit/withdrawal workflows, admin tools, and database layer.",
+    tags: ["React.js", "WebSockets", "Django REST", "Crypto APIs", "PostgreSQL", "Tailwind CSS"],
+    stats: { Delivery: "Complete", Protocol: "Decentralized+CEX", Latency: "Live" },
+    statsDisplay: { Delivery: "Full", Protocol: "Hybrid", Latency: "Live" },
     github: "https://github.com/Muhamzy-ui",
-    live: "https://m-b-owebdev.vercel.app/",
+    live: "https://m-b-owebdev-c31z.onrender.com",
+    liveLabel: "Live App ↗",
   },
   {
     id: 3,
+    category: "Fintech / Production",
+    title: "9jaCash",
+    tagline: "High-Load Production Web Optimization",
+    desc: "Maintained and optimized an active production web application focusing on database efficiency, API performance, and reliability. Improved high-load admin operations through query optimization, pagination, caching, and more efficient backend processing while safeguarding application data.",
+    tags: ["Django REST", "PostgreSQL", "Query Tuning", "Redis Caching", "High Load"],
+    stats: { Speedup: "95%", Latency: "<50ms", Reliability: "99.99%" },
+    statsDisplay: { Speedup: "95%", Latency: "<50ms", Reliability: "99.99%" },
+    github: "https://github.com/Muhamzy-ui",
+    live: "https://m-b-owebdev-c31z.onrender.com",
+    liveLabel: "Platform ↗",
+  },
+  {
+    id: 4,
+    category: "Full Stack",
+    title: "MABIO",
+    tagline: "Real-Time WebSocket Communication Platform",
+    desc: "Developed a real-time messaging app concept with instant messaging, active-status indicators, and WebSocket communication across a responsive React frontend and Django REST / PostgreSQL / Redis / Django Channels backend.",
+    tags: ["React.js", "Django REST", "Django Channels", "WebSockets", "Redis", "PostgreSQL"],
+    stats: { Stream: "Instant", Protocols: "WSS/HTTPS", Presence: "Active" },
+    statsDisplay: { Stream: "Instant", Protocols: "WSS/HTTPS", Presence: "Active" },
+    github: "https://github.com/Muhamzy-ui",
+    live: "https://m-b-owebdev-c31z.onrender.com",
+    liveLabel: "Demo ↗",
+  },
+  {
+    id: 5,
+    category: "Full Stack",
+    title: "MZCart",
+    tagline: "End-to-End E-Commerce Web Application",
+    desc: "Built an end-to-end e-commerce application with customer authentication, product catalogues, cart and wishlist, reviews, vendor workflows, checkout integration, email notification workflows, and comprehensive admin features.",
+    tags: ["Django", "PostgreSQL", "SQLite", "JavaScript", "Bootstrap"],
+    stats: { Modules: 12, Cart: "Sync", Security: "CSRF/JWT" },
+    statsDisplay: { Modules: "12+", Cart: "Sync", Security: "CSRF/JWT" },
+    github: "https://github.com/Muhamzy-ui",
+    live: "https://m-b-owebdev-c31z.onrender.com",
+    liveLabel: "Store ↗",
+  },
+  {
+    id: 6,
     category: "System Design",
     title: "Titanium Web Architecture",
     tagline: "Ultra-Fast Liquid Glass Web System",
@@ -50,14 +91,112 @@ const INIT_PROJECTS = [
     stats: { Score: 99, Load: "<0.8s", FPS: 60 },
     statsDisplay: { Score: "99/100", Load: "<0.8s", FPS: "60fps" },
     github: "https://github.com/Muhamzy-ui",
-    live: "https://m-b-owebdev.vercel.app/",
+    live: "https://m-b-owebdev-c31z.onrender.com",
+    liveLabel: "System ↗",
   },
 ];
 
+// ─── RESUME VERIFIED DATA REPOSITORIES ────────────────────────────────────────
+const WORK_EXPERIENCE = [
+  {
+    company: "MBOVIBE Systems",
+    location: "Abuja, Nigeria",
+    role: "Founder / Full-Stack Developer",
+    period: "2024 – Present",
+    tag: "Core Engineering & Production",
+    bullets: [
+      "Build and deploy full-stack web applications for digital products and client requirements across frontend, backend, databases, APIs, and production infrastructure.",
+      "Own development end-to-end, from requirements and interface implementation to backend architecture, testing, and deployment.",
+      "Develop secure authentication, transactional workflows, admin dashboards, and database-backed APIs."
+    ],
+    tech: ["React.js", "Django", "Python", "REST APIs", "PostgreSQL", "Production Deployments"]
+  },
+  {
+    company: "Axiom Wallets",
+    location: "Remote / Client Project",
+    role: "Full-Stack Developer",
+    period: "Client Delivery",
+    tag: "Decentralized & CEX Hybrid",
+    bullets: [
+      "Built and deployed a full-stack trading application combining capabilities of decentralized trading platforms and centralized exchanges.",
+      "Developed the frontend, backend, trading interface, authentication, wallet functionality, API integrations, market-data visualizations, and database layer.",
+      "Implemented deposit and withdrawal workflows, admin functionality, and production deployment."
+    ],
+    tech: ["React.js", "WebSockets", "Django REST", "Crypto APIs", "PostgreSQL", "Wallet Engine"]
+  },
+  {
+    company: "9jaCash",
+    location: "Production Application",
+    role: "Full-Stack Developer / Maintenance",
+    period: "Fintech Optimization",
+    tag: "High-Load Optimization",
+    bullets: [
+      "Maintained and optimized a production web application, focusing on database efficiency, API performance, and reliability.",
+      "Improved high-load admin operations through query optimization, pagination, caching, and more efficient backend processing.",
+      "Worked within an existing production codebase while protecting application data and minimizing disruptive changes."
+    ],
+    tech: ["Python", "Django REST", "PostgreSQL Query Tuning", "Pagination", "Redis Caching", "EXPLAIN ANALYZE"]
+  }
+];
+
+const EDUCATION_DATA = {
+  degree: "B.Sc. Cybersecurity",
+  institution: "Miva Open University",
+  period: "2026 – Expected 2029",
+  details: "Focusing on cyber defense, network security architecture, web application vulnerabilities, encryption, and systems resilience.",
+  professionalDev: [
+    "Cybersecurity & Web Application Security",
+    "Linux / WSL Systems Administration & Bash Scripting",
+    "Networking Fundamentals, Protocols & Socket Engineering",
+    "Hands-on TryHackMe security labs & vulnerability analysis",
+    "Continued Full-Stack Software Engineering & High-Load Architecture"
+  ]
+};
+
+const RESUME_SKILL_GROUPS = [
+  {
+    title: "Languages",
+    icon: "💻",
+    skills: ["Python", "JavaScript (ES6+)", "HTML5", "CSS3", "SQL", "Bash"]
+  },
+  {
+    title: "Frontend",
+    icon: "🎨",
+    skills: ["React.js", "Next.js", "Tailwind CSS", "Bootstrap", "Responsive UI"]
+  },
+  {
+    title: "Backend",
+    icon: "⚙️",
+    skills: ["Django", "Django REST Framework", "RESTful APIs", "WebSockets", "Django Channels"]
+  },
+  {
+    title: "Databases",
+    icon: "🗄️",
+    skills: ["PostgreSQL", "SQLite", "Redis"]
+  },
+  {
+    title: "Tools & Deployment",
+    icon: "🚀",
+    skills: ["Git", "GitHub", "Postman", "Vercel", "Render", "Linux/WSL"]
+  },
+  {
+    title: "Engineering",
+    icon: "🛡️",
+    skills: [
+      "Authentication",
+      "API Integration",
+      "Payment & Wallet Workflows",
+      "Admin Dashboards",
+      "Database Design",
+      "Performance Optimization"
+    ]
+  }
+];
+
 const MARQUEE_TECH = [
-  "Python", "Django", "React 19", "PostgreSQL", "Redis", "Celery",
-  "WebSockets", "Paystack", "Stripe", "Render", "Railway", "Docker",
-  "TailwindCSS", "Git", "REST APIs", "TypeScript", "Linux", "Vite"
+  "Python", "Django", "React.js", "Next.js", "PostgreSQL", "Redis",
+  "WebSockets", "Django Channels", "Tailwind CSS", "Bootstrap", "Git",
+  "Render", "Vercel", "Linux/WSL", "REST APIs", "SQLite", "Bash"
 ];
 
 const WORK_PROCESS = [
@@ -96,30 +235,40 @@ const SKILL_CATEGORIES = [
     name: "Backend Architecture",
     icon: "⚙️",
     items: [
-      { name: "Python", level: 94, note: "Async, Concurrency, OOP" },
-      { name: "Django & DRF", level: 92, note: "ViewSets, Serializers, JWT" },
-      { name: "REST APIs", level: 95, note: "Contract Design & Scalability" },
-      { name: "PostgreSQL", level: 90, note: "Composite Indexing & Tuning" },
+      { name: "Django & DRF", level: 96, note: "ViewSets, Serializers, JWT, Auth" },
+      { name: "Python", level: 95, note: "Async, Concurrency, OOP, Scripting" },
+      { name: "RESTful APIs", level: 96, note: "Contract Design & Scalability" },
+      { name: "WebSockets & Channels", level: 91, note: "Real-Time Event Streams, Redis" },
     ],
   },
   {
-    name: "Frontend Engineering",
+    name: "Frontend Systems",
     icon: "🎨",
     items: [
-      { name: "React 19", level: 90, note: "Hooks, State, Fiber" },
-      { name: "JavaScript (ES6+)", level: 92, note: "Async/Await, Modern Engine" },
-      { name: "Liquid Glass / CSS", level: 94, note: "Specular Shimmer & Physics" },
-      { name: "Tailwind & Bootstrap", level: 88, note: "Clean Responsive Layouts" },
+      { name: "React.js & Next.js", level: 94, note: "Hooks, State, Fiber Engine" },
+      { name: "JavaScript (ES6+)", level: 93, note: "Async/Await, Modern Engine" },
+      { name: "Tailwind CSS & Bootstrap", level: 92, note: "Clean Responsive Layouts" },
+      { name: "Responsive UI & Glass", level: 95, note: "Mobile-First, Liquid Glass Design" },
     ],
   },
   {
-    name: "DevOps & Cloud",
-    icon: "☁️",
+    name: "Databases & Performance",
+    icon: "🗄️",
     items: [
-      { name: "Git & GitHub", level: 92, note: "Version Control & Automation" },
-      { name: "Render & Railway", level: 88, note: "Zero-Downtime Deployment" },
-      { name: "Redis & WebSockets", level: 85, note: "Pub/Sub & Real-Time Sync" },
-      { name: "React Native", level: 80, note: "iOS & Android Cross-Platform" },
+      { name: "PostgreSQL", level: 93, note: "Composite Indexing & EXPLAIN Tuning" },
+      { name: "Redis Caching", level: 90, note: "Cache Layer, Sub-50ms Latency" },
+      { name: "SQLite", level: 92, note: "Embedded Stores & Fast Testing" },
+      { name: "SQL & Query Tuning", level: 94, note: "Optimized High-Load Pagination" },
+    ],
+  },
+  {
+    name: "DevOps & Security",
+    icon: "🛡️",
+    items: [
+      { name: "B.Sc. Cybersecurity", level: 92, note: "Miva Open Univ (2026-2029)" },
+      { name: "Git & GitHub", level: 93, note: "Version Control & Automation" },
+      { name: "Linux / WSL & Bash", level: 89, note: "Environment Config & Scripting" },
+      { name: "Render & Vercel", level: 91, note: "Production Zero-Downtime Host" },
     ],
   },
 ];
@@ -427,9 +576,11 @@ const Typewriter = ({ phrases, speed = 80 }) => {
 
 // ─── MAIN APP COMPONENT ──────────────────────────────────────────────────────
 export default function App() {
-  const [activeTab, setActiveTab] = useState("code"); // 'code' | 'projects' | 'info'
+  const [activeTab, setActiveTab] = useState("code"); // 'code' | 'resume' | 'projects' | 'info'
   const [activeSection, setActiveSection] = useState("hero");
   const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedResume, setCopiedResume] = useState(false);
+  const [showResumeModal, setShowResumeModal] = useState(false);
   const [projects, setProjects] = useState(INIT_PROJECTS);
   const [ratings, setRatings] = useState(INIT_RATINGS);
   const [selectedBlog, setSelectedBlog] = useState(null);
@@ -445,7 +596,7 @@ export default function App() {
     title: "",
     tagline: "",
     desc: "",
-    category: "Full Stack",
+    category: "Fintech / Web3",
     tags: "",
     github: "",
     live: "",
@@ -455,10 +606,48 @@ export default function App() {
     stat2v: "500+",
   });
 
+  // Theme State (Dark / Light)
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("mbo_portfolio_theme") || "dark";
+    }
+    return "dark";
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("mbo_portfolio_theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
+  // Helper for default booking date (tomorrow)
+  const getDefaultBookingDate = () => {
+    const dt = new Date();
+    dt.setDate(dt.getDate() + 1);
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+  };
+
+  // Helper to build prefilled WhatsApp message for bookings
+  const getWhatsAppBookingUrl = (date = bookDate, time = bookTime, info = bookInfo) => {
+    const lines = [
+      "Hello Mahmud! I would like to schedule a discovery session:",
+      `• Name: ${info.name || "Client"}`,
+      `• Email: ${info.email || "Provided on chat"}`,
+      `• Date: ${date || "Next available"}`,
+      `• Time: ${time || "10:30 AM"} (GMT+1 / West Africa Time)`,
+    ];
+    if (info.company) lines.push(`• Company: ${info.company}`);
+    if (info.project) lines.push(`• Project Scope: ${info.project}`);
+    return `https://wa.me/2348072410373?text=${encodeURIComponent(lines.join("\n"))}`;
+  };
+
   // Booking State
   const [bookingStep, setBookingStep] = useState(1);
-  const [bookDate, setBookDate] = useState("");
-  const [bookTime, setBookTime] = useState("");
+  const [bookDate, setBookDate] = useState(getDefaultBookingDate());
+  const [bookTime, setBookTime] = useState("10:30 AM");
   const [bookInfo, setBookInfo] = useState({ name: "", email: "", project: "", company: "" });
   const [bookingStatus, setBookingStatus] = useState({ submitting: false, msg: "", err: "" });
 
@@ -484,7 +673,7 @@ export default function App() {
   useEffect(() => {
     const handleScroll = () => {
       setNavScrolled(window.scrollY > 40);
-      const sections = ["hero", "about", "projects", "skills", "process", "reviews", "blog", "booking", "contact"];
+      const sections = ["hero", "about", "resume", "projects", "skills", "process", "reviews", "blog", "booking", "contact"];
       const scrollPos = window.scrollY + 200;
       for (const id of sections) {
         const el = document.getElementById(id);
@@ -513,14 +702,70 @@ export default function App() {
 
   const copyCodeProfile = () => {
     const codeSnippet = `# Mahmud Bashir Olasunkanmi
-ROLE = "Full Stack Developer & Systems Engineer"
+ROLE = "Full-Stack Developer (React • Django • Python)"
 LOCATION = "Abuja, Nigeria"
-STACK = ["Python", "Django", "React", "PostgreSQL", "REST APIs"]
-AVAILABILITY = "Ready for Contract & Full-time"
-CONTACT = "mahmudolasunkami895@gmail.com"`;
+EXPERIENCE = ["MBOVIBE Systems", "Axiom Wallets", "9jaCash"]
+PROJECTS = ["SwiftSats", "MABIO", "MZCart"]
+EDUCATION = "B.Sc. Cybersecurity - Miva Open University (2026-2029)"
+CONTACT = "mahmudolasunkanmi895@gmail.com"`;
     navigator.clipboard.writeText(codeSnippet);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2200);
+  };
+
+  const copyResumeText = () => {
+    const text = `MAHMUD BASHIR OLASUNKANMI
+Full-Stack Developer | React • Django • Python
+Location: Abuja, Nigeria | Phone: +234 807 241 0373 | Email: mahmudolasunkanmi895@gmail.com
+Portfolio: m-b-owebdev-c31z.onrender.com | GitHub: github.com/Muhamzy-ui | LinkedIn: linkedin.com/in/mahmud-olasunkanmi-29b231384
+
+CAREER OBJECTIVE
+Full-Stack Developer building and deploying complete web applications since 2024, with a focus on React, Django, Python, REST APIs, and PostgreSQL. Experienced in taking products from interface and backend development through database design, API integration, authentication, payment and wallet workflows, admin systems, and production deployment. Open to remote and international Full-Stack, Django/Python, React, and Web Development roles.
+
+WORK EXPERIENCE
+• MBOVIBE Systems — Abuja, Nigeria | Founder / Full-Stack Developer | 2024 – Present
+  - Build and deploy full-stack web applications for digital products and client requirements across frontend, backend, databases, APIs, and production infrastructure.
+  - Own development end-to-end, from requirements and interface implementation to backend architecture, testing, and deployment.
+  - Develop secure authentication, transactional workflows, admin dashboards, and database-backed APIs.
+
+• Axiom Wallets — Client Project | Full-Stack Developer | Client Delivery
+  - Built and deployed a full-stack trading application combining capabilities of decentralized trading platforms and centralized exchanges.
+  - Developed the frontend, backend, trading interface, authentication, wallet functionality, API integrations, market-data visualizations, and database layer.
+  - Implemented deposit and withdrawal workflows, admin functionality, and production deployment.
+
+• 9jaCash — Production Application | Full-Stack Developer / Maintenance
+  - Maintained and optimized a production web application, focusing on database efficiency, API performance, and reliability.
+  - Improved high-load admin operations through query optimization, pagination, caching, and more efficient backend processing.
+  - Worked within an existing production codebase while protecting application data and minimizing disruptive changes.
+
+PROJECTS
+• SwiftSats — Crypto Purchase & Naira Settlement Platform | Founder / Full-Stack Developer | swiftsat.app
+  - Designed and built a platform where customers pick a supported coin and amount, receive a generated payment account, and pay in Naira before the crypto is released.
+  - Built the full stack: responsive frontend, backend logic, APIs, data handling, validation, and deployment.
+
+• MABIO — Real-Time Communication Platform
+  React, Django REST Framework, PostgreSQL, Redis, Django Channels
+  - Developed a real-time messaging app concept with instant messaging, active-status, and WebSocket communication across a React frontend and Django/PostgreSQL/Redis backend.
+
+• MZCart — E-Commerce Web Application
+  Django, PostgreSQL/SQLite, JavaScript, Bootstrap
+  - Built an end-to-end e-commerce app with authentication, product catalogues, cart and wishlist, reviews, vendor workflows, checkout integration, email workflows, and admin features.
+
+EDUCATION
+• B.Sc. Cybersecurity — Miva Open University (2026 – Expected 2029)
+
+SKILLS
+• Languages: Python, JavaScript (ES6+), HTML5, CSS3, SQL, Bash
+• Frontend: React.js, Next.js, Tailwind CSS, Bootstrap, Responsive UI
+• Backend: Django, Django REST Framework, RESTful APIs, WebSockets, Django Channels
+• Databases: PostgreSQL, SQLite, Redis
+• Tools & Deployment: Git, GitHub, Postman, Vercel, Render, Linux/WSL
+• Engineering: Authentication, API integration, payment & wallet workflows, admin dashboards, database design, performance optimization
+• Professional Development: Cybersecurity, Linux/WSL, networking fundamentals, web application security, TryHackMe labs, and continued full-stack engineering.`;
+
+    navigator.clipboard.writeText(text);
+    setCopiedResume(true);
+    setTimeout(() => setCopiedResume(false), 2200);
   };
 
   // Booking handler
@@ -553,8 +798,8 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
         });
         setTimeout(() => {
           setBookingStep(1);
-          setBookDate("");
-          setBookTime("");
+          setBookDate(getDefaultBookingDate());
+          setBookTime("10:30 AM");
           setBookInfo({ name: "", email: "", project: "", company: "" });
           setBookingStatus({ submitting: false, msg: "", err: "" });
         }, 4500);
@@ -564,7 +809,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
         setBookingStatus({
           submitting: false,
           msg: "",
-          err: "Please email Mahmud directly at mahmudolasunkami895@gmail.com",
+          err: "Email dispatch encountered latency. Please click below to confirm instantly via WhatsApp (08072410373) or email directly.",
         });
       });
   };
@@ -751,11 +996,33 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
   }
 
   return (
-    <div style={{ background: "#000000", minHeight: "100vh", color: "#ffffff", overflowX: "hidden", position: "relative" }}>
+    <div style={{ background: "var(--bg-deep)", minHeight: "100vh", color: "var(--text-primary)", overflowX: "hidden", position: "relative" }}>
       {/* ─── SCROLL PROGRESS BAR ─── */}
       <motion.div className="scroll-progress-bar" style={{ scaleX }} />
 
-      {/* ─── CLEAN SUBTLE PERSPECTIVE GRID ON SOLID BLACK ─── */}
+      {/* ─── ANIMATED MONOCHROME (BLACK & WHITE) BACKGROUND ─── */}
+      <div className="monochrome-animated-bg">
+        <div className="monochrome-ambient-orb orb-1" />
+        <div className="monochrome-ambient-orb orb-2" />
+        <div className="monochrome-ambient-orb orb-3" />
+        <div className="monochrome-mesh-shimmer" />
+        {STARDUST.map((p) => (
+          <div
+            key={p.id}
+            className="monochrome-particle"
+            style={{
+              top: p.top,
+              left: p.left,
+              width: p.size,
+              height: p.size,
+              animationDelay: p.delay,
+              animationDuration: p.duration,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* ─── CLEAN SUBTLE PERSPECTIVE GRID ─── */}
       <div className="animated-grid-overlay" />
 
       {/* ─── FLOATING TOP NAVIGATION (iOS 27 Glass Dock) ─── */}
@@ -833,6 +1100,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
             {[
               { id: "hero", label: "Overview" },
               { id: "about", label: "About" },
+              { id: "resume", label: "Resume" },
               { id: "projects", label: "Projects" },
               { id: "skills", label: "Stack" },
               { id: "process", label: "Process" },
@@ -889,6 +1157,42 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
 
           {/* Action CTA */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {/* Theme Toggle Button */}
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
+              onClick={toggleTheme}
+              className="theme-toggle-btn"
+              title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
+              aria-label="Toggle Theme"
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </motion.button>
+
+            {/* Direct WhatsApp Action Link */}
+            <a
+              href="https://wa.me/2348072410373?text=Hi%20Mahmud,%20I'm%20reaching%20out%20from%20your%20portfolio"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-shining-glass"
+              style={{
+                textDecoration: "none",
+                color: "#25D366",
+                borderColor: "rgba(37, 211, 102, 0.45)",
+                fontWeight: 700,
+                fontSize: 12,
+                padding: "6px 12px",
+                minHeight: 38,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+              title="Reach out on WhatsApp: 08072410373"
+            >
+              <span>💬</span>
+              <span className="nav-book-text">08072410373</span>
+            </a>
+
             <motion.button
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
@@ -903,7 +1207,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               style={{
                 background: "rgba(255,255,255,0.08)",
                 border: "1px solid rgba(255,255,255,0.25)",
-                color: "#ffffff",
+                color: "inherit",
                 padding: "8px 14px",
                 borderRadius: 9999,
                 fontSize: 16,
@@ -965,6 +1269,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               {[
                 { id: "hero", label: "Overview" },
                 { id: "about", label: "About & Stack" },
+                { id: "resume", label: "Resume & Experience" },
                 { id: "projects", label: "Projects" },
                 { id: "skills", label: "Capabilities" },
                 { id: "process", label: "Engineering Process" },
@@ -995,6 +1300,33 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
                   {n.label}
                 </button>
               ))}
+
+              <div style={{ display: "flex", gap: 10, marginTop: 10, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.12)" }}>
+                <button
+                  onClick={toggleTheme}
+                  className="btn-shining-glass"
+                  style={{ flex: 1, justifyContent: "center", fontSize: 13 }}
+                >
+                  {theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"}
+                </button>
+                <a
+                  href="https://wa.me/2348072410373?text=Hi%20Mahmud,%20I'm%20reaching%20out%20from%20your%20portfolio"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-shining-primary"
+                  style={{
+                    flex: 1,
+                    background: "#25D366",
+                    color: "#052e16",
+                    textDecoration: "none",
+                    fontWeight: 800,
+                    fontSize: 13,
+                    justifyContent: "center",
+                  }}
+                >
+                  💬 WhatsApp
+                </a>
+              </div>
             </motion.div>
           </>
         )}
@@ -1142,7 +1474,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               <span style={{ width: 36, height: 1, background: "linear-gradient(90deg, rgba(255,255,255,0.6), transparent)" }} />
             </div>
 
-            {/* ─── INTERACTIVE PILL DOCK (Code | Projects | Info) ─── */}
+            {/* ─── INTERACTIVE PILL DOCK (Code | Resume | Projects | Info) ─── */}
             <div
               style={{
                 display: "flex",
@@ -1163,6 +1495,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               >
                 {[
                   { key: "code", label: "Code" },
+                  { key: "resume", label: "Resume" },
                   { key: "projects", label: "Projects" },
                   { key: "info", label: "Info" },
                 ].map((tab) => {
@@ -1219,6 +1552,30 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               >
                 ⚡ Explore Work ↗
               </button>
+              <a
+                href="https://wa.me/2348072410373?text=Hi%20Mahmud,%20I'm%20reaching%20out%20from%20your%20portfolio%20regarding%20a%20project!"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-shining-glass hero-btn-sub"
+                style={{
+                  background: "#25D366",
+                  color: "#052e16",
+                  borderColor: "#4ade80",
+                  fontWeight: 800,
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                💬 WhatsApp: 08072410373
+              </a>
+              <button
+                onClick={() => setShowResumeModal(true)}
+                className="btn-shining-glass hero-btn-sub"
+              >
+                📄 View Resume
+              </button>
               <button
                 onClick={() => scrollTo("booking")}
                 className="btn-shining-glass hero-btn-sub"
@@ -1229,8 +1586,9 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
                 href="/Mahmud_Bashir_Resume_v2.docx"
                 download="Mahmud_Bashir_Olasunkanmi_Resume.docx"
                 className="btn-shining-glass hero-btn-sub"
+                title="Download Word DOCX"
               >
-                📄 Resume
+                ⬇️ Download .docx
               </a>
             </div>
           </div>
@@ -1271,13 +1629,120 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
                   <span style={{ color: "#818cf8", fontWeight: 700 }}>class</span> <span style={{ color: "#ffffff", fontWeight: 800 }}>FullStackEngineer</span>:{"\n"}
                   {"    "}developer = <span style={{ color: "#38bdf8" }}>"Mahmud Bashir Olasunkanmi"</span>{"\n"}
                   {"    "}headquarters = <span style={{ color: "#38bdf8" }}>"Abuja, Nigeria"</span>{"\n"}
+                  {"    "}experience = [<span style={{ color: "#38bdf8" }}>"MBOVIBE Systems"</span>, <span style={{ color: "#38bdf8" }}>"Axiom Wallets"</span>, <span style={{ color: "#38bdf8" }}>"9jaCash"</span>]{"\n"}
+                  {"    "}projects = [<span style={{ color: "#38bdf8" }}>"SwiftSats"</span>, <span style={{ color: "#38bdf8" }}>"MABIO"</span>, <span style={{ color: "#38bdf8" }}>"MZCart"</span>]{"\n"}
+                  {"    "}education = <span style={{ color: "#38bdf8" }}>"B.Sc. Cybersecurity - Miva Open Univ"</span>{"\n"}
                   {"    "}core_stack = [
-                  {"\n        "}<span style={{ color: "#38bdf8" }}>"Python"</span>, <span style={{ color: "#38bdf8" }}>"Django REST Framework"</span>, <span style={{ color: "#38bdf8" }}>"React 19"</span>, <span style={{ color: "#38bdf8" }}>"PostgreSQL"</span>, <span style={{ color: "#38bdf8" }}>"Stripe"</span>
+                  {"\n        "}<span style={{ color: "#38bdf8" }}>"Python"</span>, <span style={{ color: "#38bdf8" }}>"Django REST"</span>, <span style={{ color: "#38bdf8" }}>"React.js"</span>, <span style={{ color: "#38bdf8" }}>"PostgreSQL"</span>, <span style={{ color: "#38bdf8" }}>"WebSockets"</span>
                   {"\n    "}]
                   {"\n    "}metrics = &#123; <span style={{ color: "#e4e4e7" }}>"latency"</span>: <span style={{ color: "#34d399", fontWeight: 700 }}>"&lt;50ms"</span>, <span style={{ color: "#e4e4e7" }}>"uptime"</span>: <span style={{ color: "#34d399", fontWeight: 700 }}>"99.9%"</span>, <span style={{ color: "#e4e4e7" }}>"satisfaction"</span>: <span style={{ color: "#34d399", fontWeight: 700 }}>"100%"</span> &#125;
-                  {"\n    "}status = <span style={{ color: "#38bdf8", fontWeight: 700 }}>"Available for High-Impact Projects"</span>
+                  {"\n    "}status = <span style={{ color: "#38bdf8", fontWeight: 700 }}>"Available for Remote & International Roles"</span>
                 </code>
               </pre>
+            </div>
+          </SpotlightCard>
+        )}
+
+        {/* ─── DYNAMIC HERO RESUME QUICK-VIEW ─── */}
+        {activeTab === "resume" && (
+          <SpotlightCard
+            style={{
+              padding: "clamp(22px, 3.5vw, 36px)",
+              borderRadius: 20,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: 12,
+                borderBottom: "1px solid rgba(255, 255, 255, 0.12)",
+                paddingBottom: 16,
+                marginBottom: 20,
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 20 }}>📄</span>
+                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 800, color: "#ffffff" }}>
+                    Mahmud Bashir Olasunkanmi
+                  </span>
+                  <span className="floating-chip" style={{ fontSize: 11, padding: "3px 10px" }}>
+                    Full-Stack Developer
+                  </span>
+                </div>
+                <div style={{ fontSize: 12, color: "#a1a1aa", marginTop: 4 }}>
+                  React • Django • Python • Abuja, Nigeria • +234 807 241 0373
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button
+                  onClick={() => setShowResumeModal(true)}
+                  className="btn-shining-primary"
+                  style={{ padding: "6px 14px", fontSize: 12 }}
+                >
+                  🔍 Full Executive Modal
+                </button>
+                <a
+                  href="/Mahmud_Bashir_Resume_v2.docx"
+                  download="Mahmud_Bashir_Olasunkanmi_Resume.docx"
+                  className="btn-shining-glass"
+                  style={{ padding: "6px 14px", fontSize: 12, textDecoration: "none" }}
+                >
+                  ⬇️ Download .docx
+                </a>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, marginBottom: 20 }}>
+              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "16px" }}>
+                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: "#6366f1", marginBottom: 8, textTransform: "uppercase" }}>
+                  💼 Work Experience
+                </div>
+                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>MBOVIBE Systems (2024–Present)</div>
+                <div style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 8 }}>Founder / Full-Stack Developer • End-to-end web apps</div>
+                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>Axiom Wallets</div>
+                <div style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 8 }}>Full-Stack Developer • Hybrid trading & wallet platform</div>
+                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>9jaCash</div>
+                <div style={{ fontSize: 11, color: "#a1a1aa" }}>Full-Stack Developer / Maintenance • Query tuning & caching</div>
+              </div>
+
+              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "16px" }}>
+                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: "#38bdf8", marginBottom: 8, textTransform: "uppercase" }}>
+                  🚀 Key Projects
+                </div>
+                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>SwiftSats (swiftsat.app)</div>
+                <div style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 8 }}>Crypto Purchase & Naira Settlement Platform</div>
+                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>MABIO</div>
+                <div style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 8 }}>React + Django Channels real-time messaging</div>
+                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>MZCart</div>
+                <div style={{ fontSize: 11, color: "#a1a1aa" }}>Full-featured e-commerce web platform</div>
+              </div>
+
+              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "16px" }}>
+                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: "#34d399", marginBottom: 8, textTransform: "uppercase" }}>
+                  🎓 Education & Security
+                </div>
+                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>B.Sc. Cybersecurity</div>
+                <div style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 8 }}>Miva Open University • 2026 – Expected 2029</div>
+                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>Security Focus</div>
+                <div style={{ fontSize: 11, color: "#a1a1aa" }}>Linux/WSL, Networking, TryHackMe labs, Web Security</div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, paddingTop: 4 }}>
+              <span style={{ fontSize: 12, color: "#a1a1aa" }}>
+                Open for remote and international Full-Stack, Django/Python, and React roles.
+              </span>
+              <button
+                onClick={() => scrollTo("resume")}
+                className="btn-shining-glass"
+                style={{ padding: "6px 16px", fontSize: 12 }}
+              >
+                View Full Timeline Section ↓
+              </button>
             </div>
           </SpotlightCard>
         )}
@@ -1468,6 +1933,231 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
         </div>
       </section>
 
+      {/* ─── RESUME & CAREER TRACK RECORD SECTION ─── */}
+      <section
+        id="resume"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          padding: "70px clamp(16px, 4vw, 40px)",
+          maxWidth: 1100,
+          margin: "0 auto",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: 12,
+              letterSpacing: 2,
+              color: "#a1a1aa",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}
+          >
+            // VERIFIED TRACK RECORD & CREDENTIALS
+          </div>
+          <h2
+            className="text-shining-titanium"
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "clamp(28px, 4vw, 46px)",
+              fontWeight: 800,
+              letterSpacing: "-1px",
+              marginBottom: 14,
+            }}
+          >
+            Resume & Experience
+          </h2>
+          <p style={{ maxWidth: 700, margin: "0 auto", color: "#a1a1aa", fontSize: 15, lineHeight: 1.7 }}>
+            Full-Stack Developer building and deploying complete web applications since 2024. Proven record in high-concurrency Python & Django backends, reactive React interfaces, and database performance optimization.
+          </p>
+
+          {/* Quick Action Button Strip */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 24, flexWrap: "wrap" }}>
+            <button
+              onClick={() => setShowResumeModal(true)}
+              className="btn-shining-primary"
+              style={{ padding: "10px 22px", fontSize: 13 }}
+            >
+              📄 View Interactive Resume
+            </button>
+            <a
+              href="/Mahmud_Bashir_Resume_v2.docx"
+              download="Mahmud_Bashir_Olasunkanmi_Resume.docx"
+              className="btn-shining-glass"
+              style={{ padding: "10px 22px", fontSize: 13, textDecoration: "none" }}
+            >
+              ⬇️ Download .docx
+            </a>
+            <button
+              onClick={() => {
+                setShowResumeModal(true);
+                setTimeout(() => window.print(), 350);
+              }}
+              className="btn-shining-glass"
+              style={{ padding: "10px 22px", fontSize: 13 }}
+            >
+              🖨️ Print / Save as PDF
+            </button>
+            <button
+              onClick={copyResumeText}
+              className="btn-shining-glass"
+              style={{ padding: "10px 22px", fontSize: 13 }}
+            >
+              {copiedResume ? "✓ Text Copied!" : "📋 Copy Plain Text"}
+            </button>
+          </div>
+        </div>
+
+        {/* Career Objective Card */}
+        <SpotlightCard style={{ padding: "clamp(22px, 3.5vw, 32px)", marginBottom: 30 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <span style={{ fontSize: 20 }}>🎯</span>
+            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+              Career Objective
+            </h3>
+          </div>
+          <p style={{ color: "#d4d4d8", fontSize: 14.5, lineHeight: 1.75, margin: 0 }}>
+            Full-Stack Developer building and deploying complete web applications since 2024, with a focus on React, Django, Python, REST APIs, and PostgreSQL. Experienced in taking products from interface and backend development through database design, API integration, authentication, payment and wallet workflows, admin systems, and production deployment. Open to remote and international Full-Stack, Django/Python, React, and Web Development roles.
+          </p>
+        </SpotlightCard>
+
+        {/* Main Resume Grid: Left Timeline / Right Credentials & Skills */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 28, marginBottom: 30 }}>
+          
+          {/* Left Column: Work Experience Timeline */}
+          <SpotlightCard style={{ padding: "clamp(24px, 3.5vw, 36px)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24, borderBottom: "1px solid rgba(255,255,255,0.12)", paddingBottom: 14 }}>
+              <span style={{ fontSize: 22 }}>💼</span>
+              <div>
+                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+                  Work Experience
+                </h3>
+                <span style={{ fontSize: 12, color: "#a1a1aa" }}>Active Roles & Client Projects</span>
+              </div>
+            </div>
+
+            <div className="resume-timeline">
+              {WORK_EXPERIENCE.map((exp, idx) => (
+                <div key={idx} className="resume-timeline-item">
+                  <div className="resume-timeline-node" />
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 6, marginBottom: 4 }}>
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 800, color: "#ffffff" }}>
+                      {exp.company}
+                    </div>
+                    <span className="floating-chip" style={{ fontSize: 10, padding: "2px 8px" }}>
+                      {exp.period}
+                    </span>
+                  </div>
+                  
+                  <div style={{ fontSize: 13, color: "#818cf8", fontWeight: 700, marginBottom: 8 }}>
+                    {exp.role} <span style={{ color: "#71717a", fontWeight: 400 }}>• {exp.location}</span>
+                  </div>
+
+                  <ul style={{ margin: "4px 0 12px 18px", padding: 0, color: "#d4d4d8", fontSize: 13, lineHeight: 1.65 }}>
+                    {exp.bullets.map((b, bIdx) => (
+                      <li key={bIdx} style={{ marginBottom: 6 }}>
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {exp.tech.map((t) => (
+                      <span key={t} className="resume-skills-badge" style={{ fontSize: 11, padding: "3px 8px" }}>
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SpotlightCard>
+
+          {/* Right Column: Education & Skills Matrix */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+            
+            {/* Education & Professional Development */}
+            <SpotlightCard style={{ padding: "clamp(24px, 3.5vw, 36px)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, borderBottom: "1px solid rgba(255,255,255,0.12)", paddingBottom: 14 }}>
+                <span style={{ fontSize: 22 }}>🎓</span>
+                <div>
+                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+                    Education & Security
+                  </h3>
+                  <span style={{ fontSize: 12, color: "#a1a1aa" }}>Academic Credentials & Cybersecurity Specialization</span>
+                </div>
+              </div>
+
+              <div style={{ background: "rgba(99, 102, 241, 0.08)", border: "1px solid rgba(99, 102, 241, 0.25)", borderRadius: 14, padding: "16px 20px", marginBottom: 20 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6, marginBottom: 4 }}>
+                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 800, color: "#ffffff" }}>
+                    {EDUCATION_DATA.degree}
+                  </span>
+                  <span className="floating-chip" style={{ fontSize: 10, padding: "2px 8px", background: "rgba(34, 197, 94, 0.15)", borderColor: "rgba(34, 197, 94, 0.4)", color: "#4ade80" }}>
+                    {EDUCATION_DATA.period}
+                  </span>
+                </div>
+                <div style={{ fontSize: 13, color: "#38bdf8", fontWeight: 700, marginBottom: 6 }}>
+                  {EDUCATION_DATA.institution}
+                </div>
+                <p style={{ margin: 0, fontSize: 12.5, color: "#a1a1aa", lineHeight: 1.6 }}>
+                  {EDUCATION_DATA.details}
+                </p>
+              </div>
+
+              <div>
+                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12.5, fontWeight: 700, color: "#ffffff", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                  🛡️ Professional Development
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {EDUCATION_DATA.professionalDev.map((dev, dIdx) => (
+                    <div key={dIdx} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "#d4d4d8" }}>
+                      <span style={{ color: "#22c55e", fontSize: 12 }}>✓</span>
+                      <span>{dev}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </SpotlightCard>
+
+            {/* Direct Skills Matrix from Resume */}
+            <SpotlightCard style={{ padding: "clamp(24px, 3.5vw, 36px)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18, borderBottom: "1px solid rgba(255,255,255,0.12)", paddingBottom: 14 }}>
+                <span style={{ fontSize: 22 }}>⚡</span>
+                <div>
+                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+                    Skills Matrix (6 Domains)
+                  </h3>
+                  <span style={{ fontSize: 12, color: "#a1a1aa" }}>Direct Competencies from Official Resume</span>
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14 }}>
+                {RESUME_SKILL_GROUPS.map((group, gIdx) => (
+                  <div key={gIdx} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "12px 14px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 8, fontFamily: "'Space Grotesk', sans-serif" }}>
+                      <span>{group.icon}</span>
+                      <span>{group.title}</span>
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                      {group.skills.map((s) => (
+                        <span key={s} className="resume-skills-badge" style={{ fontSize: 10.5, padding: "2px 7px" }}>
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </SpotlightCard>
+
+          </div>
+        </div>
+      </section>
+
       {/* ─── FEATURED PROJECTS (CARDS WITH FILTER LAYOUT ANIMATION) ─── */}
       <section
         id="projects"
@@ -1508,7 +2198,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
 
           {/* Category Filter Tabs with Sliding Active Pill */}
           <div className="filter-tabs-wrapper">
-            {["All", "Full Stack", "Backend / API", "System Design"].map((cat) => {
+            {["All", "Fintech / Web3", "Full Stack", "Fintech / Production", "System Design"].map((cat) => {
               const isSelected = projectFilter === cat;
               return (
                 <button
@@ -1859,7 +2549,7 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
                       className="btn-shining-primary"
                       style={{ flex: 1, textDecoration: "none", fontSize: 13, padding: "9px 14px" }}
                     >
-                      Live Demo ↗
+                      {proj.liveLabel || "Live Demo ↗"}
                     </a>
                   </div>
                 </SpotlightCard>
@@ -2374,11 +3064,46 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
 
           {bookingStatus.msg ? (
             <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid #ffffff", padding: 24, borderRadius: 16, textAlign: "center", fontWeight: 700 }}>
-              {bookingStatus.msg}
+              <div style={{ fontSize: 18, marginBottom: 8 }}>✅ {bookingStatus.msg}</div>
+              <p style={{ fontSize: 13, color: "#a1a1aa", marginBottom: 16 }}>Need to follow up or connect immediately? Chat directly on WhatsApp:</p>
+              <a
+                href={getWhatsAppBookingUrl(bookDate, bookTime, bookInfo)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-shining-primary"
+                style={{ background: "#25D366", color: "#052e16", textDecoration: "none", fontWeight: 800 }}
+              >
+                💬 Open WhatsApp Chat (08072410373)
+              </a>
             </div>
           ) : bookingStatus.err ? (
-            <div style={{ background: "rgba(239,68,68,0.15)", border: "1px solid #ef4444", color: "#fca5a5", padding: 20, borderRadius: 16, textAlign: "center" }}>
-              {bookingStatus.err}
+            <div style={{ background: "rgba(239,68,68,0.15)", border: "1px solid #ef4444", color: "#fca5a5", padding: 24, borderRadius: 16, textAlign: "center" }}>
+              <div style={{ fontWeight: 700, marginBottom: 8 }}>⚠️ {bookingStatus.err}</div>
+              <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginTop: 16 }}>
+                <a
+                  href={getWhatsAppBookingUrl(bookDate, bookTime, bookInfo)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-shining-primary"
+                  style={{ background: "#25D366", color: "#052e16", textDecoration: "none", fontWeight: 800 }}
+                >
+                  💬 Book Directly via WhatsApp (08072410373)
+                </a>
+                <a
+                  href={`mailto:mahmudolasunkanmi895@gmail.com?subject=Discovery Session Request&body=Hi Mahmud, I would like to schedule a session on ${bookDate} at ${bookTime}. Project: ${encodeURIComponent(bookInfo.project)}`}
+                  className="btn-shining-glass"
+                  style={{ textDecoration: "none" }}
+                >
+                  ✉️ Email Directly
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setBookingStatus({ submitting: false, msg: "", err: "" })}
+                  className="btn-shining-glass"
+                >
+                  ← Edit & Retry
+                </button>
+              </div>
             </div>
           ) : bookingStep === 1 ? (
             <div>
@@ -2454,7 +3179,24 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
                 </div>
               )}
 
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginTop: 24 }}>
+                <a
+                  href={getWhatsAppBookingUrl(bookDate, bookTime)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-shining-glass"
+                  style={{
+                    textDecoration: "none",
+                    color: "#25D366",
+                    borderColor: "rgba(37, 211, 102, 0.45)",
+                    fontWeight: 700,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  💬 Quick Book via WhatsApp (08072410373)
+                </a>
                 <button
                   onClick={() => setBookingStep(2)}
                   disabled={!bookDate || !bookTime}
@@ -2534,15 +3276,33 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
                 style={{ width: "100%", padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, marginBottom: 20 }}
               />
 
-              <div style={{ display: "flex", gap: 12 }}>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                 <button type="button" onClick={() => setBookingStep(1)} className="btn-shining-glass">
                   ← Back
                 </button>
+                <a
+                  href={getWhatsAppBookingUrl(bookDate, bookTime, bookInfo)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-shining-glass"
+                  style={{
+                    background: "#25D366",
+                    color: "#052e16",
+                    borderColor: "#4ade80",
+                    fontWeight: 800,
+                    textDecoration: "none",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  💬 Book on WhatsApp (08072410373)
+                </a>
                 <button
                   type="submit"
                   disabled={bookingStatus.submitting}
                   className="btn-shining-primary"
-                  style={{ flex: 1 }}
+                  style={{ flex: 1, minWidth: 200 }}
                 >
                   {bookingStatus.submitting ? "Booking..." : "Confirm Discovery Session ✅"}
                 </button>
@@ -2597,12 +3357,12 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               {
                 icon: "✉️",
                 label: "Email",
-                val: "mahmudolasunkami895@gmail.com",
-                href: "mailto:mahmudolasunkami895@gmail.com",
+                val: "mahmudolasunkanmi895@gmail.com",
+                href: "mailto:mahmudolasunkanmi895@gmail.com",
               },
               {
                 icon: "💬",
-                label: "WhatsApp",
+                label: "WhatsApp / Phone",
                 val: "+234 807 241 0373",
                 href: "https://wa.me/2348072410373",
               },
@@ -2615,8 +3375,14 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
               {
                 icon: "💼",
                 label: "LinkedIn",
-                val: "linkedin.com/in/mahmud-olasunkanmi",
-                href: "https://linkedin.com/in/mahmud-olasunkanmi",
+                val: "linkedin.com/in/mahmud-olasunkanmi-29b231384",
+                href: "https://linkedin.com/in/mahmud-olasunkanmi-29b231384",
+              },
+              {
+                icon: "📍",
+                label: "Location",
+                val: "Abuja, Nigeria (Open to Remote)",
+                href: "https://maps.google.com/?q=Abuja,Nigeria",
               },
             ].map((c) => (
               <a
@@ -2717,6 +3483,300 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
         </div>
       </section>
 
+      {/* ─── FULL EXECUTIVE RESUME MODAL & PRINT CONTAINER ─── */}
+      <AnimatePresence>
+        {showResumeModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="resume-modal-overlay"
+            onClick={() => setShowResumeModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 20 }}
+              transition={{ duration: 0.22 }}
+              className="resume-paper-container"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Action Toolbar */}
+              <div className="resume-paper-toolbar">
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <TitaniumLogo size={28} />
+                  <div>
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 14, color: "#ffffff" }}>
+                      MAHMUD BASHIR OLASUNKANMI
+                    </div>
+                    <div style={{ fontSize: 11, color: "#a1a1aa" }}>
+                      Curriculum Vitae • Verified Full-Stack Profile
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    onClick={() => window.print()}
+                    className="btn-shining-primary"
+                    style={{ padding: "6px 14px", fontSize: 12 }}
+                  >
+                    🖨️ Print / Save PDF
+                  </button>
+                  <a
+                    href="/Mahmud_Bashir_Resume_v2.docx"
+                    download="Mahmud_Bashir_Olasunkanmi_Resume.docx"
+                    className="btn-shining-glass"
+                    style={{ padding: "6px 14px", fontSize: 12, textDecoration: "none" }}
+                  >
+                    ⬇️ Download .docx
+                  </a>
+                  <button
+                    onClick={copyResumeText}
+                    className="btn-shining-glass"
+                    style={{ padding: "6px 14px", fontSize: 12 }}
+                  >
+                    {copiedResume ? "✓ Copied" : "📋 Copy Text"}
+                  </button>
+                  <button
+                    onClick={() => setShowResumeModal(false)}
+                    className="btn-shining-glass"
+                    style={{ padding: "6px 14px", fontSize: 12 }}
+                  >
+                    ✕ Close
+                  </button>
+                </div>
+              </div>
+
+              {/* Printable Resume Sheet Content (Exact match to uploaded Resume!) */}
+              <div id="printable-resume" className="resume-sheet">
+                {/* Header */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, borderBottom: "2px solid rgba(255,255,255,0.18)", paddingBottom: 20, marginBottom: 24 }}>
+                  <div>
+                    <h1 style={{ fontSize: "clamp(24px, 3.5vw, 32px)", fontWeight: 900, letterSpacing: "-0.5px", margin: 0, textTransform: "uppercase" }}>
+                      MAHMUD BASHIR OLASUNKANMI
+                    </h1>
+                    <div className="print-accent" style={{ fontSize: 17, fontWeight: 700, color: "#38bdf8", marginTop: 4 }}>
+                      Full-Stack Developer
+                    </div>
+                    <div style={{ fontSize: 13, color: "#a1a1aa", marginTop: 2, fontWeight: 600 }}>
+                      React • Django • Python
+                    </div>
+                  </div>
+
+                  <div style={{ fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.6, textAlign: "right" }}>
+                    <div>📍 <strong>Location:</strong> Abuja, Nigeria</div>
+                    <div>📞 <strong>Phone:</strong> +234 807 241 0373</div>
+                    <div>✉️ <strong>Email:</strong> mahmudolasunkanmi895@gmail.com</div>
+                    <div>🌐 <strong>Portfolio:</strong> m-b-owebdev-c31z.onrender.com</div>
+                    <div>🐙 <strong>GitHub:</strong> github.com/Muhamzy-ui</div>
+                    <div>💼 <strong>LinkedIn:</strong> linkedin.com/in/mahmud-olasunkanmi-29b231384</div>
+                  </div>
+                </div>
+
+                {/* Two-Column Layout (Matching PDF Resume Structure) */}
+                <div className="resume-grid-two-col">
+                  
+                  {/* Left Column: Contact, Education, Skills, Professional Development */}
+                  <div className="resume-col-sidebar">
+                    
+                    {/* EDUCATION */}
+                    <div style={{ marginBottom: 24 }}>
+                      <h3 style={{ fontSize: 13, letterSpacing: 1.5, textTransform: "uppercase", color: "#6366f1", marginBottom: 10 }}>
+                        EDUCATION
+                      </h3>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: "#ffffff" }}>
+                        B.Sc. Cybersecurity
+                      </div>
+                      <div style={{ fontSize: 13, color: "#38bdf8", fontWeight: 600 }}>
+                        Miva Open University
+                      </div>
+                      <div style={{ fontSize: 12, color: "#a1a1aa" }}>
+                        2026 – Expected 2029
+                      </div>
+                    </div>
+
+                    {/* SKILLS */}
+                    <div style={{ marginBottom: 24 }}>
+                      <h3 style={{ fontSize: 13, letterSpacing: 1.5, textTransform: "uppercase", color: "#6366f1", marginBottom: 12 }}>
+                        SKILLS
+                      </h3>
+
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>Languages</div>
+                        <div style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.5 }}>
+                          Python, JavaScript (ES6+), HTML5, CSS3, SQL, Bash
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>Frontend</div>
+                        <div style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.5 }}>
+                          React.js, Next.js, Tailwind CSS, Bootstrap, Responsive UI
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>Backend</div>
+                        <div style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.5 }}>
+                          Django, Django REST Framework, RESTful APIs, WebSockets, Django Channels
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>Databases</div>
+                        <div style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.5 }}>
+                          PostgreSQL, SQLite, Redis
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>Tools & Deployment</div>
+                        <div style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.5 }}>
+                          Git, GitHub, Postman, Vercel, Render, Linux/WSL
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>Engineering</div>
+                        <div style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.5 }}>
+                          Authentication, API integration, payment & wallet workflows, admin dashboards, database design, performance optimization
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* PROFESSIONAL DEVELOPMENT */}
+                    <div>
+                      <h3 style={{ fontSize: 13, letterSpacing: 1.5, textTransform: "uppercase", color: "#6366f1", marginBottom: 10 }}>
+                        PROFESSIONAL DEVELOPMENT
+                      </h3>
+                      <div style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.6 }}>
+                        Cybersecurity, Linux/WSL, networking fundamentals, web application security, TryHackMe labs, and continued full-stack engineering.
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Career Objective, Work Experience, Projects */}
+                  <div>
+                    
+                    {/* CAREER OBJECTIVE */}
+                    <div style={{ marginBottom: 28 }}>
+                      <h3 style={{ fontSize: 13, letterSpacing: 1.5, textTransform: "uppercase", color: "#6366f1", marginBottom: 10 }}>
+                        CAREER OBJECTIVE
+                      </h3>
+                      <p style={{ fontSize: 13.5, color: "#d4d4d8", lineHeight: 1.7, margin: 0 }}>
+                        Full-Stack Developer building and deploying complete web applications since 2024, with a focus on React, Django, Python, REST APIs, and PostgreSQL. Experienced in taking products from interface and backend development through database design, API integration, authentication, payment and wallet workflows, admin systems, and production deployment. Open to remote and international Full-Stack, Django/Python, React, and Web Development roles.
+                      </p>
+                    </div>
+
+                    {/* WORK EXPERIENCE */}
+                    <div style={{ marginBottom: 28 }}>
+                      <h3 style={{ fontSize: 13, letterSpacing: 1.5, textTransform: "uppercase", color: "#6366f1", marginBottom: 14 }}>
+                        WORK EXPERIENCE
+                      </h3>
+
+                      {/* MBOVIBE */}
+                      <div style={{ marginBottom: 20 }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                          MBOVIBE Systems — Abuja, Nigeria
+                        </div>
+                        <div style={{ fontSize: 12.5, color: "#38bdf8", fontWeight: 700, marginBottom: 6 }}>
+                          Founder / Full-Stack Developer | 2024 – Present
+                        </div>
+                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.65 }}>
+                          <li>Build and deploy full-stack web applications for digital products and client requirements across frontend, backend, databases, APIs, and production infrastructure.</li>
+                          <li>Own development end-to-end, from requirements and interface implementation to backend architecture, testing, and deployment.</li>
+                          <li>Develop secure authentication, transactional workflows, admin dashboards, and database-backed APIs.</li>
+                        </ul>
+                      </div>
+
+                      {/* Axiom Wallets */}
+                      <div style={{ marginBottom: 20 }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                          Axiom Wallets — Client Project
+                        </div>
+                        <div style={{ fontSize: 12.5, color: "#38bdf8", fontWeight: 700, marginBottom: 6 }}>
+                          Full-Stack Developer | Client Delivery
+                        </div>
+                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.65 }}>
+                          <li>Built and deployed a full-stack trading application combining capabilities of decentralized trading platforms and centralized exchanges.</li>
+                          <li>Developed the frontend, backend, trading interface, authentication, wallet functionality, API integrations, market-data visualizations, and database layer.</li>
+                          <li>Implemented deposit and withdrawal workflows, admin functionality, and production deployment.</li>
+                        </ul>
+                      </div>
+
+                      {/* 9jaCash */}
+                      <div>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                          9jaCash — Production Application
+                        </div>
+                        <div style={{ fontSize: 12.5, color: "#38bdf8", fontWeight: 700, marginBottom: 6 }}>
+                          Full-Stack Developer / Maintenance
+                        </div>
+                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.65 }}>
+                          <li>Maintained and optimized a production web application, focusing on database efficiency, API performance, and reliability.</li>
+                          <li>Improved high-load admin operations through query optimization, pagination, caching, and more efficient backend processing.</li>
+                          <li>Worked within an existing production codebase while protecting application data and minimizing disruptive changes.</li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    {/* PROJECTS */}
+                    <div>
+                      <h3 style={{ fontSize: 13, letterSpacing: 1.5, textTransform: "uppercase", color: "#6366f1", marginBottom: 14 }}>
+                        PROJECTS
+                      </h3>
+
+                      {/* SwiftSats */}
+                      <div style={{ marginBottom: 16 }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                          SwiftSats — Crypto Purchase & Naira Settlement Platform
+                        </div>
+                        <div style={{ fontSize: 12.5, color: "#38bdf8", fontWeight: 700, marginBottom: 6 }}>
+                          Founder / Full-Stack Developer | swiftsat.app
+                        </div>
+                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.65 }}>
+                          <li>Designed and built a platform where customers pick a supported coin and amount, receive a generated payment account, and pay in Naira before the crypto is released.</li>
+                          <li>Built the full stack: responsive frontend, backend logic, APIs, data handling, validation, and deployment.</li>
+                        </ul>
+                      </div>
+
+                      {/* MABIO */}
+                      <div style={{ marginBottom: 16 }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                          MABIO — Real-Time Communication Platform
+                        </div>
+                        <div style={{ fontSize: 12, color: "#a1a1aa", fontWeight: 600, marginBottom: 6 }}>
+                          React, Django REST Framework, PostgreSQL, Redis, Django Channels
+                        </div>
+                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.65 }}>
+                          <li>Developed a real-time messaging app concept with instant messaging, active-status, and WebSocket communication across a React frontend and Django/PostgreSQL/Redis backend.</li>
+                        </ul>
+                      </div>
+
+                      {/* MZCart */}
+                      <div>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                          MZCart — E-Commerce Web Application
+                        </div>
+                        <div style={{ fontSize: 12, color: "#a1a1aa", fontWeight: 600, marginBottom: 6 }}>
+                          Django, PostgreSQL/SQLite, JavaScript, Bootstrap
+                        </div>
+                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.65 }}>
+                          <li>Built an end-to-end e-commerce app with authentication, product catalogues, cart and wishlist, reviews, vendor workflows, checkout integration, email workflows, and admin features.</li>
+                        </ul>
+                      </div>
+
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ─── FOOTER WITH BACK-TO-TOP BUTTON ─── */}
       <footer
         style={{
@@ -2777,6 +3837,18 @@ CONTACT = "mahmudolasunkami895@gmail.com"`;
           </div>
         </div>
       </footer>
+
+      {/* ─── FLOATING WHATSAPP BUTTON (08072410373) ─── */}
+      <a
+        href="https://wa.me/2348072410373?text=Hi%20Mahmud,%20I'm%20reaching%20out%20from%20your%20portfolio!"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="floating-whatsapp-btn"
+        title="Chat with Mahmud on WhatsApp: 08072410373"
+      >
+        <span className="floating-whatsapp-pulse" />
+        <span>💬 WhatsApp: 08072410373</span>
+      </a>
     </div>
   );
 }
