@@ -530,10 +530,9 @@ const Stars = ({ count = 5, size = 15 }) => (
       .map((_, i) => (
         <span
           key={i}
+          className={i < count ? "star-active" : "star-inactive"}
           style={{
             fontSize: size,
-            color: i < count ? "#ffffff" : "rgba(255,255,255,0.18)",
-            filter: i < count ? "drop-shadow(0 0 8px rgba(255,255,255,0.75))" : "none",
             display: "inline-block",
             transition: "all 0.2s",
           }}
@@ -926,7 +925,7 @@ SKILLS
   // ─── BLOG POST MODAL VIEW ──────────────────────────────────────────────────
   if (selectedBlog) {
     return (
-      <div style={{ background: "#05060a", minHeight: "100vh", color: "#ffffff", padding: "40px 20px" }}>
+      <div style={{ background: "var(--bg-deep)", minHeight: "100vh", color: "var(--text-primary)", padding: "40px 20px" }}>
         <div style={{ maxWidth: 840, margin: "0 auto" }}>
           <button
             onClick={() => setSelectedBlog(null)}
@@ -939,18 +938,19 @@ SKILLS
             <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 20 }}>
               <span
                 style={{
-                  background: "rgba(255,255,255,0.1)",
-                  border: "1px solid rgba(255,255,255,0.25)",
+                  background: "var(--input-bg)",
+                  border: "1px solid var(--border-shining)",
                   padding: "4px 14px",
                   borderRadius: 9999,
                   fontSize: 12,
                   fontFamily: "'Space Grotesk', sans-serif",
                   fontWeight: 700,
+                  color: "var(--text-primary)",
                 }}
               >
                 {selectedBlog.tag}
               </span>
-              <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
+              <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
                 {selectedBlog.date} • {selectedBlog.rt} read
               </span>
             </div>
@@ -972,7 +972,7 @@ SKILLS
                 color: "#a1a1aa",
                 lineHeight: 1.6,
                 marginBottom: 36,
-                borderBottom: "1px solid rgba(255,255,255,0.12)",
+                borderBottom: "1px solid var(--border-subtle)",
                 paddingBottom: 24,
               }}
             >
@@ -982,7 +982,7 @@ SKILLS
               style={{
                 fontSize: "16px",
                 lineHeight: 1.9,
-                color: "#e4e4e7",
+                color: "var(--text-secondary)",
                 whiteSpace: "pre-wrap",
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
               }}
@@ -1108,7 +1108,7 @@ SKILLS
                     position: "relative",
                     background: "transparent",
                     border: "none",
-                    color: isActive ? "#ffffff" : "#a1a1aa",
+                    color: isActive ? "var(--text-primary)" : "var(--text-secondary)",
                     fontFamily: "'Plus Jakarta Sans', sans-serif",
                     fontSize: 13,
                     fontWeight: 600,
@@ -1286,7 +1286,7 @@ SKILLS
                     background: "transparent",
                     border: "none",
                     textAlign: "left",
-                    color: "#ffffff",
+                    color: "var(--text-primary)",
                     fontFamily: "'Space Grotesk', sans-serif",
                     fontSize: 15,
                     fontWeight: 700,
@@ -1386,7 +1386,7 @@ SKILLS
                   boxShadow: "0 0 8px #22c55e",
                 }}
               />
-              <span style={{ fontSize: 11, color: "#d4d4d8", fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700 }}>
+              <span style={{ fontSize: 11, color: "var(--text-secondary)", fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700 }}>
                 ONLINE
               </span>
             </div>
@@ -1403,7 +1403,7 @@ SKILLS
                 fontFamily: "'Space Grotesk', sans-serif",
                 fontSize: "clamp(15px, 2.2vw, 21px)",
                 fontWeight: 700,
-                color: "#e2e8f0",
+                color: "var(--text-secondary)",
                 letterSpacing: "-0.2px",
                 marginBottom: 12,
               }}
@@ -1422,7 +1422,7 @@ SKILLS
                 minHeight: 24,
               }}
             >
-              <span style={{ color: "#ffffff", fontWeight: 700 }}>Expertise: </span>
+              <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>Expertise: </span>
               <Typewriter
                 phrases={[
                   "High-Throughput Django REST Framework APIs",
@@ -1457,7 +1457,7 @@ SKILLS
               }}
             >
               <span style={{ width: 36, height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.6))" }} />
-              <span style={{ fontFamily: "'Space Grotesk', monospace", fontSize: 11, letterSpacing: 2, color: "#ffffff", fontWeight: 700 }}>
+              <span style={{ fontFamily: "'Space Grotesk', monospace", fontSize: 11, letterSpacing: 2, color: "var(--text-primary)", fontWeight: 700 }}>
                 ABUJA, NIGERIA 🇳🇬
               </span>
               <span style={{ width: 36, height: 1, background: "linear-gradient(90deg, rgba(255,255,255,0.6), transparent)" }} />
@@ -1476,8 +1476,8 @@ SKILLS
                   display: "inline-flex",
                   padding: 4,
                   gap: 4,
-                  background: "rgba(18, 18, 24, 0.9)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  background: "var(--pill-bg)",
+                  border: "1px solid var(--border-subtle)",
                   borderRadius: 9999,
                   boxShadow: "0 6px 20px rgba(0,0,0,0.8)",
                 }}
@@ -1507,7 +1507,7 @@ SKILLS
                         fontWeight: 700,
                         fontSize: 13,
                         background: "transparent",
-                        color: isActive ? "#000000" : "#a1a1aa",
+                        color: isActive ? "var(--bg-deep)" : "var(--text-secondary)",
                         transition: "color 0.15s ease",
                         minHeight: 38,
                       }}
@@ -1519,8 +1519,8 @@ SKILLS
                             position: "absolute",
                             inset: 0,
                             borderRadius: 9999,
-                            background: "#ffffff",
-                            boxShadow: "0 2px 10px rgba(255, 255, 255, 0.5)",
+                            background: "var(--text-primary)",
+                            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.15)",
                             zIndex: -1,
                           }}
                           transition={{ type: "spring", stiffness: 400, damping: 35 }}
@@ -1597,7 +1597,7 @@ SKILLS
             </div>
 
             {/* Horizontal Scrollable Code Container with Straight Quotes */}
-            <div className="code-scroll-pane" style={{ paddingBottom: 4 }}>
+            <div className="code-scroll-pane code-terminal-wrapper" style={{ paddingBottom: 4 }}>
               <pre style={{ margin: 0, whiteSpace: "pre", fontFamily: "inherit" }}>
                 <code>
                   <span style={{ color: "#71717a" }}># Production Systems & Architectural Blueprint</span>{"\n"}
@@ -1641,7 +1641,7 @@ SKILLS
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 20 }}>📄</span>
-                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 800, color: "#ffffff" }}>
+                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 800, color: "var(--text-primary)" }}>
                     Mahmud Bashir Olasunkanmi
                   </span>
                   <span className="floating-chip" style={{ fontSize: 11, padding: "3px 10px" }}>
@@ -1672,37 +1672,37 @@ SKILLS
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, marginBottom: 20 }}>
-              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "16px" }}>
+              <div style={{ background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 14, padding: "16px" }}>
                 <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: "#6366f1", marginBottom: 8, textTransform: "uppercase" }}>
                   💼 Work Experience
                 </div>
-                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>MBOVIBE Systems (2024–Present)</div>
+                <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 700, marginBottom: 2 }}>MBOVIBE Systems (2024–Present)</div>
                 <div style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 8 }}>Founder / Full-Stack Developer • End-to-end web apps</div>
-                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>Axiom Wallets</div>
+                <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 700, marginBottom: 2 }}>Axiom Wallets</div>
                 <div style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 8 }}>Full-Stack Developer • Hybrid trading & wallet platform</div>
-                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>9jaCash</div>
+                <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 700, marginBottom: 2 }}>9jaCash</div>
                 <div style={{ fontSize: 11, color: "#a1a1aa" }}>Full-Stack Developer / Maintenance • Query tuning & caching</div>
               </div>
 
-              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "16px" }}>
+              <div style={{ background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 14, padding: "16px" }}>
                 <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: "#38bdf8", marginBottom: 8, textTransform: "uppercase" }}>
                   🚀 Key Projects
                 </div>
-                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>SwiftSats (swiftsat.app)</div>
+                <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 700, marginBottom: 2 }}>SwiftSats (swiftsat.app)</div>
                 <div style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 8 }}>Crypto Purchase & Naira Settlement Platform</div>
-                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>MABIO</div>
+                <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 700, marginBottom: 2 }}>MABIO</div>
                 <div style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 8 }}>React + Django Channels real-time messaging</div>
-                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>MZCart</div>
+                <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 700, marginBottom: 2 }}>MZCart</div>
                 <div style={{ fontSize: 11, color: "#a1a1aa" }}>Full-featured e-commerce web platform</div>
               </div>
 
-              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "16px" }}>
+              <div style={{ background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 14, padding: "16px" }}>
                 <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: "#34d399", marginBottom: 8, textTransform: "uppercase" }}>
                   🎓 Education & Security
                 </div>
-                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>B.Sc. Cybersecurity</div>
+                <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 700, marginBottom: 2 }}>B.Sc. Cybersecurity</div>
                 <div style={{ fontSize: 11, color: "#a1a1aa", marginBottom: 8 }}>Miva Open University • 2026 – Expected 2029</div>
-                <div style={{ fontSize: 13, color: "#ffffff", fontWeight: 700, marginBottom: 2 }}>Security Focus</div>
+                <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 700, marginBottom: 2 }}>Security Focus</div>
                 <div style={{ fontSize: 11, color: "#a1a1aa" }}>Linux/WSL, Networking, TryHackMe labs, Web Security</div>
               </div>
             </div>
@@ -1762,15 +1762,14 @@ SKILLS
                   fontFamily: "'Space Grotesk', sans-serif",
                   fontSize: "clamp(26px, 3.5vw, 36px)",
                   fontWeight: 900,
-                  color: "#ffffff",
+                  color: "var(--text-primary)",
                   letterSpacing: "-1px",
                   marginBottom: 4,
-                  filter: "drop-shadow(0 0 16px rgba(255,255,255,0.4))",
                 }}
               >
                 <CountUp target={item.num} suffix={item.suffix} />
               </div>
-              <div className="stats-label" style={{ fontSize: 13, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>
+              <div className="stats-label" style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>
                 {item.label}
               </div>
               <div style={{ fontSize: 11, color: "#a1a1aa" }}>{item.note}</div>
@@ -1822,7 +1821,7 @@ SKILLS
           {/* Bento Card 1: Core Bio */}
           <SpotlightCard style={{ padding: "clamp(24px, 4vw, 36px)", gridColumn: "span 1" }}>
             <div style={{ fontSize: 24, marginBottom: 12 }}>🚀</div>
-            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 800, marginBottom: 12, color: "#ffffff" }}>
+            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 800, marginBottom: 12, color: "var(--text-primary)" }}>
               Full-Stack Discipline
             </h3>
             <p style={{ color: "#a1a1aa", lineHeight: 1.75, fontSize: 14, marginBottom: 16 }}>
@@ -1837,20 +1836,20 @@ SKILLS
           {/* Bento Card 2: Systems & Telemetry */}
           <SpotlightCard style={{ padding: "clamp(24px, 4vw, 36px)", gridColumn: "span 1" }}>
             <div style={{ fontSize: 24, marginBottom: 12 }}>🛡️</div>
-            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 800, marginBottom: 12, color: "#ffffff" }}>
+            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 800, marginBottom: 12, color: "var(--text-primary)" }}>
               High-Concurrency Focus
             </h3>
             <p style={{ color: "#a1a1aa", lineHeight: 1.75, fontSize: 14, marginBottom: 16 }}>
-              Writing code is easy; building architectures that survive high traffic without crashing takes engineering precision. I prioritize query profiling with <code style={{ color: "#fff", background: "rgba(255,255,255,0.1)", padding: "2px 6px", borderRadius: 4 }}>EXPLAIN ANALYZE</code>, JWT security lifecycle compliance, and non-blocking I/O.
+              Writing code is easy; building architectures that survive high traffic without crashing takes engineering precision. I prioritize query profiling with <code style={{ color: "var(--text-primary)", background: "var(--input-bg)", padding: "2px 6px", borderRadius: 4, border: "1px solid var(--border-subtle)" }}>EXPLAIN ANALYZE</code>, JWT security lifecycle compliance, and non-blocking I/O.
             </p>
-            <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "12px 16px", marginTop: "auto" }}>
+            <div style={{ background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 14, padding: "12px 16px", marginTop: "auto" }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
                 <span style={{ color: "#a1a1aa" }}>Database Query Overhead</span>
-                <span style={{ color: "#ffffff", fontWeight: 700 }}>&lt; 50ms</span>
+                <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>&lt; 50ms</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
                 <span style={{ color: "#a1a1aa" }}>API Contract Testing</span>
-                <span style={{ color: "#ffffff", fontWeight: 700 }}>100% Validated</span>
+                <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>100% Validated</span>
               </div>
             </div>
           </SpotlightCard>
@@ -1891,12 +1890,12 @@ SKILLS
                   padding: "8px 22px",
                   margin: "0 8px",
                   borderRadius: 9999,
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  background: "var(--input-bg)",
+                  border: "1px solid var(--border-subtle)",
                   fontFamily: "'Space Grotesk', sans-serif",
                   fontSize: 13,
                   fontWeight: 700,
-                  color: "#ffffff",
+                  color: "var(--text-primary)",
                   whiteSpace: "nowrap",
                 }}
               >
@@ -1973,11 +1972,11 @@ SKILLS
         <SpotlightCard style={{ padding: "clamp(20px, 3vw, 28px)", marginBottom: 26 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
             <span style={{ fontSize: 18 }}>🎯</span>
-            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
               Career Objective
             </h3>
           </div>
-          <p style={{ color: "#d4d4d8", fontSize: 14, lineHeight: 1.7, margin: 0 }}>
+          <p style={{ color: "var(--text-secondary)", fontSize: 14, lineHeight: 1.7, margin: 0 }}>
             Full-Stack Developer building and deploying complete web applications since 2024, with a focus on React, Django, Python, REST APIs, and PostgreSQL. Experienced in taking products from interface and backend development through database design, API integration, authentication, payment and wallet workflows, admin systems, and production deployment. Open to remote and international Full-Stack, Django/Python, React, and Web Development roles.
           </p>
         </SpotlightCard>
@@ -1990,7 +1989,7 @@ SKILLS
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, borderBottom: "1px solid rgba(255,255,255,0.12)", paddingBottom: 12 }}>
               <span style={{ fontSize: 20 }}>💼</span>
               <div>
-                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 17, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 17, fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
                   Work Experience
                 </h3>
               </div>
@@ -2001,7 +2000,7 @@ SKILLS
                 <div key={idx} className="resume-timeline-item">
                   <div className="resume-timeline-node" />
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 6, marginBottom: 4 }}>
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 15, fontWeight: 800, color: "var(--text-primary)" }}>
                       {exp.company}
                     </div>
                     <span className="floating-chip" style={{ fontSize: 10, padding: "2px 8px" }}>
@@ -2013,7 +2012,7 @@ SKILLS
                     {exp.role} <span style={{ color: "#71717a", fontWeight: 400 }}>• {exp.location}</span>
                   </div>
 
-                  <ul style={{ margin: "4px 0 12px 18px", padding: 0, color: "#d4d4d8", fontSize: 13, lineHeight: 1.65 }}>
+                  <ul style={{ margin: "4px 0 12px 18px", padding: 0, color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.65 }}>
                     {exp.bullets.map((b, bIdx) => (
                       <li key={bIdx} style={{ marginBottom: 6 }}>
                         {b}
@@ -2041,7 +2040,7 @@ SKILLS
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18, borderBottom: "1px solid rgba(255,255,255,0.12)", paddingBottom: 12 }}>
                 <span style={{ fontSize: 20 }}>🎓</span>
                 <div>
-                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 17, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 17, fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
                     Education & Credentials
                   </h3>
                 </div>
@@ -2049,7 +2048,7 @@ SKILLS
 
               <div style={{ background: "rgba(99, 102, 241, 0.08)", border: "1px solid rgba(99, 102, 241, 0.25)", borderRadius: 14, padding: "16px 20px", marginBottom: 20 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6, marginBottom: 4 }}>
-                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 15, fontWeight: 800, color: "var(--text-primary)" }}>
                     {EDUCATION_DATA.degree}
                   </span>
                   <span className="floating-chip" style={{ fontSize: 10, padding: "2px 8px", background: "rgba(34, 197, 94, 0.15)", borderColor: "rgba(34, 197, 94, 0.4)", color: "#4ade80" }}>
@@ -2065,12 +2064,12 @@ SKILLS
               </div>
 
               <div>
-                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>
                   🛡️ Professional Development
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {EDUCATION_DATA.professionalDev.map((dev, dIdx) => (
-                    <div key={dIdx} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "#d4d4d8" }}>
+                    <div key={dIdx} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "var(--text-secondary)" }}>
                       <span style={{ color: "#22c55e", fontSize: 12 }}>✓</span>
                       <span>{dev}</span>
                     </div>
@@ -2084,7 +2083,7 @@ SKILLS
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, borderBottom: "1px solid rgba(255,255,255,0.12)", paddingBottom: 12 }}>
                 <span style={{ fontSize: 20 }}>⚡</span>
                 <div>
-                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 17, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 17, fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
                     Technical Competencies
                   </h3>
                 </div>
@@ -2092,8 +2091,8 @@ SKILLS
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14 }}>
                 {RESUME_SKILL_GROUPS.map((group, gIdx) => (
-                  <div key={gIdx} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "12px 14px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 8, fontFamily: "'Space Grotesk', sans-serif" }}>
+                  <div key={gIdx} style={{ background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 12, padding: "12px 14px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8, fontFamily: "'Space Grotesk', sans-serif" }}>
                       <span>{group.icon}</span>
                       <span>{group.title}</span>
                     </div>
@@ -2254,10 +2253,10 @@ SKILLS
                 style={{
                   width: "100%",
                   padding: "12px 14px",
-                  background: "rgba(255,255,255,0.06)",
-                  border: `1px solid ${adminError ? "#ef4444" : "rgba(255,255,255,0.25)"}`,
+                  background: "var(--input-bg)",
+                  border: `1px solid ${adminError ? "#ef4444" : "var(--border-subtle)"}`,
                   borderRadius: 12,
-                  color: "#ffffff",
+                  color: "var(--text-primary)",
                   fontSize: 14,
                   outline: "none",
                   marginBottom: 12,
@@ -2288,13 +2287,13 @@ SKILLS
                 placeholder="Project Title"
                 value={newProject.title}
                 onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
-                style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", minHeight: 44 }}
+                style={{ padding: 12, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 10, color: "var(--text-primary)", outline: "none", minHeight: 44 }}
               />
               <input
                 placeholder="Tagline / Short Subtitle"
                 value={newProject.tagline}
                 onChange={(e) => setNewProject({ ...newProject, tagline: e.target.value })}
-                style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", minHeight: 44 }}
+                style={{ padding: 12, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 10, color: "var(--text-primary)", outline: "none", minHeight: 44 }}
               />
             </div>
             <textarea
@@ -2302,20 +2301,20 @@ SKILLS
               placeholder="Detailed description of architecture and results..."
               value={newProject.desc}
               onChange={(e) => setNewProject({ ...newProject, desc: e.target.value })}
-              style={{ width: "100%", padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", marginBottom: 12 }}
+              style={{ width: "100%", padding: 12, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 10, color: "var(--text-primary)", outline: "none", marginBottom: 12 }}
             />
             <div className="form-two-col">
               <input
                 placeholder="Tech Tags (comma separated)"
                 value={newProject.tags}
                 onChange={(e) => setNewProject({ ...newProject, tags: e.target.value })}
-                style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", minHeight: 44 }}
+                style={{ padding: 12, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 10, color: "var(--text-primary)", outline: "none", minHeight: 44 }}
               />
               <input
                 placeholder="Live URL"
                 value={newProject.live}
                 onChange={(e) => setNewProject({ ...newProject, live: e.target.value })}
-                style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", minHeight: 44 }}
+                style={{ padding: 12, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 10, color: "var(--text-primary)", outline: "none", minHeight: 44 }}
               />
             </div>
             <div style={{ display: "flex", gap: 10 }}>
@@ -2408,7 +2407,7 @@ SKILLS
                       fontFamily: "'Space Grotesk', sans-serif",
                       fontSize: 22,
                       fontWeight: 800,
-                      color: "#ffffff",
+                      color: "var(--text-primary)",
                       marginBottom: 6,
                       letterSpacing: "-0.5px",
                     }}
@@ -2430,7 +2429,7 @@ SKILLS
                   <p
                     style={{
                       fontSize: 14,
-                      color: "rgba(255, 255, 255, 0.75)",
+                      color: "var(--text-secondary)",
                       lineHeight: 1.7,
                       marginBottom: 20,
                       flex: 1,
@@ -2445,14 +2444,14 @@ SKILLS
                       <span
                         key={tag}
                         style={{
-                          background: "rgba(255, 255, 255, 0.08)",
-                          border: "1px solid rgba(255, 255, 255, 0.16)",
+                          background: "var(--input-bg)",
+                          border: "1px solid var(--border-subtle)",
                           borderRadius: 9999,
                           padding: "4px 12px",
                           fontSize: 11,
                           fontFamily: "'Space Grotesk', sans-serif",
                           fontWeight: 700,
-                          color: "#ffffff",
+                          color: "var(--text-primary)",
                         }}
                       >
                         {tag}
@@ -2467,8 +2466,8 @@ SKILLS
                       gridTemplateColumns: `repeat(${Object.keys(proj.stats).length}, 1fr)`,
                       gap: 8,
                       marginBottom: 20,
-                      background: "rgba(255, 255, 255, 0.04)",
-                      border: "1px solid rgba(255, 255, 255, 0.12)",
+                      background: "var(--input-bg)",
+                      border: "1px solid var(--border-subtle)",
                       borderRadius: 14,
                       padding: "12px 8px",
                       textAlign: "center",
@@ -2476,7 +2475,7 @@ SKILLS
                   >
                     {Object.entries(proj.stats).map(([k, v]) => (
                       <div key={k}>
-                        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 15, fontWeight: 800, color: "var(--text-primary)" }}>
                           {typeof v === "number" ? <CountUp target={v} suffix="+" /> : v}
                         </div>
                         <div style={{ fontSize: 10, color: "#a1a1aa", textTransform: "uppercase", letterSpacing: 0.8, marginTop: 2 }}>
@@ -2572,10 +2571,10 @@ SKILLS
                 <div style={{ fontSize: 11, fontFamily: "'Space Grotesk', sans-serif", color: "#6366f1", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>
                   {proc.tag}
                 </div>
-                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 17, fontWeight: 800, color: "#ffffff", marginBottom: 10 }}>
+                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 17, fontWeight: 800, color: "var(--text-primary)", marginBottom: 10 }}>
                   {proc.title}
                 </h3>
-                <p style={{ fontSize: 13, color: "#a1a1aa", lineHeight: 1.7, margin: 0 }}>
+                <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7, margin: 0 }}>
                   {proc.desc}
                 </p>
               </SpotlightCard>
@@ -2635,7 +2634,7 @@ SKILLS
                     fontFamily: "'Space Grotesk', sans-serif",
                     fontSize: 17,
                     fontWeight: 800,
-                    color: "#ffffff",
+                    color: "var(--text-primary)",
                     margin: 0,
                   }}
                 >
@@ -2647,7 +2646,7 @@ SKILLS
                   <div key={skill.name}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                       <span style={{ fontWeight: 700, fontSize: 14 }}>{skill.name}</span>
-                      <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "#ffffff", fontWeight: 800 }}>
+                      <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: "var(--text-primary)", fontWeight: 800 }}>
                         {skill.level}%
                       </span>
                     </div>
@@ -2741,12 +2740,12 @@ SKILLS
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                   <div>
-                    <div style={{ fontWeight: 800, fontSize: 15 }}>{rev.name}</div>
+                    <div style={{ fontWeight: 800, fontSize: 15, color: "var(--text-primary)" }}>{rev.name}</div>
                     <div style={{ fontSize: 12, color: "#a1a1aa" }}>{rev.role} • {rev.country}</div>
                   </div>
                   <Stars count={rev.stars} size={14} />
                 </div>
-                <p style={{ fontSize: 14, color: "#e4e4e7", lineHeight: 1.75, marginBottom: 16 }}>
+                <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.75, marginBottom: 16 }}>
                   "{rev.text}"
                 </p>
               </div>
@@ -2787,13 +2786,13 @@ SKILLS
                   placeholder="Your Name *"
                   value={newReview.name}
                   onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
-                  style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", fontSize: 13, minHeight: 44 }}
+                  style={{ padding: 12, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 10, color: "var(--text-primary)", outline: "none", fontSize: 13, minHeight: 44 }}
                 />
                 <input
                   placeholder="Role / Title"
                   value={newReview.role}
                   onChange={(e) => setNewReview({ ...newReview, role: e.target.value })}
-                  style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", fontSize: 13, minHeight: 44 }}
+                  style={{ padding: 12, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 10, color: "var(--text-primary)", outline: "none", fontSize: 13, minHeight: 44 }}
                 />
               </div>
               <div className="form-two-col">
@@ -2801,13 +2800,13 @@ SKILLS
                   placeholder="Country (e.g. 🇳🇬 Nigeria, 🇬🇧 UK)"
                   value={newReview.country}
                   onChange={(e) => setNewReview({ ...newReview, country: e.target.value })}
-                  style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", fontSize: 13, minHeight: 44 }}
+                  style={{ padding: 12, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 10, color: "var(--text-primary)", outline: "none", fontSize: 13, minHeight: 44 }}
                 />
                 <input
                   placeholder="Service / Project Delivered"
                   value={newReview.project}
                   onChange={(e) => setNewReview({ ...newReview, project: e.target.value })}
-                  style={{ padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", fontSize: 13, minHeight: 44 }}
+                  style={{ padding: 12, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 10, color: "var(--text-primary)", outline: "none", fontSize: 13, minHeight: 44 }}
                 />
               </div>
               <textarea
@@ -2816,7 +2815,7 @@ SKILLS
                 placeholder="Share your experience working with Mahmud..."
                 value={newReview.text}
                 onChange={(e) => setNewReview({ ...newReview, text: e.target.value })}
-                style={{ width: "100%", padding: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 10, color: "#fff", outline: "none", fontSize: 13, marginBottom: 16 }}
+                style={{ width: "100%", padding: 12, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 10, color: "var(--text-primary)", outline: "none", fontSize: 13, marginBottom: 16 }}
               />
               <button type="submit" className="btn-shining-primary" style={{ width: "100%" }}>
                 Submit Public Review ★
@@ -2909,18 +2908,18 @@ SKILLS
                     fontWeight: 800,
                     lineHeight: 1.3,
                     marginBottom: 10,
-                    color: "#ffffff",
+                    color: "var(--text-primary)",
                   }}
                 >
                   {article.title}
                 </h3>
-                <p style={{ fontSize: 14, color: "#a1a1aa", lineHeight: 1.65, marginBottom: 18 }}>
+                <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.65, marginBottom: 18 }}>
                   {article.desc}
                 </p>
               </div>
               <div
                 style={{
-                  color: "#ffffff",
+                  color: "var(--text-primary)",
                   fontSize: 13,
                   fontWeight: 800,
                   display: "inline-flex",
@@ -2985,8 +2984,8 @@ SKILLS
                 width: 30,
                 height: 30,
                 borderRadius: "50%",
-                background: bookingStep >= 1 ? "#ffffff" : "rgba(255,255,255,0.1)",
-                color: bookingStep >= 1 ? "#05060a" : "#ffffff",
+                background: bookingStep >= 1 ? "var(--text-primary)" : "var(--input-bg)",
+                color: bookingStep >= 1 ? "var(--bg-deep)" : "var(--text-muted)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -3003,8 +3002,8 @@ SKILLS
                 width: 30,
                 height: 30,
                 borderRadius: "50%",
-                background: bookingStep >= 2 ? "#ffffff" : "rgba(255,255,255,0.1)",
-                color: bookingStep >= 2 ? "#05060a" : "#ffffff",
+                background: bookingStep >= 2 ? "var(--text-primary)" : "var(--input-bg)",
+                color: bookingStep >= 2 ? "var(--bg-deep)" : "var(--text-muted)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -3081,9 +3080,9 @@ SKILLS
                         style={{
                           padding: "13px 6px",
                           borderRadius: 14,
-                          border: isSelected ? "1px solid #ffffff" : "1px solid rgba(255,255,255,0.18)",
-                          background: isSelected ? "#ffffff" : "rgba(255,255,255,0.05)",
-                          color: isSelected ? "#05060a" : "#ffffff",
+                          border: isSelected ? "1px solid var(--text-primary)" : "1px solid var(--border-subtle)",
+                          background: isSelected ? "var(--text-primary)" : "var(--input-bg)",
+                          color: isSelected ? "var(--bg-deep)" : "var(--text-primary)",
                           fontFamily: "'Space Grotesk', sans-serif",
                           fontWeight: 800,
                           fontSize: 12,
@@ -3114,9 +3113,9 @@ SKILLS
                           style={{
                             padding: "11px",
                             borderRadius: 12,
-                            border: isSelected ? "1px solid #ffffff" : "1px solid rgba(255,255,255,0.18)",
-                            background: isSelected ? "#ffffff" : "rgba(255,255,255,0.05)",
-                            color: isSelected ? "#05060a" : "#ffffff",
+                            border: isSelected ? "1px solid var(--text-primary)" : "1px solid var(--border-subtle)",
+                            background: isSelected ? "var(--text-primary)" : "var(--input-bg)",
+                            color: isSelected ? "var(--bg-deep)" : "var(--text-primary)",
                             fontFamily: "'Space Grotesk', sans-serif",
                             fontWeight: 800,
                             fontSize: 12,
@@ -3185,7 +3184,7 @@ SKILLS
                   style={{
                     background: "none",
                     border: "none",
-                    color: "#ffffff",
+                    color: "var(--text-primary)",
                     textDecoration: "underline",
                     cursor: "pointer",
                     fontSize: 13,
@@ -3203,7 +3202,7 @@ SKILLS
                   placeholder="Your Full Name *"
                   value={bookInfo.name}
                   onChange={(e) => setBookInfo({ ...bookInfo, name: e.target.value })}
-                  style={{ padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, minHeight: 44 }}
+                  style={{ padding: 14, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 12, color: "var(--text-primary)", outline: "none", fontSize: 14, minHeight: 44 }}
                 />
                 <input
                   required
@@ -3211,7 +3210,7 @@ SKILLS
                   placeholder="Your Work Email *"
                   value={bookInfo.email}
                   onChange={(e) => setBookInfo({ ...bookInfo, email: e.target.value })}
-                  style={{ padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, minHeight: 44 }}
+                  style={{ padding: 14, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 12, color: "var(--text-primary)", outline: "none", fontSize: 14, minHeight: 44 }}
                 />
               </div>
 
@@ -3219,7 +3218,7 @@ SKILLS
                 placeholder="Company / Organization (Optional)"
                 value={bookInfo.company}
                 onChange={(e) => setBookInfo({ ...bookInfo, company: e.target.value })}
-                style={{ width: "100%", padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, marginBottom: 14, minHeight: 44 }}
+                style={{ width: "100%", padding: 14, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 12, color: "var(--text-primary)", outline: "none", fontSize: 14, marginBottom: 14, minHeight: 44 }}
               />
 
               <textarea
@@ -3228,7 +3227,7 @@ SKILLS
                 placeholder="Briefly describe what you'd like to build or solve..."
                 value={bookInfo.project}
                 onChange={(e) => setBookInfo({ ...bookInfo, project: e.target.value })}
-                style={{ width: "100%", padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, marginBottom: 20 }}
+                style={{ width: "100%", padding: 14, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 12, color: "var(--text-primary)", outline: "none", fontSize: 14, marginBottom: 20 }}
               />
 
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
@@ -3352,7 +3351,7 @@ SKILLS
                   alignItems: "center",
                   gap: 18,
                   textDecoration: "none",
-                  color: "#ffffff",
+                  color: "var(--text-primary)",
                   minHeight: 44,
                 }}
               >
@@ -3375,7 +3374,7 @@ SKILLS
                   <div style={{ fontSize: 11, color: "#a1a1aa", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 800 }}>
                     {c.label}
                   </div>
-                  <div style={{ fontSize: 15, fontWeight: 700 }}>{c.val}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}>{c.val}</div>
                 </div>
               </a>
             ))}
@@ -3390,7 +3389,7 @@ SKILLS
                   placeholder="Your Name *"
                   value={contactForm.name}
                   onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                  style={{ padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, minHeight: 44 }}
+                  style={{ padding: 14, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 12, color: "var(--text-primary)", outline: "none", fontSize: 14, minHeight: 44 }}
                 />
                 <input
                   required
@@ -3398,7 +3397,7 @@ SKILLS
                   placeholder="Your Email *"
                   value={contactForm.email}
                   onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                  style={{ padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, minHeight: 44 }}
+                  style={{ padding: 14, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 12, color: "var(--text-primary)", outline: "none", fontSize: 14, minHeight: 44 }}
                 />
               </div>
 
@@ -3408,7 +3407,7 @@ SKILLS
                 placeholder="Tell me about your project, timeline, and goals..."
                 value={contactForm.message}
                 onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                style={{ width: "100%", padding: 14, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 12, color: "#fff", outline: "none", fontSize: 14, marginBottom: 20 }}
+                style={{ width: "100%", padding: 14, background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 12, color: "var(--text-primary)", outline: "none", fontSize: 14, marginBottom: 20 }}
               />
 
               <button
@@ -3461,7 +3460,7 @@ SKILLS
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <TitaniumLogo size={28} />
                   <div>
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 14, color: "#ffffff" }}>
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 14, color: "var(--text-primary)" }}>
                       MAHMUD BASHIR OLASUNKANMI
                     </div>
                     <div style={{ fontSize: 11, color: "#a1a1aa" }}>
@@ -3519,7 +3518,7 @@ SKILLS
                     </div>
                   </div>
 
-                  <div style={{ fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.6, textAlign: "right" }}>
+                  <div style={{ fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.6, textAlign: "right" }}>
                     <div>📍 <strong>Location:</strong> Abuja, Nigeria</div>
                     <div>📞 <strong>Phone:</strong> +234 807 241 0373</div>
                     <div>✉️ <strong>Email:</strong> mahmudolasunkanmi895@gmail.com</div>
@@ -3540,7 +3539,7 @@ SKILLS
                       <h3 style={{ fontSize: 13, letterSpacing: 1.5, textTransform: "uppercase", color: "#6366f1", marginBottom: 10 }}>
                         EDUCATION
                       </h3>
-                      <div style={{ fontSize: 14, fontWeight: 800, color: "#ffffff" }}>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text-primary)" }}>
                         B.Sc. Cybersecurity
                       </div>
                       <div style={{ fontSize: 13, color: "#38bdf8", fontWeight: 600 }}>
@@ -3558,42 +3557,42 @@ SKILLS
                       </h3>
 
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>Languages</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>Languages</div>
                         <div style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.5 }}>
                           Python, JavaScript (ES6+), HTML5, CSS3, SQL, Bash
                         </div>
                       </div>
 
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>Frontend</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>Frontend</div>
                         <div style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.5 }}>
                           React.js, Next.js, Tailwind CSS, Bootstrap, Responsive UI
                         </div>
                       </div>
 
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>Backend</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>Backend</div>
                         <div style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.5 }}>
                           Django, Django REST Framework, RESTful APIs, WebSockets, Django Channels
                         </div>
                       </div>
 
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>Databases</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>Databases</div>
                         <div style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.5 }}>
                           PostgreSQL, SQLite, Redis
                         </div>
                       </div>
 
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>Tools & Deployment</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>Tools & Deployment</div>
                         <div style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.5 }}>
                           Git, GitHub, Postman, Vercel, Render, Linux/WSL
                         </div>
                       </div>
 
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 4 }}>Engineering</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>Engineering</div>
                         <div style={{ fontSize: 12, color: "#a1a1aa", lineHeight: 1.5 }}>
                           Authentication, API integration, payment & wallet workflows, admin dashboards, database design, performance optimization
                         </div>
@@ -3619,7 +3618,7 @@ SKILLS
                       <h3 style={{ fontSize: 13, letterSpacing: 1.5, textTransform: "uppercase", color: "#6366f1", marginBottom: 10 }}>
                         CAREER OBJECTIVE
                       </h3>
-                      <p style={{ fontSize: 13.5, color: "#d4d4d8", lineHeight: 1.7, margin: 0 }}>
+                      <p style={{ fontSize: 13.5, color: "var(--text-secondary)", lineHeight: 1.7, margin: 0 }}>
                         Full-Stack Developer building and deploying complete web applications since 2024, with a focus on React, Django, Python, REST APIs, and PostgreSQL. Experienced in taking products from interface and backend development through database design, API integration, authentication, payment and wallet workflows, admin systems, and production deployment. Open to remote and international Full-Stack, Django/Python, React, and Web Development roles.
                       </p>
                     </div>
@@ -3632,13 +3631,13 @@ SKILLS
 
                       {/* MBOVIBE */}
                       <div style={{ marginBottom: 20 }}>
-                        <div style={{ fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-primary)" }}>
                           MBOVIBE Systems — Abuja, Nigeria
                         </div>
                         <div style={{ fontSize: 12.5, color: "#38bdf8", fontWeight: 700, marginBottom: 6 }}>
                           Founder / Full-Stack Developer | 2024 – Present
                         </div>
-                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.65 }}>
+                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.65 }}>
                           <li>Build and deploy full-stack web applications for digital products and client requirements across frontend, backend, databases, APIs, and production infrastructure.</li>
                           <li>Own development end-to-end, from requirements and interface implementation to backend architecture, testing, and deployment.</li>
                           <li>Develop secure authentication, transactional workflows, admin dashboards, and database-backed APIs.</li>
@@ -3647,13 +3646,13 @@ SKILLS
 
                       {/* Axiom Wallets */}
                       <div style={{ marginBottom: 20 }}>
-                        <div style={{ fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-primary)" }}>
                           Axiom Wallets — Client Project
                         </div>
                         <div style={{ fontSize: 12.5, color: "#38bdf8", fontWeight: 700, marginBottom: 6 }}>
                           Full-Stack Developer | Client Delivery
                         </div>
-                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.65 }}>
+                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.65 }}>
                           <li>Built and deployed a full-stack trading application combining capabilities of decentralized trading platforms and centralized exchanges.</li>
                           <li>Developed the frontend, backend, trading interface, authentication, wallet functionality, API integrations, market-data visualizations, and database layer.</li>
                           <li>Implemented deposit and withdrawal workflows, admin functionality, and production deployment.</li>
@@ -3662,13 +3661,13 @@ SKILLS
 
                       {/* 9jaCash */}
                       <div>
-                        <div style={{ fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-primary)" }}>
                           9jaCash — Production Application
                         </div>
                         <div style={{ fontSize: 12.5, color: "#38bdf8", fontWeight: 700, marginBottom: 6 }}>
                           Full-Stack Developer / Maintenance
                         </div>
-                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.65 }}>
+                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.65 }}>
                           <li>Maintained and optimized a production web application, focusing on database efficiency, API performance, and reliability.</li>
                           <li>Improved high-load admin operations through query optimization, pagination, caching, and more efficient backend processing.</li>
                           <li>Worked within an existing production codebase while protecting application data and minimizing disruptive changes.</li>
@@ -3684,13 +3683,13 @@ SKILLS
 
                       {/* SwiftSats */}
                       <div style={{ marginBottom: 16 }}>
-                        <div style={{ fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-primary)" }}>
                           SwiftSats — Crypto Purchase & Naira Settlement Platform
                         </div>
                         <div style={{ fontSize: 12.5, color: "#38bdf8", fontWeight: 700, marginBottom: 6 }}>
                           Founder / Full-Stack Developer | swiftsat.app
                         </div>
-                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.65 }}>
+                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.65 }}>
                           <li>Designed and built a platform where customers pick a supported coin and amount, receive a generated payment account, and pay in Naira before the crypto is released.</li>
                           <li>Built the full stack: responsive frontend, backend logic, APIs, data handling, validation, and deployment.</li>
                         </ul>
@@ -3698,26 +3697,26 @@ SKILLS
 
                       {/* MABIO */}
                       <div style={{ marginBottom: 16 }}>
-                        <div style={{ fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-primary)" }}>
                           MABIO — Real-Time Communication Platform
                         </div>
                         <div style={{ fontSize: 12, color: "#a1a1aa", fontWeight: 600, marginBottom: 6 }}>
                           React, Django REST Framework, PostgreSQL, Redis, Django Channels
                         </div>
-                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.65 }}>
+                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.65 }}>
                           <li>Developed a real-time messaging app concept with instant messaging, active-status, and WebSocket communication across a React frontend and Django/PostgreSQL/Redis backend.</li>
                         </ul>
                       </div>
 
                       {/* MZCart */}
                       <div>
-                        <div style={{ fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text-primary)" }}>
                           MZCart — E-Commerce Web Application
                         </div>
                         <div style={{ fontSize: 12, color: "#a1a1aa", fontWeight: 600, marginBottom: 6 }}>
                           Django, PostgreSQL/SQLite, JavaScript, Bootstrap
                         </div>
-                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "#d4d4d8", lineHeight: 1.65 }}>
+                        <ul style={{ margin: "4px 0 0 16px", padding: 0, fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.65 }}>
                           <li>Built an end-to-end e-commerce app with authentication, product catalogues, cart and wishlist, reviews, vendor workflows, checkout integration, email workflows, and admin features.</li>
                         </ul>
                       </div>
