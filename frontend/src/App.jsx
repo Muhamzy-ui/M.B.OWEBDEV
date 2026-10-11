@@ -1047,12 +1047,12 @@ SKILLS
             pointerEvents: "auto",
             display: "flex",
             alignItems: "center",
-            gap: "clamp(8px, 1.6vw, 24px)",
-            padding: "8px 16px",
-            maxWidth: 980,
-            width: "100%",
-            justifyContent: "space-between",
-            background: navScrolled ? "rgba(10, 12, 20, 0.9)" : "rgba(14, 16, 26, 0.72)",
+            gap: "clamp(8px, 1.4vw, 16px)",
+            padding: "6px 12px 6px 14px",
+            maxWidth: 780,
+            width: "fit-content",
+            boxSizing: "border-box",
+            background: navScrolled ? "rgba(10, 12, 20, 0.92)" : "rgba(14, 16, 26, 0.78)",
             backdropFilter: "blur(28px) saturate(200%)",
             WebkitBackdropFilter: "blur(28px) saturate(200%)",
             border: "1px solid rgba(255, 255, 255, 0.18)",
@@ -1067,24 +1067,20 @@ SKILLS
           {/* Logo Monogram */}
           <div
             onClick={() => scrollTo("hero")}
-            style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", gap: 9, cursor: "pointer", flexShrink: 0 }}
           >
-            <TitaniumLogo size={30} />
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span
-                style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  fontSize: 13,
-                  fontWeight: 800,
-                  letterSpacing: "0.2px",
-                }}
-              >
-                MAHMUD BASHIR
-              </span>
-              <span className="nav-sub-role" style={{ fontSize: 9, color: "#a1a1aa", letterSpacing: "1.2px", fontWeight: 700 }}>
-                FULL-STACK DEV
-              </span>
-            </div>
+            <TitaniumLogo size={28} />
+            <span
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: 13,
+                fontWeight: 800,
+                letterSpacing: "0.2px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              MAHMUD BASHIR
+            </span>
           </div>
 
           {/* Desktop Center Links with Sliding Pill Indicator */}
@@ -1093,18 +1089,14 @@ SKILLS
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 4,
+              gap: 2,
               position: "relative",
             }}
           >
             {[
-              { id: "hero", label: "Overview" },
               { id: "about", label: "About" },
               { id: "resume", label: "Resume" },
               { id: "projects", label: "Projects" },
-              { id: "skills", label: "Stack" },
-              { id: "process", label: "Process" },
-              { id: "reviews", label: "Reviews" },
               { id: "contact", label: "Contact" },
             ].map((item) => {
               const isActive = activeSection === item.id;
@@ -1120,12 +1112,13 @@ SKILLS
                     fontFamily: "'Plus Jakarta Sans', sans-serif",
                     fontSize: 13,
                     fontWeight: 600,
-                    padding: "7px 14px",
+                    padding: "6px 13px",
                     borderRadius: 9999,
                     cursor: "pointer",
                     transition: "color 0.2s ease",
                     zIndex: 2,
-                    minHeight: 44,
+                    minHeight: 34,
+                    whiteSpace: "nowrap",
                   }}
                   onMouseEnter={(e) => {
                     if (!isActive) e.currentTarget.style.color = "#ffffff";
@@ -1156,7 +1149,7 @@ SKILLS
           </div>
 
           {/* Action CTA */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
             {/* Theme Toggle Button */}
             <motion.button
               whileHover={{ scale: 1.08 }}
@@ -1165,6 +1158,7 @@ SKILLS
               className="theme-toggle-btn"
               title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
               aria-label="Toggle Theme"
+              style={{ width: 34, height: 34, fontSize: 14 }}
             >
               {theme === "dark" ? "☀️" : "🌙"}
             </motion.button>
@@ -1181,16 +1175,17 @@ SKILLS
                 borderColor: "rgba(37, 211, 102, 0.45)",
                 fontWeight: 700,
                 fontSize: 12,
-                padding: "6px 12px",
-                minHeight: 38,
+                padding: "5px 12px",
+                minHeight: 34,
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 6,
+                gap: 5,
+                flexShrink: 0,
               }}
               title="Reach out on WhatsApp: 08072410373"
             >
               <span>💬</span>
-              <span className="nav-book-text">08072410373</span>
+              <span className="nav-whatsapp-label">WhatsApp</span>
             </a>
 
             <motion.button
@@ -1198,6 +1193,12 @@ SKILLS
               whileTap={{ scale: 0.96 }}
               onClick={() => scrollTo("booking")}
               className="btn-shining-primary nav-book-btn"
+              style={{
+                padding: "5px 14px",
+                fontSize: 12,
+                minHeight: 34,
+                flexShrink: 0,
+              }}
             >
               📅 <span className="nav-book-text">Book Call</span>
             </motion.button>
@@ -1208,12 +1209,12 @@ SKILLS
                 background: "rgba(255,255,255,0.08)",
                 border: "1px solid rgba(255,255,255,0.25)",
                 color: "inherit",
-                padding: "8px 14px",
+                padding: "6px 12px",
                 borderRadius: 9999,
-                fontSize: 16,
+                fontSize: 15,
                 cursor: "pointer",
-                minHeight: 40,
-                minWidth: 40,
+                minHeight: 34,
+                minWidth: 34,
                 display: "none",
               }}
             >
@@ -1338,23 +1339,11 @@ SKILLS
         style={{
           position: "relative",
           zIndex: 1,
-          padding: "clamp(90px, 11vw, 115px) clamp(16px, 3.5vw, 36px) 36px",
+          padding: "clamp(80px, 9vw, 105px) clamp(16px, 3.5vw, 36px) 36px",
           maxWidth: 1040,
           margin: "0 auto",
         }}
       >
-        {/* Floating Ambient Chips */}
-        <div className="hero-chips-bar">
-          <div className="floating-chip">
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
-            <span>⚡ Sub-50ms API Latency</span>
-          </div>
-
-          <div className="floating-chip">
-            <span>★ 5.0 Star Verified Rating</span>
-          </div>
-        </div>
-
         {/* ─── HERO WINDOW CARD (COMPACT & SLEEK) ─── */}
         <div
           className="border-beam-card"
@@ -1384,7 +1373,7 @@ SKILLS
             </div>
 
             <div className="hero-window-header-title">
-              M.B.O WEBDEV // SOFTWARE ARCHITECT
+              MAHMUD BASHIR // FULL-STACK ARCHITECT
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -1544,7 +1533,7 @@ SKILLS
               </div>
             </div>
 
-            {/* Quick Action CTAs */}
+            {/* Quick Action CTAs - 3 Clean Primary Actions */}
             <div className="hero-cta-group">
               <button
                 onClick={() => scrollTo("projects")}
@@ -1576,20 +1565,6 @@ SKILLS
               >
                 📄 View Resume
               </button>
-              <button
-                onClick={() => scrollTo("booking")}
-                className="btn-shining-glass hero-btn-sub"
-              >
-                📅 Schedule Call
-              </button>
-              <a
-                href="/Mahmud_Bashir_Resume_v2.docx"
-                download="Mahmud_Bashir_Olasunkanmi_Resume.docx"
-                className="btn-shining-glass hero-btn-sub"
-                title="Download Word DOCX"
-              >
-                ⬇️ Download .docx
-              </a>
             </div>
           </div>
         </div>
@@ -1815,27 +1790,27 @@ SKILLS
           margin: "0 auto",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 12,
-              letterSpacing: 2,
+              fontSize: 11,
+              letterSpacing: 2.5,
               color: "#a1a1aa",
               fontWeight: 700,
               textTransform: "uppercase",
               marginBottom: 8,
             }}
           >
-            // ARCHITECT PROFILE
+            ABOUT ME
           </div>
           <h2
             className="text-shining-titanium"
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "clamp(28px, 4vw, 46px)",
+              fontSize: "clamp(26px, 3.2vw, 38px)",
               fontWeight: 800,
-              letterSpacing: "-1px",
+              letterSpacing: "-0.8px",
             }}
           >
             Engineering Foundation
@@ -1944,42 +1919,42 @@ SKILLS
           margin: "0 auto",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 12,
-              letterSpacing: 2,
+              fontSize: 11,
+              letterSpacing: 2.5,
               color: "#a1a1aa",
               fontWeight: 700,
               textTransform: "uppercase",
               marginBottom: 8,
             }}
           >
-            // VERIFIED TRACK RECORD & CREDENTIALS
+            CAREER TIMELINE
           </div>
           <h2
             className="text-shining-titanium"
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "clamp(28px, 4vw, 46px)",
+              fontSize: "clamp(26px, 3.2vw, 38px)",
               fontWeight: 800,
-              letterSpacing: "-1px",
-              marginBottom: 14,
+              letterSpacing: "-0.8px",
+              marginBottom: 12,
             }}
           >
             Resume & Experience
           </h2>
-          <p style={{ maxWidth: 700, margin: "0 auto", color: "#a1a1aa", fontSize: 15, lineHeight: 1.7 }}>
+          <p style={{ maxWidth: 660, margin: "0 auto", color: "#a1a1aa", fontSize: 14.5, lineHeight: 1.65 }}>
             Full-Stack Developer building and deploying complete web applications since 2024. Proven record in high-concurrency Python & Django backends, reactive React interfaces, and database performance optimization.
           </p>
 
-          {/* Quick Action Button Strip */}
-          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 24, flexWrap: "wrap" }}>
+          {/* Clean 2-Action Button Strip */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 18, flexWrap: "wrap" }}>
             <button
               onClick={() => setShowResumeModal(true)}
               className="btn-shining-primary"
-              style={{ padding: "10px 22px", fontSize: 13 }}
+              style={{ padding: "9px 22px", fontSize: 13 }}
             >
               📄 View Interactive Resume
             </button>
@@ -1987,55 +1962,37 @@ SKILLS
               href="/Mahmud_Bashir_Resume_v2.docx"
               download="Mahmud_Bashir_Olasunkanmi_Resume.docx"
               className="btn-shining-glass"
-              style={{ padding: "10px 22px", fontSize: 13, textDecoration: "none" }}
+              style={{ padding: "9px 22px", fontSize: 13, textDecoration: "none" }}
             >
               ⬇️ Download .docx
             </a>
-            <button
-              onClick={() => {
-                setShowResumeModal(true);
-                setTimeout(() => window.print(), 350);
-              }}
-              className="btn-shining-glass"
-              style={{ padding: "10px 22px", fontSize: 13 }}
-            >
-              🖨️ Print / Save as PDF
-            </button>
-            <button
-              onClick={copyResumeText}
-              className="btn-shining-glass"
-              style={{ padding: "10px 22px", fontSize: 13 }}
-            >
-              {copiedResume ? "✓ Text Copied!" : "📋 Copy Plain Text"}
-            </button>
           </div>
         </div>
 
         {/* Career Objective Card */}
-        <SpotlightCard style={{ padding: "clamp(22px, 3.5vw, 32px)", marginBottom: 30 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-            <span style={{ fontSize: 20 }}>🎯</span>
-            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+        <SpotlightCard style={{ padding: "clamp(20px, 3vw, 28px)", marginBottom: 26 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+            <span style={{ fontSize: 18 }}>🎯</span>
+            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 800, color: "#ffffff", margin: 0 }}>
               Career Objective
             </h3>
           </div>
-          <p style={{ color: "#d4d4d8", fontSize: 14.5, lineHeight: 1.75, margin: 0 }}>
+          <p style={{ color: "#d4d4d8", fontSize: 14, lineHeight: 1.7, margin: 0 }}>
             Full-Stack Developer building and deploying complete web applications since 2024, with a focus on React, Django, Python, REST APIs, and PostgreSQL. Experienced in taking products from interface and backend development through database design, API integration, authentication, payment and wallet workflows, admin systems, and production deployment. Open to remote and international Full-Stack, Django/Python, React, and Web Development roles.
           </p>
         </SpotlightCard>
 
         {/* Main Resume Grid: Left Timeline / Right Credentials & Skills */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 28, marginBottom: 30 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24, marginBottom: 30 }}>
           
           {/* Left Column: Work Experience Timeline */}
-          <SpotlightCard style={{ padding: "clamp(24px, 3.5vw, 36px)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24, borderBottom: "1px solid rgba(255,255,255,0.12)", paddingBottom: 14 }}>
-              <span style={{ fontSize: 22 }}>💼</span>
+          <SpotlightCard style={{ padding: "clamp(22px, 3vw, 32px)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, borderBottom: "1px solid rgba(255,255,255,0.12)", paddingBottom: 12 }}>
+              <span style={{ fontSize: 20 }}>💼</span>
               <div>
-                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 17, fontWeight: 800, color: "#ffffff", margin: 0 }}>
                   Work Experience
                 </h3>
-                <span style={{ fontSize: 12, color: "#a1a1aa" }}>Active Roles & Client Projects</span>
               </div>
             </div>
 
@@ -2044,7 +2001,7 @@ SKILLS
                 <div key={idx} className="resume-timeline-item">
                   <div className="resume-timeline-node" />
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 6, marginBottom: 4 }}>
-                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 800, color: "#ffffff" }}>
+                    <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
                       {exp.company}
                     </div>
                     <span className="floating-chip" style={{ fontSize: 10, padding: "2px 8px" }}>
@@ -2077,23 +2034,22 @@ SKILLS
           </SpotlightCard>
 
           {/* Right Column: Education & Skills Matrix */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             
             {/* Education & Professional Development */}
-            <SpotlightCard style={{ padding: "clamp(24px, 3.5vw, 36px)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, borderBottom: "1px solid rgba(255,255,255,0.12)", paddingBottom: 14 }}>
-                <span style={{ fontSize: 22 }}>🎓</span>
+            <SpotlightCard style={{ padding: "clamp(22px, 3vw, 32px)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18, borderBottom: "1px solid rgba(255,255,255,0.12)", paddingBottom: 12 }}>
+                <span style={{ fontSize: 20 }}>🎓</span>
                 <div>
-                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 800, color: "#ffffff", margin: 0 }}>
-                    Education & Security
+                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 17, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+                    Education & Credentials
                   </h3>
-                  <span style={{ fontSize: 12, color: "#a1a1aa" }}>Academic Credentials & Cybersecurity Specialization</span>
                 </div>
               </div>
 
               <div style={{ background: "rgba(99, 102, 241, 0.08)", border: "1px solid rgba(99, 102, 241, 0.25)", borderRadius: 14, padding: "16px 20px", marginBottom: 20 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6, marginBottom: 4 }}>
-                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 800, color: "#ffffff" }}>
+                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 15, fontWeight: 800, color: "#ffffff" }}>
                     {EDUCATION_DATA.degree}
                   </span>
                   <span className="floating-chip" style={{ fontSize: 10, padding: "2px 8px", background: "rgba(34, 197, 94, 0.15)", borderColor: "rgba(34, 197, 94, 0.4)", color: "#4ade80" }}>
@@ -2109,7 +2065,7 @@ SKILLS
               </div>
 
               <div>
-                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12.5, fontWeight: 700, color: "#ffffff", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, fontWeight: 700, color: "#ffffff", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>
                   🛡️ Professional Development
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -2124,14 +2080,13 @@ SKILLS
             </SpotlightCard>
 
             {/* Direct Skills Matrix from Resume */}
-            <SpotlightCard style={{ padding: "clamp(24px, 3.5vw, 36px)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18, borderBottom: "1px solid rgba(255,255,255,0.12)", paddingBottom: 14 }}>
-                <span style={{ fontSize: 22 }}>⚡</span>
+            <SpotlightCard style={{ padding: "clamp(22px, 3vw, 32px)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, borderBottom: "1px solid rgba(255,255,255,0.12)", paddingBottom: 12 }}>
+                <span style={{ fontSize: 20 }}>⚡</span>
                 <div>
-                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 18, fontWeight: 800, color: "#ffffff", margin: 0 }}>
-                    Skills Matrix (6 Domains)
+                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 17, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+                    Technical Competencies
                   </h3>
-                  <span style={{ fontSize: 12, color: "#a1a1aa" }}>Direct Competencies from Official Resume</span>
                 </div>
               </div>
 
@@ -2169,28 +2124,28 @@ SKILLS
           margin: "0 auto",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 12,
-              letterSpacing: 2,
+              fontSize: 11,
+              letterSpacing: 2.5,
               color: "#a1a1aa",
               fontWeight: 700,
               textTransform: "uppercase",
               marginBottom: 8,
             }}
           >
-            // CURATED REPOSITORY
+            FEATURED PROJECTS
           </div>
           <h2
             className="text-shining-titanium"
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "clamp(28px, 4vw, 46px)",
+              fontSize: "clamp(26px, 3.2vw, 38px)",
               fontWeight: 800,
-              letterSpacing: "-1px",
-              marginBottom: 16,
+              letterSpacing: "-0.8px",
+              marginBottom: 14,
             }}
           >
             Selected Works
@@ -2570,27 +2525,27 @@ SKILLS
           margin: "0 auto",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 12,
-              letterSpacing: 2,
+              fontSize: 11,
+              letterSpacing: 2.5,
               color: "#a1a1aa",
               fontWeight: 700,
               textTransform: "uppercase",
               marginBottom: 8,
             }}
           >
-            // METHODOLOGY
+            ENGINEERING LIFECYCLE
           </div>
           <h2
             className="text-shining-titanium"
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "clamp(28px, 4vw, 46px)",
+              fontSize: "clamp(26px, 3.2vw, 38px)",
               fontWeight: 800,
-              letterSpacing: "-1px",
+              letterSpacing: "-0.8px",
             }}
           >
             How I Build & Ship
@@ -2640,27 +2595,27 @@ SKILLS
           margin: "0 auto",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 12,
-              letterSpacing: 2,
+              fontSize: 11,
+              letterSpacing: 2.5,
               color: "#a1a1aa",
               fontWeight: 700,
               textTransform: "uppercase",
               marginBottom: 8,
             }}
           >
-            // TECHNICAL DEPTH
+            TECHNICAL CAPABILITIES
           </div>
           <h2
             className="text-shining-titanium"
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "clamp(28px, 4vw, 46px)",
+              fontSize: "clamp(26px, 3.2vw, 38px)",
               fontWeight: 800,
-              letterSpacing: "-1px",
+              letterSpacing: "-0.8px",
             }}
           >
             Engineered Capabilities
@@ -2738,31 +2693,31 @@ SKILLS
           margin: "0 auto",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 12,
-              letterSpacing: 2,
+              fontSize: 11,
+              letterSpacing: 2.5,
               color: "#a1a1aa",
               fontWeight: 700,
               textTransform: "uppercase",
               marginBottom: 8,
             }}
           >
-            // VERIFIED REPUTATION
+            CLIENT TESTIMONIALS
           </div>
           <h2
             className="text-shining-titanium"
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "clamp(28px, 4vw, 46px)",
+              fontSize: "clamp(26px, 3.2vw, 38px)",
               fontWeight: 800,
-              letterSpacing: "-1px",
+              letterSpacing: "-0.8px",
               marginBottom: 10,
             }}
           >
-            Client Reviews
+            Client Endorsements
           </h2>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginTop: 8 }}>
             <Stars count={5} size={18} />
@@ -2882,27 +2837,27 @@ SKILLS
           margin: "0 auto",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 12,
-              letterSpacing: 2,
+              fontSize: 11,
+              letterSpacing: 2.5,
               color: "#a1a1aa",
               fontWeight: 700,
               textTransform: "uppercase",
               marginBottom: 8,
             }}
           >
-            // ENGINEERING LOGS
+            TECHNICAL WRITING
           </div>
           <h2
             className="text-shining-titanium"
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "clamp(28px, 4vw, 46px)",
+              fontSize: "clamp(26px, 3.2vw, 38px)",
               fontWeight: 800,
-              letterSpacing: "-1px",
+              letterSpacing: "-0.8px",
             }}
           >
             Technical Articles
@@ -2991,33 +2946,33 @@ SKILLS
           margin: "0 auto",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: 36 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 12,
-              letterSpacing: 2,
+              fontSize: 11,
+              letterSpacing: 2.5,
               color: "#a1a1aa",
               fontWeight: 700,
               textTransform: "uppercase",
               marginBottom: 8,
             }}
           >
-            // DIRECT COLLABORATION
+            DISCOVERY SESSION
           </div>
           <h2
             className="text-shining-titanium"
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "clamp(28px, 4vw, 46px)",
+              fontSize: "clamp(26px, 3.2vw, 38px)",
               fontWeight: 800,
-              letterSpacing: "-1px",
+              letterSpacing: "-0.8px",
               marginBottom: 10,
             }}
           >
             Schedule a Discovery Call
           </h2>
-          <p style={{ color: "#a1a1aa", fontSize: 15, maxWidth: 480, margin: "0 auto" }}>
+          <p style={{ color: "#a1a1aa", fontSize: 14, maxWidth: 480, margin: "0 auto" }}>
             Book a 30-minute direct session to review architecture, project scope, or technical advisory.
           </p>
         </div>
@@ -3323,27 +3278,27 @@ SKILLS
           margin: "0 auto",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 12,
-              letterSpacing: 2,
+              fontSize: 11,
+              letterSpacing: 2.5,
               color: "#a1a1aa",
               fontWeight: 700,
               textTransform: "uppercase",
               marginBottom: 8,
             }}
           >
-            // DIRECT CONTACT
+            GET IN TOUCH
           </div>
           <h2
             className="text-shining-titanium"
             style={{
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "clamp(28px, 4vw, 46px)",
+              fontSize: "clamp(26px, 3.2vw, 38px)",
               fontWeight: 800,
-              letterSpacing: "-1px",
+              letterSpacing: "-0.8px",
             }}
           >
             Let's Build Something Exceptional

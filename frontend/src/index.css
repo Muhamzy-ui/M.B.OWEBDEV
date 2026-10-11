@@ -774,9 +774,15 @@ body {
   }
 }
 
+@media (max-width: 540px) {
+  .nav-whatsapp-label {
+    display: none !important;
+  }
+}
+
 @media (max-width: 480px) {
   .nav-header-dock {
-    padding: 6px 12px !important;
+    padding: 6px 10px !important;
   }
   .nav-sub-role {
     display: none !important;
