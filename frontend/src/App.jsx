@@ -408,16 +408,6 @@ const TIMES = [
   "09:00 AM", "10:30 AM", "01:00 PM", "02:30 PM", "04:00 PM", "05:30 PM",
 ];
 
-// ─── STARDUST PARTICLES DATA ─────────────────────────────────────────────────
-const STARDUST = Array.from({ length: 28 }, (_, i) => ({
-  id: i,
-  top: `${(i * 17) % 96}%`,
-  left: `${(i * 29) % 96}%`,
-  size: (i % 3) + 1.5,
-  delay: `${(i * 0.4) % 4}s`,
-  duration: `${3.5 + ((i * 0.6) % 3)}s`,
-}));
-
 // ─── TITANIUM LOGO ───────────────────────────────────────────────────────────
 const TitaniumLogo = ({ size = 38 }) => (
   <div
@@ -668,25 +658,37 @@ export default function App() {
   const shouldReduceMotion = useReducedMotion();
 
 
-  // Scroll spy & Nav blur trigger
+  // High-performance scroll spy with requestAnimationFrame throttling
   useEffect(() => {
+    let ticking = false;
+    const sections = ["hero", "about", "resume", "projects", "skills", "process", "reviews", "blog", "booking", "contact"];
+
     const handleScroll = () => {
-      setNavScrolled(window.scrollY > 40);
-      const sections = ["hero", "about", "resume", "projects", "skills", "process", "reviews", "blog", "booking", "contact"];
-      const scrollPos = window.scrollY + 200;
-      for (const id of sections) {
-        const el = document.getElementById(id);
-        if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPos >= top && scrollPos < top + height) {
-            setActiveSection(id);
-            break;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const sy = window.scrollY;
+          setNavScrolled((prev) => {
+            const next = sy > 40;
+            return prev !== next ? next : prev;
+          });
+          const scrollPos = sy + 220;
+          for (const id of sections) {
+            const el = document.getElementById(id);
+            if (el) {
+              const top = el.offsetTop;
+              const height = el.offsetHeight;
+              if (scrollPos >= top && scrollPos < top + height) {
+                setActiveSection((prev) => (prev !== id ? id : prev));
+                break;
+              }
+            }
           }
-        }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -1000,30 +1002,11 @@ SKILLS
       {/* ─── SCROLL PROGRESS BAR ─── */}
       <motion.div className="scroll-progress-bar" style={{ scaleX }} />
 
-      {/* ─── ANIMATED MONOCHROME (BLACK & WHITE) BACKGROUND ─── */}
-      <div className="monochrome-animated-bg">
-        <div className="monochrome-ambient-orb orb-1" />
-        <div className="monochrome-ambient-orb orb-2" />
-        <div className="monochrome-ambient-orb orb-3" />
-        <div className="monochrome-mesh-shimmer" />
-        {STARDUST.map((p) => (
-          <div
-            key={p.id}
-            className="monochrome-particle"
-            style={{
-              top: p.top,
-              left: p.left,
-              width: p.size,
-              height: p.size,
-              animationDelay: p.delay,
-              animationDuration: p.duration,
-            }}
-          />
-        ))}
+      {/* ─── HIGH-PERFORMANCE TECH STUDIO BACKGROUND ─── */}
+      <div className="tech-studio-bg">
+        <div className="tech-ambient-mesh" />
+        <div className="tech-cyber-grid" />
       </div>
-
-      {/* ─── CLEAN SUBTLE PERSPECTIVE GRID ─── */}
-      <div className="animated-grid-overlay" />
 
       {/* ─── FLOATING TOP NAVIGATION (iOS 27 Glass Dock) ─── */}
       <header

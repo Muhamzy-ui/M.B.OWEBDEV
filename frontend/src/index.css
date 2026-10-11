@@ -123,143 +123,60 @@ body {
   box-shadow: 0 0 10px rgba(6, 182, 212, 0.7);
 }
 
-/* ─── ANIMATED MONOCHROME (BLACK & WHITE) BACKGROUND ─── */
-.monochrome-animated-bg {
+/* ─── ULTRA-FAST HIGH PERFORMANCE TECH STUDIO BACKGROUND ─── */
+.tech-studio-bg {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
-  background: #000000;
-  transition: background 0.4s ease;
+  background-color: var(--bg-deep);
+  transform: translateZ(0);
 }
 
-[data-theme="light"] .monochrome-animated-bg {
-  background: #f8fafc;
-}
-
-.monochrome-ambient-orb {
+.tech-ambient-mesh {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  will-change: transform, opacity;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 85% 55% at 50% -12%, rgba(99, 102, 241, 0.16) 0%, rgba(6, 182, 212, 0.08) 45%, transparent 75%),
+    radial-gradient(circle 500px at 95% 35%, rgba(6, 182, 212, 0.05) 0%, transparent 70%),
+    radial-gradient(circle 600px at 5% 75%, rgba(139, 92, 246, 0.05) 0%, transparent 70%);
   pointer-events: none;
 }
 
-.monochrome-ambient-orb.orb-1 {
-  width: min(700px, 85vw);
-  height: min(700px, 85vw);
-  top: -15%;
-  left: 15%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, rgba(220, 220, 220, 0.05) 50%, transparent 70%);
-  animation: monochromeOrb1 18s ease-in-out infinite alternate;
+[data-theme="light"] .tech-ambient-mesh {
+  background: 
+    radial-gradient(ellipse 85% 45% at 50% -10%, rgba(99, 102, 241, 0.08) 0%, rgba(6, 182, 212, 0.05) 40%, transparent 70%),
+    radial-gradient(circle 500px at 95% 30%, rgba(6, 182, 212, 0.035) 0%, transparent 70%),
+    radial-gradient(circle 600px at 5% 70%, rgba(99, 102, 241, 0.035) 0%, transparent 70%);
 }
 
-.monochrome-ambient-orb.orb-2 {
-  width: min(600px, 80vw);
-  height: min(600px, 80vw);
-  bottom: 8%;
-  right: -5%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.09) 0%, rgba(180, 180, 180, 0.03) 50%, transparent 70%);
-  animation: monochromeOrb2 22s ease-in-out infinite alternate;
-}
-
-.monochrome-ambient-orb.orb-3 {
-  width: min(500px, 65vw);
-  height: min(500px, 65vw);
-  top: 45%;
-  left: -12%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.07) 0%, rgba(140, 140, 140, 0.02) 50%, transparent 70%);
-  animation: monochromeOrb3 20s ease-in-out infinite alternate;
-}
-
-[data-theme="light"] .monochrome-ambient-orb.orb-1 {
-  background: radial-gradient(circle, rgba(15, 23, 42, 0.07) 0%, rgba(30, 41, 59, 0.03) 50%, transparent 70%);
-}
-
-[data-theme="light"] .monochrome-ambient-orb.orb-2 {
-  background: radial-gradient(circle, rgba(15, 23, 42, 0.05) 0%, rgba(51, 65, 85, 0.02) 50%, transparent 70%);
-}
-
-[data-theme="light"] .monochrome-ambient-orb.orb-3 {
-  background: radial-gradient(circle, rgba(15, 23, 42, 0.04) 0%, transparent 70%);
-}
-
-@keyframes monochromeOrb1 {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(14%, 18%) scale(1.25); }
-  100% { transform: translate(-10%, 10%) scale(0.95); }
-}
-
-@keyframes monochromeOrb2 {
-  0% { transform: translate(0, 0) scale(1.1); }
-  50% { transform: translate(-18%, -15%) scale(0.9); }
-  100% { transform: translate(10%, -8%) scale(1.2); }
-}
-
-@keyframes monochromeOrb3 {
-  0% { transform: translate(0, 0) scale(0.95); }
-  50% { transform: translate(15%, -14%) scale(1.2); }
-  100% { transform: translate(-8%, 15%) scale(1); }
-}
-
-.monochrome-mesh-shimmer {
-  position: absolute;
-  inset: -50%;
-  background: radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.035) 0%, transparent 60%);
-  animation: monochromeShimmerSweep 35s linear infinite;
-  transform-origin: center center;
-  pointer-events: none;
-}
-
-[data-theme="light"] .monochrome-mesh-shimmer {
-  background: radial-gradient(ellipse at 50% 50%, rgba(15, 23, 42, 0.02) 0%, transparent 60%);
-}
-
-@keyframes monochromeShimmerSweep {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.monochrome-particle {
-  position: absolute;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.85);
-  animation: monochromeParticlePulse ease-in-out infinite;
-  pointer-events: none;
-}
-
-[data-theme="light"] .monochrome-particle {
-  background: #0f172a;
-  box-shadow: 0 0 4px rgba(15, 23, 42, 0.35);
-}
-
-@keyframes monochromeParticlePulse {
-  0%, 100% { opacity: 0.15; transform: translateY(0) scale(1); }
-  50% { opacity: 0.9; transform: translateY(-16px) scale(1.35); }
-}
-
-/* ─── CLEAN SUBTLE PERSPECTIVE GRID ─── */
-.animated-grid-overlay {
+.tech-cyber-grid {
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 100%);
+    radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 85% 70% at 50% 25%, black 40%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 25%, black 40%, transparent 95%);
   pointer-events: none;
-  z-index: 1;
 }
 
-[data-theme="light"] .animated-grid-overlay {
+[data-theme="light"] .tech-cyber-grid {
   background-image: 
-    linear-gradient(to right, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 40%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 40%, transparent 100%);
+    radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 85% 70% at 50% 25%, black 40%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 25%, black 40%, transparent 95%);
+}
+
+/* ─── RENDERING CONTAINMENT FOR FAST BUTTER-SMOOTH SCROLLING ─── */
+#reviews,
+#blog,
+#booking,
+#contact {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 700px;
 }
 
 /* ─── TITANIUM HIGH-PERFORMANCE CARDS ─── */
