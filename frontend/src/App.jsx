@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import emailjs from "@emailjs/browser";
 import React from "react";
 import { motion, AnimatePresence, useScroll, useSpring, useReducedMotion } from "framer-motion";
+import MonochromeBackground from "./MonochromeBackground";
 
 // ─── EMAILJS CONFIG ──────────────────────────────────────────────────────────
 const EMAILJS_CONFIG = {
@@ -1002,11 +1003,8 @@ SKILLS
       {/* ─── SCROLL PROGRESS BAR ─── */}
       <motion.div className="scroll-progress-bar" style={{ scaleX }} />
 
-      {/* ─── HIGH-PERFORMANCE TECH STUDIO BACKGROUND ─── */}
-      <div className="tech-studio-bg">
-        <div className="tech-ambient-mesh" />
-        <div className="tech-cyber-grid" />
-      </div>
+      {/* ─── ANIMATED MOVING MONOCHROME (BLACK & WHITE) BACKGROUND ─── */}
+      <MonochromeBackground theme={theme} />
 
       {/* ─── FLOATING TOP NAVIGATION (iOS 27 Glass Dock) ─── */}
       <header
