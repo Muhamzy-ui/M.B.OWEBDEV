@@ -726,6 +726,30 @@ body {
   .section-glow-divider {
     margin: 20px auto !important;
   }
+  
+  /* Mobile resume timeline compacting */
+  .resume-timeline {
+    padding-left: 22px !important;
+  }
+  .resume-timeline::before {
+    left: 6px !important;
+  }
+  .resume-timeline-item {
+    margin-bottom: 20px !important;
+  }
+  .resume-timeline-node {
+    left: -22px !important;
+    width: 14px !important;
+    height: 14px !important;
+  }
+  .resume-timeline-node::after {
+    width: 4px !important;
+    height: 4px !important;
+  }
+  .resume-timeline-item ul {
+    margin: 4px 0 8px 14px !important;
+    font-size: 12.5px !important;
+  }
 }
 
 @media (max-width: 640px) {

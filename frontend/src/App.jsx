@@ -575,6 +575,27 @@ export default function App() {
   const [ratings, setRatings] = useState(INIT_RATINGS);
   const [showAllProjects, setShowAllProjects] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  
+  // Mobile-only resume streamling states
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 768;
+    }
+    return false;
+  });
+  const [showFullObjective, setShowFullObjective] = useState(false);
+  const [showAllExperience, setShowAllExperience] = useState(false);
+  const [showFullEducation, setShowFullEducation] = useState(false);
+  const [showAllTechSkills, setShowAllTechSkills] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [projectFilter, setProjectFilter] = useState("All");
 
@@ -929,6 +950,9 @@ SKILLS
 
   const displayedProjects = showAllProjects ? filteredProjects : filteredProjects.slice(0, 3);
   const displayedRatings = showAllReviews ? ratings : ratings.slice(0, 3);
+  const displayedExperience = isMobile && !showAllExperience ? WORK_EXPERIENCE.slice(0, 1) : WORK_EXPERIENCE;
+  const displayedProfessionalDev = isMobile && !showFullEducation ? EDUCATION_DATA.professionalDev.slice(0, 2) : EDUCATION_DATA.professionalDev;
+  const displayedTechSkillGroups = isMobile && !showAllTechSkills ? RESUME_SKILL_GROUPS.slice(0, 2) : RESUME_SKILL_GROUPS;
 
   // ─── BLOG POST MODAL VIEW ──────────────────────────────────────────────────
   if (selectedBlog) {
@@ -1955,15 +1979,67 @@ SKILLS
         </div>
 
         {/* Career Objective Card */}
-        <SpotlightCard style={{ padding: "clamp(20px, 3vw, 28px)", marginBottom: 26 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-            <span style={{ fontSize: 18 }}>🎯</span>
-            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
-              Career Objective
-            </h3>
+        <SpotlightCard style={{ padding: "clamp(18px, 3vw, 28px)", marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 18 }}>🎯</span>
+              <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 16, fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
+                Career Objective
+              </h3>
+            </div>
+            {isMobile && (
+              <span className="floating-chip" style={{ fontSize: 10, padding: "2px 8px" }}>
+                Full-Stack
+              </span>
+            )}
           </div>
-          <p style={{ color: "var(--text-secondary)", fontSize: 14, lineHeight: 1.7, margin: 0 }}>
-            Full-Stack Developer building and deploying complete web applications since 2024, with a focus on React, Django, Python, REST APIs, and PostgreSQL. Experienced in taking products from interface and backend development through database design, API integration, authentication, payment and wallet workflows, admin systems, and production deployment. Open to remote and international Full-Stack, Django/Python, React, and Web Development roles.
+          <p style={{ color: "var(--text-secondary)", fontSize: 13.5, lineHeight: 1.65, margin: 0 }}>
+            {isMobile && !showFullObjective ? (
+              <>
+                Full-Stack Developer building and deploying complete web applications since 2024, with a focus on React, Django, Python, REST APIs, and PostgreSQL.{" "}
+                <button
+                  type="button"
+                  onClick={() => setShowFullObjective(true)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "var(--text-primary)",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    padding: 0,
+                    fontSize: 12.5,
+                    textDecoration: "underline",
+                  }}
+                >
+                  Read More ↓
+                </button>
+              </>
+            ) : (
+              <>
+                Full-Stack Developer building and deploying complete web applications since 2024, with a focus on React, Django, Python, REST APIs, and PostgreSQL. Experienced in taking products from interface and backend development through database design, API integration, authentication, payment and wallet workflows, admin systems, and production deployment. Open to remote and international Full-Stack, Django/Python, React, and Web Development roles.
+                {isMobile && showFullObjective && (
+                  <>
+                    {" "}
+                    <button
+                      type="button"
+                      onClick={() => setShowFullObjective(false)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "var(--text-primary)",
+                        fontWeight: 800,
+                        cursor: "pointer",
+                        padding: 0,
+                        fontSize: 12.5,
+                        textDecoration: "underline",
+                      }}
+                    >
+                      Show Less ↑
+                    </button>
+                  </>
+                )}
+              </>
+            )}
           </p>
         </SpotlightCard>
 
@@ -1982,7 +2058,7 @@ SKILLS
             </div>
 
             <div className="resume-timeline">
-              {WORK_EXPERIENCE.map((exp, idx) => (
+              {displayedExperience.map((exp, idx) => (
                 <div key={idx} className="resume-timeline-item">
                   <div className="resume-timeline-node" />
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 6, marginBottom: 4 }}>
@@ -2016,6 +2092,36 @@ SKILLS
                 </div>
               ))}
             </div>
+
+            {/* View More Experience Button on Mobile */}
+            {isMobile && (
+              <div style={{ textAlign: "center", marginTop: 16, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowAllExperience(!showAllExperience)}
+                  className="btn-shining-glass"
+                  style={{
+                    width: "100%",
+                    padding: "9px 16px",
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                  }}
+                >
+                  {showAllExperience ? (
+                    <>Show Less Experience ↑</>
+                  ) : (
+                    <>
+                      View All Experience ({WORK_EXPERIENCE.length} Roles) <span style={{ opacity: 0.7 }}>↓</span>
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            )}
           </SpotlightCard>
 
           {/* Right Column: Education & Skills Matrix */}
@@ -2054,13 +2160,37 @@ SKILLS
                   🛡️ Professional Development
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {EDUCATION_DATA.professionalDev.map((dev, dIdx) => (
+                  {displayedProfessionalDev.map((dev, dIdx) => (
                     <div key={dIdx} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "var(--text-secondary)" }}>
                       <span style={{ color: "#22c55e", fontSize: 12 }}>✓</span>
                       <span>{dev}</span>
                     </div>
                   ))}
                 </div>
+
+                {/* View More Credentials Button on Mobile */}
+                {isMobile && (
+                  <button
+                    type="button"
+                    onClick={() => setShowFullEducation(!showFullEducation)}
+                    className="btn-shining-glass"
+                    style={{
+                      width: "100%",
+                      padding: "7px 14px",
+                      fontSize: 12,
+                      marginTop: 12,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {showFullEducation ? (
+                      <>Show Less Credentials ↑</>
+                    ) : (
+                      <>
+                        View All Credentials ({EDUCATION_DATA.professionalDev.length}) <span style={{ opacity: 0.7 }}>↓</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </SpotlightCard>
 
@@ -2076,7 +2206,7 @@ SKILLS
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14 }}>
-                {RESUME_SKILL_GROUPS.map((group, gIdx) => (
+                {displayedTechSkillGroups.map((group, gIdx) => (
                   <div key={gIdx} style={{ background: "var(--input-bg)", border: "1px solid var(--border-subtle)", borderRadius: 12, padding: "12px 14px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8, fontFamily: "'Space Grotesk', sans-serif" }}>
                       <span>{group.icon}</span>
@@ -2092,6 +2222,31 @@ SKILLS
                   </div>
                 ))}
               </div>
+
+              {/* View More Competencies Button on Mobile */}
+              {isMobile && (
+                <div style={{ marginTop: 12 }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowAllTechSkills(!showAllTechSkills)}
+                    className="btn-shining-glass"
+                    style={{
+                      width: "100%",
+                      padding: "7px 14px",
+                      fontSize: 12,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {showAllTechSkills ? (
+                      <>Show Less Competencies ↑</>
+                    ) : (
+                      <>
+                        View All Competencies ({RESUME_SKILL_GROUPS.length} Groups) <span style={{ opacity: 0.7 }}>↓</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </SpotlightCard>
 
           </div>
