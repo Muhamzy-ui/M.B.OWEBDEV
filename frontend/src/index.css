@@ -691,10 +691,70 @@ body {
   align-items: start;
 }
 
+.contact-shortcuts-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 @media (max-width: 768px) {
   .contact-layout-grid {
     grid-template-columns: 1fr !important;
     gap: 20px !important;
+  }
+  
+  /* Compact mobile section vertical padding to reduce excess scrolling */
+  section {
+    padding-top: 36px !important;
+    padding-bottom: 36px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+  #hero {
+    padding-top: 72px !important;
+    padding-bottom: 24px !important;
+  }
+  .border-beam-card {
+    padding: 16px 14px !important;
+    border-radius: 16px !important;
+  }
+  .code-scroll-pane {
+    max-height: 220px !important;
+    overflow-y: auto !important;
+    font-size: 11px !important;
+  }
+  .section-glow-divider {
+    margin: 20px auto !important;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Sleek 2x2 grid for contact shortcuts on mobile */
+  .contact-shortcuts-col {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  .contact-shortcuts-col .border-beam-card {
+    padding: 10px 12px !important;
+    gap: 10px !important;
+    min-height: auto !important;
+  }
+  .contact-shortcuts-col .border-beam-card:last-child {
+    grid-column: span 2 !important;
+  }
+  .contact-shortcut-icon {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 16px !important;
+    border-radius: 10px !important;
+  }
+  .contact-shortcut-val {
+    font-size: 11.5px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 120px !important;
   }
 }
 
@@ -717,8 +777,10 @@ body {
 }
 
 @media (max-width: 480px) {
+  /* Ultra-compact centered pill dock on small mobile viewports */
   .nav-header-dock {
-    padding: 6px 10px !important;
+    padding: 5px 8px !important;
+    gap: 6px !important;
   }
   .nav-sub-role {
     display: none !important;
@@ -727,16 +789,10 @@ body {
     display: none !important;
   }
   .nav-book-btn {
-    padding: 7px 12px !important;
-    font-size: 13px !important;
+    display: none !important;
   }
-  .border-beam-card {
-    border-radius: 16px;
-    padding: 20px 16px !important;
-  }
-  section {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+  .stats-grid .border-beam-card {
+    padding: 12px 8px !important;
   }
 }
 

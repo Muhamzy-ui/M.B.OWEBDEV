@@ -573,6 +573,8 @@ export default function App() {
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [projects, setProjects] = useState(INIT_PROJECTS);
   const [ratings, setRatings] = useState(INIT_RATINGS);
+  const [showAllProjects, setShowAllProjects] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [projectFilter, setProjectFilter] = useState("All");
 
@@ -924,6 +926,9 @@ SKILLS
     projectFilter === "All"
       ? projects
       : projects.filter((p) => p.category.toLowerCase().includes(projectFilter.toLowerCase()));
+
+  const displayedProjects = showAllProjects ? filteredProjects : filteredProjects.slice(0, 3);
+  const displayedRatings = showAllReviews ? ratings : ratings.slice(0, 3);
 
   // ─── BLOG POST MODAL VIEW ──────────────────────────────────────────────────
   if (selectedBlog) {
@@ -2315,7 +2320,7 @@ SKILLS
           className="projects-grid"
         >
           <AnimatePresence mode="popLayout">
-            {filteredProjects.map((proj) => (
+            {displayedProjects.map((proj) => (
               <motion.div
                 key={proj.id}
                 layout
@@ -2492,6 +2497,34 @@ SKILLS
             ))}
           </AnimatePresence>
         </motion.div>
+
+        {/* ─── EXPAND / COLLAPSE PROJECTS (MOBILE HEIGHT STREAMLINE) ─── */}
+        {filteredProjects.length > 3 && (
+          <div style={{ textAlign: "center", marginTop: 28 }}>
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setShowAllProjects((prev) => !prev)}
+              className="btn-shining-glass"
+              style={{
+                padding: "10px 24px",
+                fontSize: 13,
+                fontWeight: 700,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              {showAllProjects ? (
+                <>Show Fewer Projects ↑</>
+              ) : (
+                <>
+                  View All Projects ({filteredProjects.length}) <span style={{ opacity: 0.7 }}>↓</span>
+                </>
+              )}
+            </motion.button>
+          </div>
+        )}
       </section>
 
       {/* ─── ENGINEERING PROCESS & HOW I WORK ─── */}
@@ -2708,7 +2741,7 @@ SKILLS
         </div>
 
         <div className="reviews-grid">
-          {ratings.map((rev) => (
+          {displayedRatings.map((rev) => (
             <SpotlightCard
               key={rev.id}
               style={{
@@ -2746,6 +2779,34 @@ SKILLS
             </SpotlightCard>
           ))}
         </div>
+
+        {/* ─── EXPAND / COLLAPSE ENDORSEMENTS (MOBILE HEIGHT STREAMLINE) ─── */}
+        {ratings.length > 3 && (
+          <div style={{ textAlign: "center", marginTop: 20, marginBottom: 32 }}>
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setShowAllReviews((prev) => !prev)}
+              className="btn-shining-glass"
+              style={{
+                padding: "10px 24px",
+                fontSize: 13,
+                fontWeight: 700,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              {showAllReviews ? (
+                <>Show Fewer Endorsements ↑</>
+              ) : (
+                <>
+                  View All Client Endorsements ({ratings.length}) <span style={{ opacity: 0.7 }}>↓</span>
+                </>
+              )}
+            </motion.button>
+          </div>
+        )}
 
         {/* Leave a Review Form */}
         <div className="border-beam-card" style={{ maxWidth: 640, margin: "0 auto", padding: "clamp(24px, 4vw, 36px)" }}>
@@ -3287,7 +3348,7 @@ SKILLS
 
         <div className="contact-layout-grid">
           {/* Left Cards */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div className="contact-shortcuts-col">
             {[
               {
                 icon: "✉️",
@@ -3327,35 +3388,39 @@ SKILLS
                 rel="noreferrer"
                 className="border-beam-card"
                 style={{
-                  padding: "20px 24px",
+                  padding: "16px 20px",
                   display: "flex",
                   alignItems: "center",
-                  gap: 18,
+                  gap: 16,
                   textDecoration: "none",
                   color: "var(--text-primary)",
                   minHeight: 44,
                 }}
               >
                 <div
+                  className="contact-shortcut-icon"
                   style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 14,
+                    width: 42,
+                    height: 42,
+                    borderRadius: 12,
                     background: "rgba(255,255,255,0.08)",
                     border: "1px solid rgba(255,255,255,0.25)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: 20,
+                    flexShrink: 0,
                   }}
                 >
                   {c.icon}
                 </div>
-                <div>
+                <div style={{ overflow: "hidden" }}>
                   <div style={{ fontSize: 11, color: "#a1a1aa", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 800 }}>
                     {c.label}
                   </div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}>{c.val}</div>
+                  <div className="contact-shortcut-val" style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text-primary)" }}>
+                    {c.val}
+                  </div>
                 </div>
               </a>
             ))}
