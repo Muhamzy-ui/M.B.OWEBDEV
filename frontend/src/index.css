@@ -145,21 +145,21 @@ body {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
 }
 
 .moving-monochrome-grid {
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 44px 44px;
   animation: movingMonochromeGrid 12s linear infinite;
-  mask-image: radial-gradient(ellipse 85% 75% at 50% 30%, black 35%, transparent 95%);
-  -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 30%, black 35%, transparent 95%);
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 30%, black 40%, transparent 98%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 30%, black 40%, transparent 98%);
   pointer-events: none;
-  z-index: 2;
+  z-index: 1;
 }
 
 [data-theme="light"] .moving-monochrome-grid {
@@ -180,13 +180,13 @@ body {
 .monochrome-vignette-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 15%, transparent 0%, rgba(0, 0, 0, 0.65) 90%);
+  background: radial-gradient(circle at 50% 20%, transparent 0%, rgba(0, 0, 0, 0.4) 95%);
   pointer-events: none;
   z-index: 3;
 }
 
 [data-theme="light"] .monochrome-vignette-overlay {
-  background: radial-gradient(circle at 50% 15%, transparent 0%, rgba(248, 250, 252, 0.5) 90%);
+  background: radial-gradient(circle at 50% 20%, transparent 0%, rgba(248, 250, 252, 0.35) 95%);
 }
 
 /* ─── RENDERING CONTAINMENT FOR FAST BUTTER-SMOOTH SCROLLING ─── */

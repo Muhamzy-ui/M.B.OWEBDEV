@@ -20,21 +20,32 @@ export default function MonochromeBackground({ theme = "dark" }) {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    // Responsive particle count (45 for mobile, 65 for desktop)
-    const particleCount = width < 768 ? 40 : 65;
-    const maxLineDist = width < 768 ? 90 : 125;
+    // Responsive particle count (45 for mobile, 70 for desktop)
+    const particleCount = width < 768 ? 45 : 70;
+    const maxLineDist = width < 768 ? 100 : 135;
 
-    // Create particles
-    const particles = Array.from({ length: particleCount }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.55,
-      vy: (Math.random() - 0.5) * 0.55,
-      radius: Math.random() * 1.6 + 0.8,
-      baseAlpha: Math.random() * 0.5 + 0.3,
-      pulse: Math.random() * Math.PI * 2,
-      pulseSpeed: Math.random() * 0.02 + 0.01,
-    }));
+    // Create particles with noticeably bigger radius and crisp visibility
+    const particles = Array.from({ length: particleCount }, (_, idx) => {
+      // 30% of particles are prominent anchor stars (3.6px - 5.4px radius)
+      const isAnchor = idx % 3 === 0;
+      const radius = isAnchor
+        ? Math.random() * 1.8 + 3.6  // 3.6 to 5.4px radius (diameter 7.2 to 10.8px)
+        : Math.random() * 1.2 + 2.2; // 2.2 to 3.4px radius (diameter 4.4 to 6.8px)
+
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.45,
+        vy: (Math.random() - 0.5) * 0.45,
+        radius,
+        isAnchor,
+        baseAlpha: isAnchor
+          ? Math.random() * 0.15 + 0.85  // 0.85 to 1.0 (very crisp and bright!)
+          : Math.random() * 0.25 + 0.65, // 0.65 to 0.9 (clearly visible!)
+        pulse: Math.random() * Math.PI * 2,
+        pulseSpeed: Math.random() * 0.025 + 0.015,
+      };
+    });
 
     // Shooting stars / stardust streaks
     const streaks = [];
@@ -160,12 +171,28 @@ export default function MonochromeBackground({ theme = "dark" }) {
           p.y += (dyMouse / distMouse) * force * 1.5;
         }
 
-        // Draw particle
-        const alpha = p.baseAlpha * (0.75 + Math.sin(p.pulse) * 0.25);
+        // Draw particle with luminous glow
+        const alpha = Math.min(1, p.baseAlpha * (0.85 + Math.sin(p.pulse) * 0.15));
+
+        // Corona / glowing aura for prominent anchor stars
+        if (p.isAnchor) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius * 2.2, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${particleRGB}, ${alpha * (isDark ? 0.35 : 0.18)})`;
+          ctx.fill();
+        }
+
+        // Crisp luminous glowing dot
+        ctx.shadowBlur = isDark ? (p.isAnchor ? 14 : 8) : 5;
+        ctx.shadowColor = `rgba(${particleRGB}, ${alpha * 0.95})`;
+
         ctx.fillStyle = `rgba(${particleRGB}, ${alpha})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
+
+        // Reset shadowBlur for clean line drawing
+        ctx.shadowBlur = 0;
 
         // Draw links to nearby particles
         for (let j = i + 1; j < particles.length; j++) {
@@ -175,9 +202,9 @@ export default function MonochromeBackground({ theme = "dark" }) {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < maxLineDist) {
-            const lineAlpha = (1 - dist / maxLineDist) * (isDark ? 0.14 : 0.08);
+            const lineAlpha = (1 - dist / maxLineDist) * (isDark ? 0.22 : 0.12);
             ctx.strokeStyle = `rgba(${particleRGB}, ${lineAlpha})`;
-            ctx.lineWidth = 0.85;
+            ctx.lineWidth = 1.0;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
